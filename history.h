@@ -23,4 +23,7 @@ void history_init();
 void history_add(const char *command, int result);
 void history_show();
 
+int history_size();
+const char* history_get_command(int index);
+
 #endif // HISTORY_H

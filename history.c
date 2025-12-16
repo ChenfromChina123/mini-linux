@@ -121,3 +121,6 @@ void history_show() {
         printf("%-5d %-20s %-30s %s\n", i + 1, history[i].timestamp, history[i].command, result_str);
     }
 }
+
+int history_size() { return history_count; }
+const char* history_get_command(int index) { if (index < 0 || index >= history_count) return NULL; return history[index].command; }

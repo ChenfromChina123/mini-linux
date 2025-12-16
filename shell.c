@@ -5,6 +5,78 @@
 #include "util.h"
 #include <unistd.h>
 #include <sys/wait.h>
+#include <termios.h>
+
+static void enable_raw(struct termios *orig, int *use_raw) {
+    *use_raw = 0;
+    if (tcgetattr(STDIN_FILENO, orig) == 0) {
+        struct termios raw = *orig;
+        raw.c_lflag &= ~(ECHO | ICANON);
+        raw.c_cc[VMIN] = 1;
+        raw.c_cc[VTIME] = 0;
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+        *use_raw = 1;
+    }
+}
+
+static void disable_raw(struct termios *orig, int use_raw) {
+    if (use_raw) tcsetattr(STDIN_FILENO, TCSAFLUSH, orig);
+}
+
+static int read_key() {
+    int c = getchar();
+    if (c == 27) {
+        int c1 = getchar();
+        if (c1 == '[') {
+            int c2 = getchar();
+            if (c2 == 'A') return -1001;
+            if (c2 == 'B') return -1002;
+            if (c2 == 'C') return -1003;
+            if (c2 == 'D') return -1004;
+        }
+        return 27;
+    }
+    return c;
+}
+
+static int read_line_edit(const char *prompt, char *out, size_t out_size) {
+    struct termios orig; int use_raw = 0; enable_raw(&orig, &use_raw);
+    size_t len = 0; size_t cur = 0; int hist_idx = history_size();
+    char saved[1024]; saved[0] = '\0';
+    printf("%s", prompt); fflush(stdout);
+    while (1) {
+        int k = read_key();
+        if (k == '\r' || k == '\n') { putchar('\n'); break; }
+        else if (k == 127 || k == 8) {
+            if (cur > 0) {
+                cur--; for (size_t i = cur; i < len - 1; i++) out[i] = out[i + 1]; len--; out[len] = '\0';
+                fputs("\x1b[D", stdout); fputs("\x1b[K", stdout); fwrite(out + cur, 1, len - cur, stdout); fputs(" ", stdout);
+                size_t back = len - cur + 1; while (back--) fputs("\x1b[D", stdout);
+                fflush(stdout);
+            }
+        } else if (k == -1004) {
+            if (cur > 0) { fputs("\x1b[D", stdout); cur--; }
+        } else if (k == -1003) {
+            if (cur < len) { fputs("\x1b[C", stdout); cur++; }
+        } else if (k == -1001 || k == -1002) {
+            if (hist_idx == history_size()) strncpy(saved, out, sizeof(saved) - 1), saved[sizeof(saved) - 1] = '\0';
+            if (k == -1001 && hist_idx > 0) hist_idx--; else if (k == -1002 && hist_idx < history_size()) hist_idx++;
+            const char *h = hist_idx < history_size() ? history_get_command(hist_idx) : saved;
+            if (!h) h = "";
+            size_t L = strlen(h); if (L >= out_size) L = out_size - 1;
+            memcpy(out, h, L); out[L] = '\0'; len = L; cur = L;
+            fputs("\r", stdout); fputs("\x1b[K", stdout); printf("%s%s", prompt, out); fflush(stdout);
+        } else if (k >= 32 && k < 127) {
+            if (len + 1 < out_size) {
+                for (size_t i = len; i > cur; i--) out[i] = out[i - 1]; out[cur] = (char)k; len++; out[len] = '\0';
+                fputs("\x1b[K", stdout); fwrite(out + cur, 1, len - cur, stdout);
+                cur++; size_t back = len - cur; while (back--) fputs("\x1b[D", stdout); fflush(stdout);
+            }
+        }
+    }
+    disable_raw(&orig, use_raw);
+    return (int)len;
+}
 
 // 定义所有命令
 Command commands[] = {
@@ -254,15 +326,9 @@ void shell_loop() {
     char command[MAX_CMD_LENGTH];
     
     while (1) {
-        // 显示命令提示符
-        printf("\033[32m%s@mini-linux\033[0m:\033[34m$\033[0m ", current_user.username);
-        
-        // 读取用户输入
-        if (fgets(command, sizeof(command), stdin) == NULL) {
-            break;
-        }
-        
-        trim(command);
+        char prompt[128]; snprintf(prompt, sizeof(prompt), "\033[32m%s@mini-linux\033[0m:\033[34m$\033[0m ", current_user.username);
+        int L = read_line_edit(prompt, command, sizeof(command));
+        if (L <= 0) continue;
         
         if (strlen(command) == 0) {
             continue;
@@ -275,7 +341,6 @@ void shell_loop() {
         // 执行命令并获取结果
         int result = execute_command(argc, argv);
         
-        // 记录命令历史
         history_add(command, result);
         
         // 释放内存
