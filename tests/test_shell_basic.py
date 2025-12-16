@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import platform
 
-from .conftest import run_shell_script, ROOT
+from conftest import run_shell_script, ROOT
 import pytest
 
 

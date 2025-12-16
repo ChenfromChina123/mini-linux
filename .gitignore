@@ -7,6 +7,8 @@
 !.gitignore
 !tests/
 !tests/**
+!requirements/
+!requirements/**
 .trae/
 *.o
 *.obj
