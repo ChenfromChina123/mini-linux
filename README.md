@@ -23,15 +23,16 @@
 
 ### 核心功能
 - **命令行界面**：动态提示符显示当前用户名
+- **行编辑器**：支持方向键左右移动、上下浏览历史、行内插入/删除
 - **命令解析**：将输入标记化为命令和参数
 - **多进程执行**：使用 `fork()` 和 `waitpid()` 执行命令
-- **命令历史**：记录所有命令，包含时间戳和执行结果
-- **用户认证**：基本登录系统，支持root和普通用户权限
+- **命令历史**：记录并持久化，包含时间戳和执行结果
+- **用户认证**：支持root和普通用户权限，用户/会话持久化
 
 ### 文件操作
 - **mycat**：显示文件内容
 - **myrm**：删除文件
-- **myvi**：简单文本文件编辑器
+- **myvi**：vi风格文本编辑器（NORMAL/INSERT/COMMAND/SEARCH）
 - **mytouch**：创建空文件
 - **myecho**：向文件写入内容
 - **mycp**：复制文件
@@ -45,6 +46,8 @@
 ### 用户管理
 - **useradd**：创建新用户（仅root权限）
 - **userdel**：删除用户（仅root权限）
+- **users**：列出所有用户与活跃用户（跨终端会话）
+- **passwd**：修改密码（本人需验证旧密码；root可修改他人）
 
 ## 文件结构
 
@@ -148,11 +151,14 @@ root@mini-linux:$
   root@mini-linux:$ myrm file.txt
   ```
 
-- **myvi**: 编辑文件（简单文本编辑器）
+- **myvi**: 编辑文件（vi风格）
   ```bash
   root@mini-linux:$ myvi file.txt
   ```
-  > 逐行输入内容，在新行输入 `.` 保存并退出
+  - NORMAL：`h/j/k/l` 或方向键移动，`dd` 删除行，`p` 粘贴，`x` 删除字符
+  - INSERT：`i/a/I/A/o/O` 进入插入，`ESC` 返回 NORMAL，`Enter` 断行
+  - COMMAND：输入 `:`，支持 `w`/`q`/`q!`/`wq`、`set number`/`set nonumber`
+  - SEARCH：输入 `/pattern`，`n` 下一个，`N` 上一个
 
 - **mytouch**: 创建空文件
   ```bash
@@ -216,6 +222,21 @@ root@mini-linux:$
   root@mini-linux:$ userdel newuser
   ```
 
+- **users**: 显示所有用户与活跃用户
+  ```bash
+  root@mini-linux:$ users
+  ```
+
+- **passwd**: 修改密码
+  ```bash
+  # 修改本人密码（需旧密码）
+  user@mini-linux:$ passwd
+  # 以root修改他人密码
+  root@mini-linux:$ passwd otheruser
+  # 以root直接指定新密码
+  root@mini-linux:$ passwd otheruser newpass
+  ```
+
 ### 命令历史
 
 - **history**: 显示命令历史，包含时间戳和结果
@@ -241,15 +262,15 @@ Shell采用经典的Unix风格多进程架构：
 
 ### 用户认证
 
-- 简单的无文件认证系统
-- 用户凭证存储在内存中
-- 用户管理操作需要root权限
+- 用户持久化：`~/.mini_users`（用户名、密码、是否root）
+- 会话跟踪：`~/.mini_sessions`（用户名、PID），跨终端显示活跃用户
+- 用户管理操作需要root权限（除本人修改密码）
 
 ### 命令历史
 
-- 最多存储100条命令
-- 记录时间戳、命令字符串和退出状态
-- 实现为循环缓冲区
+- 持久化文件：`~/.mini_history`
+- 启动时加载最近记录，执行时追加
+- 记录时间戳、命令字符串和退出状态（最多显示100条）
 
 ## 未来增强
 
