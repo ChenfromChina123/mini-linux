@@ -47,7 +47,7 @@ def test_myps_linux_only():
     lines = [
         'root',
         'root',
-        'myps',
+        'myps -p 1',
         'exit',
     ]
     out, err, code = run_shell_script(lines)
