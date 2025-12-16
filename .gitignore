@@ -10,7 +10,7 @@ $gitignoreContent = @"
 !README.md
 !*.md
 !.gitignore
-
+!tests/
 # 忽略特定目录和文件
 .trae/
 *.o
