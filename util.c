@@ -1,0 +1,53 @@
+#include "util.h"
+
+// 显示错误信息
+void error(const char *message) {
+    printf("\033[31mError: %s\033[0m\n", message);
+}
+
+// 显示成功信息
+void success(const char *message) {
+    printf("\033[32mSuccess: %s\033[0m\n", message);
+}
+
+// 显示警告信息
+void warning(const char *message) {
+    printf("\033[33mWarning: %s\033[0m\n", message);
+}
+
+// 将命令字符串分割成命令和参数
+int split_command(const char *command, char **argv, int max_args) {
+    int argc = 0;
+    char *cmd_copy = strdup(command);
+    char *token = strtok(cmd_copy, " ");
+    
+    while (token != NULL && argc < max_args) {
+        argv[argc++] = strdup(token);
+        token = strtok(NULL, " ");
+    }
+    
+    free(cmd_copy);
+    return argc;
+}
+
+// 去除字符串两端的空格和换行符
+void trim(char *str) {
+    int start = 0;
+    int end = strlen(str) - 1;
+    
+    // 去除开头的空格和换行符
+    while (start <= end && (str[start] == ' ' || str[start] == '\n' || str[start] == '\t')) {
+        start++;
+    }
+    
+    // 去除结尾的空格和换行符
+    while (end >= start && (str[end] == ' ' || str[end] == '\n' || str[end] == '\t')) {
+        end--;
+    }
+    
+    // 重新构建字符串
+    for (int i = 0; i <= end - start; i++) {
+        str[i] = str[start + i];
+    }
+    str[end - start + 1] = '\0';
+}

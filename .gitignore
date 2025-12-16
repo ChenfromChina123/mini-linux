@@ -1,0 +1,16 @@
+# 写入忽略规则到.gitignore
+"@"
+"*"
+"!*.c"
+"!*.h"
+"!Makefile"
+"!README.md"
+"!*.md"
+"!.gitignore"
+".trae/"
+"*.o"
+"*.obj"
+"*.out"
+".vscode/"
+".idea/"
+"@" | Out-File -FilePath ".gitignore" -Encoding utf8
