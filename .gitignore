@@ -1,9 +1,4 @@
-# 写入忽略规则到 .gitignore
-$gitignoreContent = @"
-# 忽略所有文件
 *
-
-# 但保留以下文件和目录
 !*.c
 !*.h
 !Makefile
@@ -11,14 +6,10 @@ $gitignoreContent = @"
 !*.md
 !.gitignore
 !tests/
-# 忽略特定目录和文件
+!tests/**
 .trae/
 *.o
 *.obj
 *.out
 .vscode/
 .idea/
-"@
-
-# 写入 .gitignore 文件，使用 UTF-8 编码
-$gitignoreContent | Out-File -FilePath ".gitignore" -Encoding utf8
