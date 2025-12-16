@@ -10,7 +10,7 @@ CFLAGS = -Wall -g
 TARGET = mini_linux_shell
 
 # C语言程序源文件
-C_SRCS = mycat.c myrm.c myvi.c mytouch.c myecho.c mycp.c myls.c myps.c mycd.c
+C_SRCS = mycat.c myrm.c myvi.c mytouch.c myecho.c mycp.c myls.c myps.c mycd.c mymkdir.c
 
 # 目标文件列表
 C_OBJS = $(C_SRCS:.c=.o)

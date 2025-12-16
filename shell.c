@@ -16,6 +16,7 @@ Command commands[] = {
     {"mycp", cmd_mycp, "复制文件"},
     {"myls", cmd_myls, "显示目录内容"},
     {"mycd", cmd_mycd, "切换当前目录"},
+    {"mymkdir", cmd_mymkdir, "创建目录"},
     {"myps", cmd_myps, "显示进程信息"},
     {"exit", cmd_exit, "退出shell"},
     {"clear", cmd_clear, "清屏"},
@@ -67,6 +68,8 @@ int cmd_help(int argc, char *argv[]) {
             printf("，用法: myls [目录] 或 myls -l [目录]");
         } else if (strcmp(commands[i].name, "mycd") == 0) {
             printf("，用法: mycd [目录]（无参数切换到主目录，支持 ~ 展开）");
+        } else if (strcmp(commands[i].name, "mymkdir") == 0) {
+            printf("，用法: mymkdir [-p] <目录>（-p: 创建父目录）");
         } else if (strcmp(commands[i].name, "myecho") == 0) {
             printf("，用法: myecho <文本> [> 文件]（支持重定向）");
         } else if (strcmp(commands[i].name, "mycp") == 0) {
