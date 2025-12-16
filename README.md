@@ -85,7 +85,7 @@ Mini_computer/
 
 1. **克隆或导航到项目目录**
    ```bash
-   cd Mini_computer
+   cd mini-linux
    ```
 
 2. **使用Makefile编译**
