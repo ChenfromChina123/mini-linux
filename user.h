@@ -31,8 +31,9 @@ const User* get_user(int index);
 const User* get_current_user();
 void user_list_all();
 void user_list_active();
-
 void user_session_register();
 void user_session_unregister();
+
+int user_change_password(const char *username, const char *old_password, const char *new_password, int force);
 
 #endif // USER_H

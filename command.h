@@ -19,5 +19,6 @@ int cmd_userdel(int argc, char *argv[]);
 int cmd_mycd(int argc, char *argv[]);
 int cmd_mymkdir(int argc, char *argv[]);
 int cmd_users(int argc, char *argv[]);
+int cmd_passwd(int argc, char *argv[]);
 
 #endif // COMMAND_H

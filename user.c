@@ -288,3 +288,22 @@ void user_list_active() {
     fclose(f);
     if (sc == 0) printf("无\n"); else for (int i = 0; i < sc; i++) printf("%s\n", seen[i]);
 }
+
+int user_change_password(const char *username, const char *old_password, const char *new_password, int force) {
+    if (!username || !new_password) { error("参数无效"); return 0; }
+    int idx = -1;
+    for (int i = 0; i < user_count; i++) {
+        if (strcmp(users[i].username, username) == 0) { idx = i; break; }
+    }
+    if (idx < 0) { error("用户不存在"); return 0; }
+    if (!force) {
+        if (!old_password || strcmp(users[idx].password, old_password) != 0) { error("旧密码错误"); return 0; }
+    }
+    size_t L = strlen(new_password);
+    if (L == 0 || L >= MAX_PASSWORD_LENGTH) { error("新密码长度非法"); return 0; }
+    strncpy(users[idx].password, new_password, MAX_PASSWORD_LENGTH - 1);
+    users[idx].password[MAX_PASSWORD_LENGTH - 1] = '\0';
+    save_users();
+    success("密码已更新");
+    return 1;
+}

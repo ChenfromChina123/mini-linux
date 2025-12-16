@@ -97,6 +97,7 @@ Command commands[] = {
     {"mymkdir", cmd_mymkdir, "创建目录"},
     {"myps", cmd_myps, "显示进程信息"},
     {"users", cmd_users, "显示系统用户与活跃用户"},
+    {"passwd", cmd_passwd, "修改密码"},
     {"exit", cmd_exit, "退出shell"},
     {"clear", cmd_clear, "清屏"},
     {"help", cmd_help, "显示帮助信息"},
@@ -164,6 +165,8 @@ int cmd_help(int argc, char *argv[]) {
             printf("，用法: myps");
         } else if (strcmp(commands[i].name, "users") == 0) {
             printf("，用法: users");
+        } else if (strcmp(commands[i].name, "passwd") == 0) {
+            printf("，用法: passwd [用户名]（root可改他人）");
         } else if (strcmp(commands[i].name, "history") == 0) {
             printf("，用法: history");
         }
@@ -171,6 +174,33 @@ int cmd_help(int argc, char *argv[]) {
         printf("\n");
     }
     return 0;
+}
+
+int cmd_passwd(int argc, char *argv[]) {
+    if (argc == 1) {
+        char oldpw[MAX_PASSWORD_LENGTH];
+        char newpw1[MAX_PASSWORD_LENGTH];
+        char newpw2[MAX_PASSWORD_LENGTH];
+        printf("旧密码: "); fgets(oldpw, sizeof(oldpw), stdin); trim(oldpw);
+        printf("新密码: "); fgets(newpw1, sizeof(newpw1), stdin); trim(newpw1);
+        printf("再次输入新密码: "); fgets(newpw2, sizeof(newpw2), stdin); trim(newpw2);
+        if (strcmp(newpw1, newpw2) != 0) { error("两次输入不一致"); return 1; }
+        return user_change_password(current_user.username, oldpw, newpw1, 0) ? 0 : 1;
+    } else {
+        if (!is_root_user()) { error("只有root可以修改其他用户"); return 1; }
+        const char *target = argv[1];
+        char newpw1[MAX_PASSWORD_LENGTH];
+        char newpw2[MAX_PASSWORD_LENGTH];
+        if (argc >= 3) {
+            strncpy(newpw1, argv[2], sizeof(newpw1) - 1); newpw1[sizeof(newpw1) - 1] = '\0';
+            strncpy(newpw2, newpw1, sizeof(newpw2) - 1); newpw2[sizeof(newpw2) - 1] = '\0';
+        } else {
+            printf("新密码: "); fgets(newpw1, sizeof(newpw1), stdin); trim(newpw1);
+            printf("再次输入新密码: "); fgets(newpw2, sizeof(newpw2), stdin); trim(newpw2);
+        }
+        if (strcmp(newpw1, newpw2) != 0) { error("两次输入不一致"); return 1; }
+        return user_change_password(target, NULL, newpw1, 1) ? 0 : 1;
+    }
 }
 
 // 历史命令实现
