@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #ifdef _WIN32
 #include <direct.h>
 #define chdir _chdir
@@ -42,7 +43,7 @@ int cmd_mycd(int argc, char *argv[]) {
                 target = home;
             } else if (target[1] == '/' || target[1] == '\\') {
                 // 需要构造新的路径字符串
-                size_t len = strlen(home) + strlen(target);
+                size_t len = strlen(home) + strlen(target) + 1;
                 char *buf = (char *)malloc(len);
                 if (buf == NULL) {
                     error("内存分配失败");
@@ -54,7 +55,9 @@ int cmd_mycd(int argc, char *argv[]) {
                 int rc = chdir(buf);
                 free(buf);
                 if (rc != 0) {
-                    error("切换目录失败");
+                    char msg[256];
+                    snprintf(msg, sizeof(msg), "切换目录失败: %s", strerror(errno));
+                    error(msg);
                     return 1;
                 }
                 return 0;
@@ -68,7 +71,9 @@ int cmd_mycd(int argc, char *argv[]) {
 
     // 直接 chdir
     if (chdir(target) != 0) {
-        error("切换目录失败");
+        char msg[256];
+        snprintf(msg, sizeof(msg), "切换目录失败: %s", strerror(errno));
+        error(msg);
         return 1;
     }
 
