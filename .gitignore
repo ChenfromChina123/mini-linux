@@ -1,16 +1,24 @@
-# 写入忽略规则到.gitignore
-"@"
-"*"
-"!*.c"
-"!*.h"
-"!Makefile"
-"!README.md"
-"!*.md"
-"!.gitignore"
-".trae/"
-"*.o"
-"*.obj"
-"*.out"
-".vscode/"
-".idea/"
-"@" | Out-File -FilePath ".gitignore" -Encoding utf8
+# 写入忽略规则到 .gitignore
+$gitignoreContent = @"
+# 忽略所有文件
+*
+
+# 但保留以下文件和目录
+!*.c
+!*.h
+!Makefile
+!README.md
+!*.md
+!.gitignore
+
+# 忽略特定目录和文件
+.trae/
+*.o
+*.obj
+*.out
+.vscode/
+.idea/
+"@
+
+# 写入 .gitignore 文件，使用 UTF-8 编码
+$gitignoreContent | Out-File -FilePath ".gitignore" -Encoding utf8
