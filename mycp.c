@@ -106,8 +106,6 @@ int cmd_mycp(int argc, char *argv[]) {
     fclose(src);
     fclose(dest);
 
-    char okmsg[512];
-    snprintf(okmsg, sizeof(okmsg), "已复制文件: %s -> %s", src_file, final_dest);
-    printf("%s\n", okmsg);
+    printf("已复制文件: %s -> %s\n", src_file, final_dest);
     return 0;
 }
