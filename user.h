@@ -26,4 +26,10 @@ int user_delete(const char *username);
 int is_root_user();
 void user_init();
 
+int get_user_count();
+const User* get_user(int index);
+const User* get_current_user();
+void user_list_all();
+void user_list_active();
+
 #endif // USER_H

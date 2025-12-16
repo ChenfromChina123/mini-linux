@@ -19,6 +19,12 @@ static void enable_raw(struct termios *orig, int *use_raw) {
     }
 }
 
+int cmd_users(int argc, char *argv[]) {
+    user_list_all();
+    user_list_active();
+    return 0;
+}
+
 static void disable_raw(struct termios *orig, int use_raw) {
     if (use_raw) tcsetattr(STDIN_FILENO, TCSAFLUSH, orig);
 }
@@ -90,6 +96,7 @@ Command commands[] = {
     {"mycd", cmd_mycd, "切换当前目录"},
     {"mymkdir", cmd_mymkdir, "创建目录"},
     {"myps", cmd_myps, "显示进程信息"},
+    {"users", cmd_users, "显示系统用户与活跃用户"},
     {"exit", cmd_exit, "退出shell"},
     {"clear", cmd_clear, "清屏"},
     {"help", cmd_help, "显示帮助信息"},
@@ -154,6 +161,8 @@ int cmd_help(int argc, char *argv[]) {
             printf("，用法: myvi <文件>");
         } else if (strcmp(commands[i].name, "myps") == 0) {
             printf("，用法: myps");
+        } else if (strcmp(commands[i].name, "users") == 0) {
+            printf("，用法: users");
         } else if (strcmp(commands[i].name, "history") == 0) {
             printf("，用法: history");
         }
