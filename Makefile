@@ -27,8 +27,16 @@ $(TARGET): shell.o user.o history.o util.o $(C_OBJS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # 清理生成的文件
+ifeq ($(OS),Windows_NT)
+RM = del
+EXE = $(TARGET).exe
+else
+RM = rm -f
+EXE = $(TARGET)
+endif
+
 clean:
-	del $(C_OBJS) shell.o user.o history.o util.o $(TARGET).exe
+	$(RM) $(C_OBJS) shell.o user.o history.o util.o $(EXE)
 
 # 伪目标
 .PHONY: all clean
