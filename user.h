@@ -32,4 +32,7 @@ const User* get_current_user();
 void user_list_all();
 void user_list_active();
 
+void user_session_register();
+void user_session_unregister();
+
 #endif // USER_H

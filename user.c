@@ -3,6 +3,12 @@
 #include <limits.h>
 #include <errno.h>
 #include <unistd.h>
+#ifdef _WIN32
+#include <process.h>
+#define GETPID() _getpid()
+#else
+#define GETPID() getpid()
+#endif
 
 // 全局变量定义
 User users[MAX_USERS];
@@ -17,6 +23,15 @@ static int get_user_db_path(char *path, size_t size) {
 #endif
     if (home == NULL) return 0;
     return snprintf(path, size, "%s/.mini_users", home) < (int)size;
+}
+
+static int get_sessions_path(char *path, size_t size) {
+    const char *home = getenv("HOME");
+#ifdef _WIN32
+    if (home == NULL) home = getenv("USERPROFILE");
+#endif
+    if (home == NULL) return 0;
+    return snprintf(path, size, "%s/.mini_sessions", home) < (int)size;
 }
 
 static void save_users() {
@@ -93,6 +108,77 @@ void user_init() {
     load_users();
     strcpy(current_user.username, "");
     current_user.is_root = 0;
+}
+
+void user_session_register() {
+    char p[PATH_MAX];
+    if (!get_sessions_path(p, sizeof(p))) return;
+    typedef struct { char u[MAX_USERNAME_LENGTH]; int pid; } E;
+    E entries[256]; int cnt = 0;
+    FILE *fin = fopen(p, "r");
+    if (fin) {
+        char line[256];
+        while (fgets(line, sizeof(line), fin)) {
+            size_t L = strlen(line);
+            if (L > 0 && (line[L-1] == '\n' || line[L-1] == '\r')) line[--L] = '\0';
+            char *u = strtok(line, "\t");
+            char *pp = u ? strtok(NULL, "\t") : NULL;
+            if (u && pp) {
+                if (cnt < (int)(sizeof(entries)/sizeof(entries[0]))) {
+                    strncpy(entries[cnt].u, u, sizeof(entries[cnt].u)-1);
+                    entries[cnt].u[sizeof(entries[cnt].u)-1] = '\0';
+                    entries[cnt].pid = atoi(pp);
+                    cnt++;
+                }
+            }
+        }
+        fclose(fin);
+    }
+    int mypid = GETPID();
+    for (int i = 0; i < cnt; i++) if (entries[i].pid == mypid) { entries[i] = entries[cnt-1]; cnt--; i--; }
+    if (cnt < (int)(sizeof(entries)/sizeof(entries[0]))) {
+        strncpy(entries[cnt].u, current_user.username, sizeof(entries[cnt].u)-1);
+        entries[cnt].u[sizeof(entries[cnt].u)-1] = '\0';
+        entries[cnt].pid = mypid;
+        cnt++;
+    }
+    FILE *fout = fopen(p, "w");
+    if (!fout) return;
+    for (int i = 0; i < cnt; i++) fprintf(fout, "%s\t%d\n", entries[i].u, entries[i].pid);
+    fclose(fout);
+}
+
+void user_session_unregister() {
+    char p[PATH_MAX];
+    if (!get_sessions_path(p, sizeof(p))) return;
+    typedef struct { char u[MAX_USERNAME_LENGTH]; int pid; } E;
+    E entries[256]; int cnt = 0;
+    FILE *fin = fopen(p, "r");
+    if (fin) {
+        char line[256];
+        while (fgets(line, sizeof(line), fin)) {
+            size_t L = strlen(line);
+            if (L > 0 && (line[L-1] == '\n' || line[L-1] == '\r')) line[--L] = '\0';
+            char *u = strtok(line, "\t");
+            char *pp = u ? strtok(NULL, "\t") : NULL;
+            if (u && pp) {
+                if (cnt < (int)(sizeof(entries)/sizeof(entries[0]))) {
+                    strncpy(entries[cnt].u, u, sizeof(entries[cnt].u)-1);
+                    entries[cnt].u[sizeof(entries[cnt].u)-1] = '\0';
+                    entries[cnt].pid = atoi(pp);
+                    cnt++;
+                }
+            }
+        }
+        fclose(fin);
+    }
+    int mypid = GETPID();
+    E kept[256]; int kcnt = 0;
+    for (int i = 0; i < cnt; i++) if (entries[i].pid != mypid) kept[kcnt++] = entries[i];
+    FILE *fout = fopen(p, "w");
+    if (!fout) return;
+    for (int i = 0; i < kcnt; i++) fprintf(fout, "%s\t%d\n", kept[i].u, kept[i].pid);
+    fclose(fout);
 }
 
 // 用户登录
@@ -184,9 +270,21 @@ void user_list_all() {
 }
 void user_list_active() {
     printf("\033[34m活跃用户：\033[0m\n");
-    if (current_user.username[0] == '\0') {
-        printf("无\n");
-    } else {
-        printf("%s\n", current_user.username);
+    char p[PATH_MAX];
+    if (!get_sessions_path(p, sizeof(p))) { if (current_user.username[0] == '\0') printf("无\n"); else printf("%s\n", current_user.username); return; }
+    FILE *f = fopen(p, "r");
+    if (!f) { if (current_user.username[0] == '\0') printf("无\n"); else printf("%s\n", current_user.username); return; }
+    char seen[MAX_USERS][MAX_USERNAME_LENGTH]; int sc = 0;
+    char line[256];
+    while (fgets(line, sizeof(line), f)) {
+        size_t L = strlen(line);
+        if (L > 0 && (line[L-1] == '\n' || line[L-1] == '\r')) line[--L] = '\0';
+        char *u = strtok(line, "\t");
+        if (u) {
+            int ok = 1; for (int i = 0; i < sc; i++) if (strcmp(seen[i], u) == 0) { ok = 0; break; }
+            if (ok && sc < MAX_USERS) { strncpy(seen[sc], u, sizeof(seen[0]) - 1); seen[sc][sizeof(seen[0]) - 1] = '\0'; sc++; }
+        }
     }
+    fclose(f);
+    if (sc == 0) printf("无\n"); else for (int i = 0; i < sc; i++) printf("%s\n", seen[i]);
 }

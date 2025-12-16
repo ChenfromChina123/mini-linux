@@ -119,6 +119,7 @@ Command* find_command(const char *name) {
 // 退出命令实现
 int cmd_exit(int argc, char *argv[]) {
     printf("\033[34m感谢使用Mini Linux Shell！\033[0m\n");
+    user_session_unregister();
     exit(0);
     return 0;
 }
@@ -331,6 +332,7 @@ void shell_loop() {
         exit(1);
     }
     
+    user_session_register();
     // 主命令循环
     char command[MAX_CMD_LENGTH];
     
