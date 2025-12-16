@@ -1,5 +1,8 @@
 #include "user.h"
 #include "util.h"
+#include <limits.h>
+#include <errno.h>
+#include <unistd.h>
 
 // 全局变量定义
 User users[MAX_USERS];
@@ -7,20 +10,87 @@ int user_count = 0;
 User current_user;
 
 // 初始化用户系统，添加默认用户
+static int get_user_db_path(char *path, size_t size) {
+    const char *home = getenv("HOME");
+#ifdef _WIN32
+    if (home == NULL) home = getenv("USERPROFILE");
+#endif
+    if (home == NULL) return 0;
+    return snprintf(path, size, "%s/.mini_users", home) < (int)size;
+}
+
+static void save_users() {
+    char p[PATH_MAX];
+    if (!get_user_db_path(p, sizeof(p))) return;
+    FILE *f = fopen(p, "w");
+    if (!f) return;
+    for (int i = 0; i < user_count; i++) fprintf(f, "%s\t%s\t%d\n", users[i].username, users[i].password, users[i].is_root);
+    fclose(f);
+}
+
+static void load_users() {
+    char p[PATH_MAX];
+    if (!get_user_db_path(p, sizeof(p))) {
+        user_count = 0;
+        strcpy(users[user_count].username, "root");
+        strcpy(users[user_count].password, "root");
+        users[user_count].is_root = 1;
+        user_count++;
+        strcpy(users[user_count].username, "user");
+        strcpy(users[user_count].password, "user");
+        users[user_count].is_root = 0;
+        user_count++;
+        return;
+    }
+    FILE *f = fopen(p, "r");
+    if (!f) {
+        user_count = 0;
+        strcpy(users[user_count].username, "root");
+        strcpy(users[user_count].password, "root");
+        users[user_count].is_root = 1;
+        user_count++;
+        strcpy(users[user_count].username, "user");
+        strcpy(users[user_count].password, "user");
+        users[user_count].is_root = 0;
+        user_count++;
+        save_users();
+        return;
+    }
+    user_count = 0;
+    char line[1024];
+    while (fgets(line, sizeof(line), f)) {
+        size_t L = strlen(line);
+        if (L > 0 && (line[L-1] == '\n' || line[L-1] == '\r')) line[--L] = '\0';
+        char *u = strtok(line, "\t");
+        char *pw = u ? strtok(NULL, "\t") : NULL;
+        char *ir = pw ? strtok(NULL, "\t") : NULL;
+        if (u && pw && ir) {
+            if (user_count < MAX_USERS) {
+                strncpy(users[user_count].username, u, sizeof(users[user_count].username)-1);
+                users[user_count].username[sizeof(users[user_count].username)-1] = '\0';
+                strncpy(users[user_count].password, pw, sizeof(users[user_count].password)-1);
+                users[user_count].password[sizeof(users[user_count].password)-1] = '\0';
+                users[user_count].is_root = atoi(ir) ? 1 : 0;
+                user_count++;
+            }
+        }
+    }
+    fclose(f);
+    if (user_count == 0) {
+        strcpy(users[user_count].username, "root");
+        strcpy(users[user_count].password, "root");
+        users[user_count].is_root = 1;
+        user_count++;
+        strcpy(users[user_count].username, "user");
+        strcpy(users[user_count].password, "user");
+        users[user_count].is_root = 0;
+        user_count++;
+        save_users();
+    }
+}
+
 void user_init() {
-    // 添加root用户
-    strcpy(users[user_count].username, "root");
-    strcpy(users[user_count].password, "root");
-    users[user_count].is_root = 1;
-    user_count++;
-    
-    // 添加普通用户
-    strcpy(users[user_count].username, "user");
-    strcpy(users[user_count].password, "user");
-    users[user_count].is_root = 0;
-    user_count++;
-    
-    // 初始化当前用户
+    load_users();
     strcpy(current_user.username, "");
     current_user.is_root = 0;
 }
@@ -60,6 +130,7 @@ int user_create(const char *username, const char *password, int is_root) {
     strcpy(users[user_count].password, password);
     users[user_count].is_root = is_root;
     user_count++;
+    save_users();
     
     return 1;
 }
@@ -91,6 +162,7 @@ int user_delete(const char *username) {
         users[i] = users[i + 1];
     }
     user_count--;
+    save_users();
     
     return 1;
 }
