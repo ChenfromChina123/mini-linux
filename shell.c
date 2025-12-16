@@ -15,6 +15,7 @@ Command commands[] = {
     {"myecho", cmd_myecho, "向文件写入内容"},
     {"mycp", cmd_mycp, "复制文件"},
     {"myls", cmd_myls, "显示目录内容"},
+    {"mycd", cmd_mycd, "切换当前目录"},
     {"myps", cmd_myps, "显示进程信息"},
     {"exit", cmd_exit, "退出shell"},
     {"clear", cmd_clear, "清屏"},
@@ -56,7 +57,33 @@ int cmd_clear(int argc, char *argv[]) {
 int cmd_help(int argc, char *argv[]) {
     printf("\033[34m可用命令：\033[0m\n");
     for (int i = 0; commands[i].name != NULL; i++) {
-        printf("%s\t- %s\n", commands[i].name, commands[i].description);
+        // 默认显示 名称 - 描述
+        printf("%s\t- %s", commands[i].name, commands[i].description);
+
+        // 为部分命令添加简短用法说明
+        if (strcmp(commands[i].name, "mycat") == 0) {
+            printf("，用法: mycat <文件名> [文件名...]");
+        } else if (strcmp(commands[i].name, "myls") == 0) {
+            printf("，用法: myls [目录] 或 myls -l [目录]");
+        } else if (strcmp(commands[i].name, "mycd") == 0) {
+            printf("，用法: mycd [目录]（无参数切换到主目录，支持 ~ 展开）");
+        } else if (strcmp(commands[i].name, "myecho") == 0) {
+            printf("，用法: myecho <文本> [> 文件]（支持重定向）");
+        } else if (strcmp(commands[i].name, "mycp") == 0) {
+            printf("，用法: mycp <源文件> <目标文件>");
+        } else if (strcmp(commands[i].name, "myrm") == 0) {
+            printf("，用法: myrm <文件>");
+        } else if (strcmp(commands[i].name, "mytouch") == 0) {
+            printf("，用法: mytouch <文件>");
+        } else if (strcmp(commands[i].name, "myvi") == 0) {
+            printf("，用法: myvi <文件>");
+        } else if (strcmp(commands[i].name, "myps") == 0) {
+            printf("，用法: myps");
+        } else if (strcmp(commands[i].name, "history") == 0) {
+            printf("，用法: history");
+        }
+
+        printf("\n");
     }
     return 0;
 }
