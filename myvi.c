@@ -43,8 +43,14 @@ static int read_key() {
     int c = getchar();
     if (c == 27) {
         int c1 = getchar();
-        if (c1 == '[') {
+        if (c1 == '[' || c1 == 'O') {
             int c2 = getchar();
+            if (c2 >= '0' && c2 <= '9') {
+                for (;;) {
+                    int cx = getchar();
+                    if (cx == 'A' || cx == 'B' || cx == 'C' || cx == 'D' || cx == '~') { c2 = cx; break; }
+                }
+            }
             if (c2 == 'A') return KEY_UP;
             if (c2 == 'B') return KEY_DOWN;
             if (c2 == 'C') return KEY_RIGHT;
@@ -296,6 +302,10 @@ int cmd_myvi(int argc, char *argv[]) {
             if (row >= top + avail) top = row - (avail ? avail - 1 : 0);
         } else if (mode == MODE_INSERT) {
             if (k == 27) { mode = MODE_NORMAL; }
+            else if (k == KEY_LEFT) { if (col > 0) col--; }
+            else if (k == KEY_RIGHT) { size_t len = strlen(lines[row]); if (col < len) col++; }
+            else if (k == KEY_DOWN) { if (row + 1 < line_count) { row++; size_t len = strlen(lines[row]); if (col > len) col = len; } }
+            else if (k == KEY_UP) { if (row > 0) { row--; size_t len = strlen(lines[row]); if (col > len) col = len; } }
             else if (k == '\r' || k == '\n') { split_line(&lines, &line_count, &cap, row, col); row++; col = 0; dirty = 1; }
             else if (k == 127 || k == 8) { if (col > 0) { delete_char(&lines[row], col - 1); col--; dirty = 1; } else if (row > 0) { join_with_prev(&lines, &line_count, row, &col); row--; dirty = 1; } }
             else { insert_char(&lines[row], col, (char)k); col++; dirty = 1; }
