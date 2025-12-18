@@ -202,6 +202,17 @@ static void save_file(const char *filename, char **lines, size_t line_count) {
     fclose(out);
 }
 
+static int myvi_exit(struct termios *orig, int use_raw, char **lines, size_t line_count, char *yank, int code) {
+    disable_raw(orig, use_raw);
+    printf("\x1b[2J");
+    printf("\x1b[H");
+    fflush(stdout);
+    for (size_t i = 0; i < line_count; i++) free(lines[i]);
+    free(lines);
+    if (yank) free(yank);
+    return code;
+}
+
 int cmd_myvi(int argc, char *argv[]) {
     if (argc < 2) {
         error("使用方法: myvi <文件名>");
@@ -330,9 +341,9 @@ int cmd_myvi(int argc, char *argv[]) {
             else if (k == '\r' || k == '\n') {
                 cmd[cmd_len] = '\0';
                 if (strcmp(cmd, "w") == 0) { save_file(filename, lines, line_count); dirty = 0; success("文件已保存"); }
-                else if (strcmp(cmd, "q") == 0) { if (dirty) { strcpy(status, "有未保存修改"); } else { disable_raw(&orig, use_raw); for (size_t i = 0; i < line_count; i++) free(lines[i]); free(lines); return 0; } }
-                else if (strcmp(cmd, "q!") == 0) { disable_raw(&orig, use_raw); for (size_t i = 0; i < line_count; i++) free(lines[i]); free(lines); return 0; }
-                else if (strcmp(cmd, "wq") == 0) { save_file(filename, lines, line_count); dirty = 0; success("文件已保存"); disable_raw(&orig, use_raw); for (size_t i = 0; i < line_count; i++) free(lines[i]); free(lines); return 0; }
+                else if (strcmp(cmd, "q") == 0) { if (dirty) { strcpy(status, "有未保存修改"); } else { return myvi_exit(&orig, use_raw, lines, line_count, yank, 0); } }
+                else if (strcmp(cmd, "q!") == 0) { return myvi_exit(&orig, use_raw, lines, line_count, yank, 0); }
+                else if (strcmp(cmd, "wq") == 0) { save_file(filename, lines, line_count); return myvi_exit(&orig, use_raw, lines, line_count, yank, 0); }
                 else if (strcmp(cmd, "set number") == 0) { show_numbers = 1; status[0] = '\0'; }
                 else if (strcmp(cmd, "set nonumber") == 0) { show_numbers = 0; status[0] = '\0'; }
                 else if (strcmp(cmd, "help") == 0) { strcpy(status, "h/j/k/l i a o dd x p :w :q :wq / n N"); }
@@ -359,5 +370,6 @@ int cmd_myvi(int argc, char *argv[]) {
     disable_raw(&orig, use_raw);
     for (size_t i = 0; i < line_count; i++) free(lines[i]);
     free(lines);
+    if (yank) free(yank);
     return 0;
 }
