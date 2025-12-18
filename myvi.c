@@ -104,6 +104,7 @@ static void insert_line(char ***lines_ptr, size_t *line_count_ptr, size_t *cap_p
     char **lines = *lines_ptr;
     size_t line_count = *line_count_ptr;
     size_t cap = *cap_ptr;
+    if (pos > line_count) pos = line_count;
     ensure_cap(&lines, &cap, line_count + 1);
     for (size_t i = line_count; i > pos; i--) lines[i] = lines[i - 1];
     lines[pos] = strdup(text ? text : "");
@@ -158,6 +159,7 @@ static void split_line(char ***lines_ptr, size_t *line_count_ptr, size_t *cap_pt
     char **lines = *lines_ptr;
     size_t line_count = *line_count_ptr;
     size_t cap = *cap_ptr;
+    if (row >= line_count) return;
     char *s = lines[row];
     size_t len = strlen(s);
     if (col > len) col = len;
@@ -176,9 +178,9 @@ static void split_line(char ***lines_ptr, size_t *line_count_ptr, size_t *cap_pt
 }
 
 static void join_with_prev(char ***lines_ptr, size_t *line_count_ptr, size_t row, size_t *col_ptr) {
-    if (row == 0) return;
-    char **lines = *lines_ptr;
     size_t line_count = *line_count_ptr;
+    if (row == 0 || row >= line_count) return;
+    char **lines = *lines_ptr;
     size_t lenp = strlen(lines[row - 1]);
     size_t lenc = strlen(lines[row]);
     char *ns = (char *)malloc(lenp + lenc + 1);
@@ -245,6 +247,17 @@ int cmd_myvi(int argc, char *argv[]) {
     int pending_g = 0;
     int count = 0;
     while (1) {
+        if (line_count == 0) {
+            ensure_cap(&lines, &cap, 1);
+            lines[0] = strdup("");
+            line_count = 1;
+            row = 0;
+            col = 0;
+            top = 0;
+        } else if (row >= line_count) {
+            row = line_count - 1;
+            col = 0;
+        }
         render(lines, line_count, top, row, col, show_numbers, mode, status);
         int k = read_key();
         if (mode == MODE_NORMAL) {
@@ -271,7 +284,7 @@ int cmd_myvi(int argc, char *argv[]) {
             else if (k == 'o') { split_line(&lines, &line_count, &cap, row, strlen(lines[row])); row++; col = 0; mode = MODE_INSERT; dirty = 1; }
             else if (k == 'O') { split_line(&lines, &line_count, &cap, row, 0); col = 0; mode = MODE_INSERT; dirty = 1; }
             else if (k == 'x') { delete_char(&lines[row], col); dirty = 1; }
-            else if (k == 'd') { if (pending_d) { int n = count ? count : 1; count = 0; while (n-- && line_count) { delete_line(&lines, &line_count, row, &yank); if (row >= line_count && line_count) row = line_count - 1; } pending_d = 0; dirty = 1; } else { pending_d = 1; } }
+            else if (k == 'd') { if (pending_d) { int n = count ? count : 1; count = 0; while (n-- && line_count) { delete_line(&lines, &line_count, row, &yank); if (line_count == 0) { ensure_cap(&lines, &cap, 1); lines[0] = strdup(""); line_count = 1; row = 0; col = 0; break; } if (row >= line_count) row = line_count - 1; } pending_d = 0; dirty = 1; } else { pending_d = 1; } }
             else if (k == 'p') { paste_line(&lines, &line_count, &cap, row + 1, yank); dirty = 1; }
             else if (k == '/') { mode = MODE_SEARCH; cmd_len = 0; }
             else if (k == ':') { mode = MODE_COMMAND; cmd_len = 0; }
