@@ -57,6 +57,21 @@ int cmd_agent(int argc, char *argv[]) {
     system("chcp 65001 > nul");
 #endif
 
+    // 检查并安装依赖
+    printf("\033[34m正在检查 Python 依赖...\033[0m\n");
+    char check_cmd[1280];
+    snprintf(check_cmd, sizeof(check_cmd), 
+             "cd %s && %s xiaochen_agent_v2/check_deps.py", 
+             cwd, python_cmd);
+    
+    int check_result = system(check_cmd);
+    if (check_result != 0) {
+        error("依赖检查失败");
+        return 1;
+    }
+    
+    printf("\n");
+
     // 构建命令
     char command[4096];
     

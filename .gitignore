@@ -7,12 +7,14 @@
 !.gitignore
 !tests/
 !tests/**
+!requirements.txt
 !requirements/
 !requirements/**
 !xiaochen_agent_v2/
 !xiaochen_agent_v2/**
 !*.bat
 !*.ps1
+!*.py
 !分工说明.md
 
 # 编译产物（确保不提交）

@@ -94,7 +94,10 @@ Mini_computer/
 - GCC编译器
 - Make 工具
 - Python 3.x（用于 `agent` AI助手命令，可选）
-- Python依赖包：requests、urllib3（用于 `agent` 命令，可选）
+- Python依赖包（首次运行 `agent` 命令时会自动安装）：
+  - requests>=2.28.0
+  - urllib3>=1.26.0
+  - colorama>=0.4.6
 
 > **Windows 用户请注意**：本项目使用了 Linux 特定的系统调用，建议使用 WSL (Windows Subsystem for Linux) 编译运行。详见 [WINDOWS_BUILD.md](WINDOWS_BUILD.md)。
 
@@ -123,9 +126,9 @@ Mini_computer/
 
 Windows 原生环境下无法编译完整的 Shell，但可以单独使用 AI 助手功能：
 
-1. **安装 Python 依赖**
+1. **安装 Python 依赖（可选，首次运行会自动安装）**
    ```powershell
-   pip install requests urllib3
+   pip install -r requirements.txt
    ```
 
 2. **使用启动脚本**
@@ -321,6 +324,7 @@ root@mini-linux:$
   - 🛠️ 命令执行：自动执行终端命令（需要确认）
   - 📝 任务管理：跟踪和管理多个任务
   - 💾 历史记录：保存操作历史，支持回滚
+  - 🔧 自动安装依赖：首次运行自动检查并安装所需 Python 包
 
 ## 实现细节
 

@@ -40,6 +40,16 @@ try {
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $env:PYTHONIOENCODING = "utf-8"
 
+# 检查并安装依赖
+Write-Host "[信息] 正在检查 Python 依赖..." -ForegroundColor Green
+$checkResult = & python xiaochen_agent_v2\check_deps.py
+if ($LASTEXITCODE -ne 0) {
+    Write-Host ""
+    Write-Host "[错误] 依赖检查失败" -ForegroundColor Red
+    Read-Host "按任意键退出"
+    exit 1
+}
+
 # 启动 Agent
 Write-Host "[信息] 正在启动小晨AI终端助手..." -ForegroundColor Green
 Write-Host ""

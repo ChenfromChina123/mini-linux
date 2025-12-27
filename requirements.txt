@@ -1,0 +1,7 @@
+# Mini Linux Shell - Python 依赖
+# xiaochen_agent_v2 AI助手所需的依赖包
+
+requests>=2.28.0
+urllib3>=1.26.0
+colorama>=0.4.6
+

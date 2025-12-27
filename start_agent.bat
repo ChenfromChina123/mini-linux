@@ -33,6 +33,16 @@ if "%VOID_API_KEY%"=="" (
 REM 设置控制台编码为 UTF-8
 chcp 65001 >nul
 
+REM 检查并安装依赖
+echo [信息] 正在检查 Python 依赖...
+python xiaochen_agent_v2\check_deps.py
+if %errorlevel% neq 0 (
+    echo.
+    echo [错误] 依赖检查失败
+    pause
+    exit /b 1
+)
+
 REM 启动 Agent
 python -m xiaochen_agent_v2
 

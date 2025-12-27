@@ -50,10 +50,21 @@ MSYS2 提供了 Unix 工具链和编译环境。
 ### 前置条件
 
 1. 安装 Python 3.x
-2. 安装依赖包：
-   ```powershell
-   pip install requests urllib3
-   ```
+2. 依赖包会在**首次运行时自动安装**，无需手动操作
+
+### 自动依赖安装
+
+项目内置了智能依赖检查和安装功能：
+
+- ✅ 首次运行时自动检测缺失的 Python 包
+- ✅ 自动调用 pip 安装所需依赖（requests、urllib3、colorama）
+- ✅ 显示友好的安装进度和结果提示
+- ✅ 安装失败时提供手动安装指导
+
+如需手动安装依赖，可执行：
+```powershell
+pip install -r requirements.txt
+```
 
 ### 设置环境变量
 
