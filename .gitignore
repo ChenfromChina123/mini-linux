@@ -9,9 +9,32 @@
 !tests/**
 !requirements/
 !requirements/**
-.trae/
+!xiaochen_agent_v2/
+!xiaochen_agent_v2/**
+!*.bat
+!*.ps1
+!分工说明.md
+
+# 编译产物（确保不提交）
 *.o
 *.obj
 *.out
+*.exe
+mini_linux_shell
+mini_linux_shell.exe
+
+# IDE 和编辑器
+.trae/
 .vscode/
 .idea/
+__pycache__/
+*.pyc
+*.pyo
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.swp
+*~

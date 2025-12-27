@@ -98,6 +98,7 @@ Command commands[] = {
     {"myps", cmd_myps, "显示进程信息"},
     {"users", cmd_users, "显示系统用户与活跃用户"},
     {"passwd", cmd_passwd, "修改密码"},
+    {"agent", cmd_agent, "启动小晨AI终端助手"},
     {"exit", cmd_exit, "退出shell"},
     {"clear", cmd_clear, "清屏"},
     {"help", cmd_help, "显示帮助信息"},
@@ -169,6 +170,8 @@ int cmd_help(int argc, char *argv[]) {
             printf("，用法: passwd [用户名]（root可改他人）");
         } else if (strcmp(commands[i].name, "history") == 0) {
             printf("，用法: history");
+        } else if (strcmp(commands[i].name, "agent") == 0) {
+            printf("，用法: agent [指令...]（无参数启动交互式AI助手）");
         }
 
         printf("\n");

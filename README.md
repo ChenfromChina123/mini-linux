@@ -49,6 +49,12 @@
 - **users**：列出所有用户与活跃用户（跨终端会话）
 - **passwd**：修改密码（本人需验证旧密码；root可修改他人）
 
+### AI助手工具
+- **agent**：启动小晨AI终端助手（xiaochen_agent_v2）
+  - 支持交互式对话模式
+  - 可执行文件操作、代码编写、项目管理等任务
+  - 基于大语言模型的智能终端助手
+
 ## 文件结构
 
 ```
@@ -70,7 +76,13 @@ Mini_computer/
 ├── mycp.c           # mycp命令实现
 ├── myls.c           # myls命令实现
 ├── myps.c           # myps命令实现
+├── myagent.c        # agent命令实现（AI助手）
+├── xiaochen_agent_v2/ # 小晨AI终端助手（Python）
 ├── Makefile         # 编译规则
+├── build.bat        # Windows 编译脚本
+├── start_agent.bat  # Agent 独立启动脚本（批处理）
+├── start_agent.ps1  # Agent 独立启动脚本（PowerShell）
+├── WINDOWS_BUILD.md # Windows 平台编译说明
 └── README.md        # 此文档
 ```
 
@@ -78,10 +90,17 @@ Mini_computer/
 
 ### 前置条件
 
+- **Linux 系统或兼容环境**（WSL、Cygwin、MSYS2）
 - GCC编译器
-- Linux系统（`myps` 需要访问 `/proc` 文件系统）
+- Make 工具
+- Python 3.x（用于 `agent` AI助手命令，可选）
+- Python依赖包：requests、urllib3（用于 `agent` 命令，可选）
+
+> **Windows 用户请注意**：本项目使用了 Linux 特定的系统调用，建议使用 WSL (Windows Subsystem for Linux) 编译运行。详见 [WINDOWS_BUILD.md](WINDOWS_BUILD.md)。
 
 ### 编译步骤
+
+#### Linux / WSL / Mac
 
 1. **克隆或导航到项目目录**
    ```bash
@@ -99,6 +118,29 @@ Mini_computer/
    ```bash
    make clean
    ```
+
+#### Windows 原生环境
+
+Windows 原生环境下无法编译完整的 Shell，但可以单独使用 AI 助手功能：
+
+1. **安装 Python 依赖**
+   ```powershell
+   pip install requests urllib3
+   ```
+
+2. **使用启动脚本**
+   ```powershell
+   # 方式 1：批处理脚本
+   .\start_agent.bat
+   
+   # 方式 2：PowerShell 脚本
+   .\start_agent.ps1
+   
+   # 方式 3：直接运行
+   python -m xiaochen_agent_v2
+   ```
+
+详细的 Windows 编译说明请参考 [WINDOWS_BUILD.md](WINDOWS_BUILD.md)。
 
 ## 使用指南
 
@@ -243,6 +285,42 @@ root@mini-linux:$
   ```bash
   root@mini-linux:$ history
   ```
+
+### AI助手工具
+
+- **agent**: 启动小晨AI终端助手
+  ```bash
+  # 启动交互式AI助手（需要先设置环境变量）
+  root@mini-linux:$ agent
+  
+  # 直接执行单条指令
+  root@mini-linux:$ agent 帮我创建一个测试文件
+  root@mini-linux:$ agent 显示当前目录结构
+  ```
+
+  **环境配置**：
+  
+  使用前需要设置以下环境变量（Windows PowerShell）：
+  ```powershell
+  $env:VOID_API_KEY = "你的API密钥"
+  $env:VOID_BASE_URL = "https://api.deepseek.com"  # 可选，默认为DeepSeek
+  $env:VOID_MODEL = "deepseek-chat"  # 可选，默认为deepseek-chat
+  ```
+
+  或在Linux/Mac终端：
+  ```bash
+  export VOID_API_KEY="你的API密钥"
+  export VOID_BASE_URL="https://api.deepseek.com"  # 可选
+  export VOID_MODEL="deepseek-chat"  # 可选
+  ```
+
+  **功能特性**：
+  - 🤖 智能对话：理解自然语言指令
+  - 📁 文件操作：读取、编写、搜索文件
+  - 🔍 代码搜索：在项目中查找代码片段
+  - 🛠️ 命令执行：自动执行终端命令（需要确认）
+  - 📝 任务管理：跟踪和管理多个任务
+  - 💾 历史记录：保存操作历史，支持回滚
 
 ## 实现细节
 
