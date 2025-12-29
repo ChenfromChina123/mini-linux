@@ -16,6 +16,7 @@
   - [用户管理](#用户管理)
   - [命令历史](#命令历史)
 - [实现细节](#实现细节)
+- [开发者文档](#开发者文档)
 - [未来增强](#未来增强)
 - [许可证](#许可证)
 
@@ -57,38 +58,37 @@
   - 基于大语言模型的智能终端助手
   - 自动检查和安装 Python 依赖
 
+## 开发者文档
+
+更多技术细节请参考以下文档：
+- [C 成员与 Agent 工作流程详细说明](docs/C_MEMBER_AND_AGENT_WORKFLOW.md)
+- [Windows 平台编译说明](docs/WINDOWS_BUILD.md)
+- [分工说明](docs/分工说明.md)
+
 ## 文件结构
 
 ```
 Mini_computer/
-├── shell.h          # 主shell头文件
-├── shell.c          # 主shell实现
-├── user.h           # 用户系统头文件
-├── user.c           # 用户系统实现
-├── history.h        # 命令历史头文件
-├── history.c        # 命令历史实现
-├── command.h        # 命令声明
-├── util.h           # 工具函数头文件
-├── util.c           # 工具函数实现
-├── mycat.c          # mycat命令实现
-├── myrm.c           # myrm命令实现
-├── myvi.c           # myvi命令实现
-├── mytouch.c        # mytouch命令实现
-├── myecho.c         # myecho命令实现
-├── mycp.c           # mycp命令实现
-├── myls.c           # myls命令实现
-├── myps.c           # myps命令实现
-├── myagent.c        # agent命令实现（AI助手）
-├── xiaochen_agent_v2/ # 小晨AI终端助手（Python）
-│   ├── check_deps.py  # 依赖检查脚本
-│   ├── run_once.py    # 单条命令执行脚本
-│   └── ...            # 其他 Agent 模块
-├── Makefile         # 编译规则
-├── build.bat        # Windows 编译脚本
-├── start_agent.bat  # Agent 独立启动脚本（批处理）
-├── start_agent.ps1  # Agent 独立启动脚本（PowerShell）
-├── WINDOWS_BUILD.md # Windows 平台编译说明
-└── README.md        # 此文档
+├── docs/             # 文档目录
+│   ├── C_MEMBER_AND_AGENT_WORKFLOW.md # C 成员与 Agent 工作流程详细说明
+│   ├── WINDOWS_BUILD.md # Windows 平台编译说明
+│   └── 分工说明.md    # 团队分工说明
+├── include/          # 头文件目录 (.h)
+│   ├── shell.h
+│   ├── user.h
+│   ├── history.h
+│   ├── command.h
+│   └── util.h
+├── src/              # 源代码目录
+│   ├── core/         # 核心系统实现 (shell, user, history, util)
+│   └── commands/     # 独立命令实现 (mycat, myvi, myls, myps, etc.)
+├── scripts/          # 脚本目录
+│   ├── build.bat     # Windows 编译脚本
+│   ├── start_agent.bat # Agent 启动脚本 (Batch)
+│   └── start_agent.ps1 # Agent 启动脚本 (PowerShell)
+├── xiaochen_agent_v2/ # 小晨AI终端助手 (Python)
+├── Makefile          # 编译规则
+└── README.md         # 此文档
 ```
 
 ## 编译说明
