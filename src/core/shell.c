@@ -4,19 +4,30 @@
 #include "history.h"
 #include "util.h"
 #include <unistd.h>
+#ifdef _WIN32
+#include <io.h>
+#include <process.h>
+#include <direct.h>
+#define STDIN_FILENO 0
+#define getcwd _getcwd
+#else
 #include <sys/wait.h>
 #include <termios.h>
+#endif
 
-static void enable_raw(struct termios *orig, int *use_raw) {
+static void enable_raw(void *orig, int *use_raw) {
     *use_raw = 0;
-    if (tcgetattr(STDIN_FILENO, orig) == 0) {
-        struct termios raw = *orig;
+#ifndef _WIN32
+    struct termios *t = (struct termios *)orig;
+    if (tcgetattr(STDIN_FILENO, t) == 0) {
+        struct termios raw = *t;
         raw.c_lflag &= ~(ECHO | ICANON);
         raw.c_cc[VMIN] = 1;
         raw.c_cc[VTIME] = 0;
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
         *use_raw = 1;
     }
+#endif
 }
 
 int cmd_users(int argc, char *argv[]) {
@@ -25,8 +36,10 @@ int cmd_users(int argc, char *argv[]) {
     return 0;
 }
 
-static void disable_raw(struct termios *orig, int use_raw) {
-    if (use_raw) tcsetattr(STDIN_FILENO, TCSAFLUSH, orig);
+static void disable_raw(void *orig, int use_raw) {
+#ifndef _WIN32
+    if (use_raw) tcsetattr(STDIN_FILENO, TCSAFLUSH, (struct termios *)orig);
+#endif
 }
 
 static int read_key() {
@@ -46,6 +59,12 @@ static int read_key() {
 }
 
 static int read_line_edit(const char *prompt, char *out, size_t out_size) {
+#ifdef _WIN32
+    printf("%s", prompt); fflush(stdout);
+    if (fgets(out, out_size, stdin) == NULL) return 0;
+    trim(out);
+    return (int)strlen(out);
+#else
     struct termios orig; int use_raw = 0; enable_raw(&orig, &use_raw);
     size_t len = 0; size_t cur = 0; int hist_idx = history_size();
     char saved[1024]; saved[0] = '\0';
@@ -82,6 +101,7 @@ static int read_line_edit(const char *prompt, char *out, size_t out_size) {
     }
     disable_raw(&orig, use_raw);
     return (int)len;
+#endif
 }
 
 // 定义所有命令
@@ -268,6 +288,29 @@ void shell_init() {
     // 显示欢迎信息
     printf("\033[34m欢迎使用Mini Linux Shell！\033[0m\n");
     printf("\033[34m输入 'help' 查看可用命令。\033[0m\n");
+    
+    // 登录界面
+    char username[MAX_USERNAME_LENGTH];
+    char password[MAX_PASSWORD_LENGTH];
+    while (1) {
+        printf("login: ");
+        if (fgets(username, sizeof(username), stdin) == NULL) exit(0);
+        trim(username);
+        if (strlen(username) == 0) continue;
+        
+        printf("password: ");
+        // 简单起见，这里不隐藏密码输入（Windows下实现隐藏输入较复杂）
+        if (fgets(password, sizeof(password), stdin) == NULL) exit(0);
+        trim(password);
+        
+        if (user_login(username, password)) {
+            user_session_register();
+            success("登录成功！");
+            break;
+        } else {
+            error("登录失败，用户名或密码错误。");
+        }
+    }
 }
 
 // 执行命令
@@ -286,8 +329,18 @@ int execute_command(int argc, char *argv[]) {
     // 2. 检查是否为可执行文件（C程序或shell脚本）
     
     // 尝试直接执行
-    if (access(argv[0], X_OK) == 0) {
+    if (access(argv[0], 0) == 0) {
         // 文件可执行
+#ifdef _WIN32
+        // Windows 下使用 system 或 _spawn
+        // 这里简单起见使用 system，但需要拼接命令
+        char cmd_line[1024] = "";
+        for (int i = 0; i < argc; i++) {
+            strcat(cmd_line, argv[i]);
+            if (i < argc - 1) strcat(cmd_line, " ");
+        }
+        return system(cmd_line);
+#else
         // 创建子进程执行命令
         pid_t pid = fork();
         
@@ -299,108 +352,59 @@ int execute_command(int argc, char *argv[]) {
             // 子进程
             execvp(argv[0], argv);
             // 如果execvp返回，说明执行失败
-            error("命令执行失败");
+            perror("execvp");
             exit(1);
         } else {
-            // 父进程，等待子进程完成
+            // 父进程，等待子进程结束
             int status;
             waitpid(pid, &status, 0);
-            
-            if (WIFEXITED(status)) {
-                return WEXITSTATUS(status);
-            } else {
-                error("命令执行异常");
-                return 1;
-            }
+            return WIFEXITED(status) ? WEXITSTATUS(status) : 1;
         }
+#endif
     }
     
-    // 3. 检查是否为C程序源文件
-    char c_filename[256];
-    sprintf(c_filename, "%s.c", argv[0]);
-    if (access(c_filename, R_OK) == 0) {
-        error("直接执行C源文件暂不支持，请先编译");
-        return 1;
-    }
-    
-    // 4. 检查是否为shell脚本文件
-    char sh_filename[256];
-    sprintf(sh_filename, "%s.sh", argv[0]);
-    if (access(sh_filename, R_OK) == 0) {
-        // 使用system函数执行shell脚本
-        return system(sh_filename);
-    }
-    
-    // 5. 命令不存在
-    error("command not found");
+    error("未找到命令");
     return 1;
 }
 
-// 主循环
+// Shell主循环
 void shell_loop() {
-    // 用户登录
-    char username[MAX_USERNAME_LENGTH];
-    char password[MAX_PASSWORD_LENGTH];
-    int login_success = 0;
-    
-    for (int i = 0; i < 3; i++) {
-        printf("\n用户名: ");
-        fgets(username, sizeof(username), stdin);
-        trim(username);
-        
-        printf("密码: ");
-        fgets(password, sizeof(password), stdin);
-        trim(password);
-        
-        if (user_login(username, password)) {
-            login_success = 1;
-            break;
-        } else {
-            error("用户名或密码错误");
-        }
-    }
-    
-    if (!login_success) {
-        printf("\033[31m登录失败次数过多，退出。\033[0m\n");
-        exit(1);
-    }
-    
-    user_session_register();
-    // 主命令循环
-    char command[MAX_CMD_LENGTH];
+    char input[MAX_CMD_LENGTH];
+    char *argv[MAX_ARGS];
+    int argc;
     
     while (1) {
-        char prompt[128]; snprintf(prompt, sizeof(prompt), "\033[32m%s@mini-linux\033[0m:\033[34m$\033[0m ", current_user.username);
-        int L = read_line_edit(prompt, command, sizeof(command));
-        if (L <= 0) continue;
+        // 显示提示符
+        char prompt[256];
+        char cwd[256];
+        if (getcwd(cwd, sizeof(cwd)) == NULL) strcpy(cwd, "?");
+        snprintf(prompt, sizeof(prompt), "\033[32m%s@mini-computer\033[0m:\033[34m%s\033[0m$ ", 
+                 current_user.username, cwd);
         
-        if (strlen(command) == 0) {
+        // 读取输入
+        if (read_line_edit(prompt, input, sizeof(input)) <= 0) {
             continue;
         }
         
+        // 保存历史记录
+        history_add(input, 0);
+        
         // 解析命令
-        char *argv[MAX_ARGS];
-        int argc = split_command(command, argv, MAX_ARGS);
+        argc = split_command(input, argv, MAX_ARGS);
         
-        // 执行命令并获取结果
-        int result = execute_command(argc, argv);
-        
-        history_add(command, result);
-        
-        // 释放内存
-        for (int i = 0; i < argc; i++) {
-            free(argv[i]);
-        }
+        // 执行命令
+        execute_command(argc, argv);
     }
 }
 
-// 主函数
-int main() {
-    // 初始化shell
+// 程序入口点
+int main(int argc, char *argv[]) {
+    // 设置控制台为 UTF-8
+#ifdef _WIN32
+    system("chcp 65001 > nul");
+#endif
+    
     shell_init();
-    
-    // 启动主循环
     shell_loop();
-    
     return 0;
 }

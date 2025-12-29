@@ -1,10 +1,33 @@
 # Windows 平台编译说明
 
-## 重要提示
+本项目现在已支持在 Windows 环境下使用 MinGW 直接编译运行。
 
-Mini Linux Shell 项目主要为 Linux 系统设计，使用了许多 Linux 特定的系统调用和头文件（如 `sys/wait.h`、`termios.h`、`pwd.h` 等）。因此，**不建议在原生 Windows 环境下编译运行**。
+## 编译方法 (推荐)
 
-## 推荐方案
+### 1. 安装 MinGW-w64
+确保你的系统已安装 MinGW-w64 并且 `gcc` 和 `mingw32-make` 已加入系统环境变量 PATH 中。
+
+### 2. 执行编译
+在项目根目录下打开 PowerShell 或 CMD，运行：
+```powershell
+mingw32-make clean
+mingw32-make
+```
+
+### 3. 运行
+```powershell
+.\mini_linux_shell.exe
+```
+
+## 注意事项
+
+- **控制台编码**：程序会自动尝试执行 `chcp 65001` 以支持 UTF-8 显示。
+- **功能限制**：
+  - `myps`：由于 Windows 不支持 `/proc` 文件系统，该命令在 Windows 下仅显示提示信息。
+  - `myls -l`：用户名和组名在 Windows 下显示为固定占位符。
+  - `myvi`：在 Windows 下支持基本的编辑功能。
+
+## 备选方案 (如果需要完整 Linux 体验)
 
 ### 方案一：使用 WSL (Windows Subsystem for Linux) - 推荐
 

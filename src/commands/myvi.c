@@ -4,43 +4,87 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#include <conio.h>
+#define STDIN_FILENO 0
+#else
 #include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#endif
 
-typedef enum { MODE_NORMAL, MODE_INSERT, MODE_COMMAND, MODE_SEARCH } Mode;
+typedef enum { MODE_NORMAL, MODE_INSERT, MODE_COMMAND, MODE_SEARCH } Mode;//定义整数常量，别名Mode
+//定义枚举常量，分别对应不同的操作模式：正常模式、插入模式、命令模式、搜索模式
 
 enum { KEY_NONE = 0, KEY_UP = -1001, KEY_DOWN = -1002, KEY_LEFT = -1003, KEY_RIGHT = -1004 };
-
+//处理非字符按键，如方向键、删除键、退格键等
 static int screen_rows = 24;
 static int screen_cols = 80;
-
+//初始化屏幕尺寸，获取终端窗口大小，后面会有更新的操作
 static void get_window_size() {
+#ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+        screen_cols = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        screen_rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    }
+#else
     struct winsize ws;
     if (ioctl(STDIN_FILENO, TIOCGWINSZ, &ws) == 0) {
         if (ws.ws_row > 0) screen_rows = ws.ws_row;
         if (ws.ws_col > 0) screen_cols = ws.ws_col;
     }
+#endif
 }
-
-static void enable_raw(struct termios *orig, int *use_raw) {
+//保留终端的当前状态，获取终端控制权
+static void enable_raw(void *orig, int *use_raw) {
     *use_raw = 0;
-    if (tcgetattr(STDIN_FILENO, orig) == 0) {
-        struct termios raw = *orig;
+#ifdef _WIN32
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode;
+    GetConsoleMode(hStdin, &mode);
+    *((DWORD*)orig) = mode;
+    mode &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT);
+    SetConsoleMode(hStdin, mode);
+    *use_raw = 1;
+#else
+    struct termios *t = (struct termios *)orig;
+    if (tcgetattr(STDIN_FILENO, t) == 0) {
+        struct termios raw = *t;
         raw.c_lflag &= ~(ECHO | ICANON);
         raw.c_cc[VMIN] = 1;
         raw.c_cc[VTIME] = 0;
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
         *use_raw = 1;
     }
+#endif
+}
+//恢复终端状态函数，将终端设置回原始状态
+static void disable_raw(void *orig, int use_raw) {
+    if (!use_raw) return;
+#ifdef _WIN32
+    SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), *((DWORD*)orig));
+#else
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, (struct termios *)orig);
+#endif
 }
 
-static void disable_raw(struct termios *orig, int use_raw) {
-    if (use_raw) tcsetattr(STDIN_FILENO, TCSAFLUSH, orig);
-}
-
+//读取用户输入，处理特殊按键（如方向键）
 static int read_key() {
+#ifdef _WIN32
+    int c = getch();
+    if (c == 0 || c == 0xE0) {
+        int c2 = getch();
+        if (c2 == 72) return KEY_UP;
+        if (c2 == 80) return KEY_DOWN;
+        if (c2 == 77) return KEY_RIGHT;
+        if (c2 == 75) return KEY_LEFT;
+    }
+    return c;
+#else
     int c = getchar();
+    //27为转义字符，用于表示特殊按键（如方向键）
     if (c == 27) {
         int c1 = getchar();
         if (c1 == '[' || c1 == 'O') {
@@ -59,11 +103,13 @@ static int read_key() {
         return 27;
     }
     return c;
+#endif
 }
 
 static void render(char **lines, size_t line_count, size_t top, size_t row, size_t col, int show_numbers, Mode mode, const char *status) {
-    printf("\x1b[2J");
-    printf("\x1b[H");
+    printf("\x1b[2J");//清屏
+    printf("\x1b[H");//复位，将光标移到左上角
+    //绘制屏幕内容，即当前编辑区域的文本
     size_t avail = screen_rows > 2 ? (size_t)(screen_rows - 2) : 0;
     for (size_t i = 0; i < avail; i++) {
         size_t li = top + i;
@@ -76,16 +122,19 @@ static void render(char **lines, size_t line_count, size_t top, size_t row, size
         }
         printf("\r\n");
     }
+    //在屏幕底下打印当前状态，包括模式、行号、列号、状态信息等
     char mode_str[32];
     if (mode == MODE_INSERT) strcpy(mode_str, "INSERT"); else if (mode == MODE_COMMAND) strcpy(mode_str, ":"); else if (mode == MODE_SEARCH) strcpy(mode_str, "/"); else strcpy(mode_str, "NORMAL");
     printf("%s  %zu/%zu  col %zu  %s\r\n", mode_str, row + 1, line_count, col + 1, status ? status : "");
     size_t cy = row - top;
     size_t cx = (show_numbers ? 7 : 0) + col + 1;
     if (cy >= avail) cy = avail ? avail - 1 : 0;
+    //将光标移动到指定位置，用于显示当前编辑位置
     printf("\x1b[%zu;%zuH", cy + 1, cx);
     fflush(stdout);
 }
 
+//当文本行数增加、原有的内存空间不够用时，动态地给数组“扩容”
 static void ensure_cap(char ***lines_ptr, size_t *cap_ptr, size_t need) {
     char **lines = *lines_ptr;
     size_t cap = *cap_ptr;
@@ -100,6 +149,7 @@ static void ensure_cap(char ***lines_ptr, size_t *cap_ptr, size_t need) {
     *cap_ptr = cap;
 }
 
+//在指定位置插入新行，将原位置及后续行向下移动
 static void insert_line(char ***lines_ptr, size_t *line_count_ptr, size_t *cap_ptr, size_t pos, const char *text) {
     char **lines = *lines_ptr;
     size_t line_count = *line_count_ptr;
@@ -113,6 +163,7 @@ static void insert_line(char ***lines_ptr, size_t *line_count_ptr, size_t *cap_p
     *cap_ptr = cap;
 }
 
+//负责删除指定行的核心函数
 static void delete_line(char ***lines_ptr, size_t *line_count_ptr, size_t pos, char **yank) {
     char **lines = *lines_ptr;
     size_t line_count = *line_count_ptr;
@@ -126,11 +177,13 @@ static void delete_line(char ***lines_ptr, size_t *line_count_ptr, size_t pos, c
     *line_count_ptr = line_count - 1;
 }
 
+//将 yanked 文本粘贴到指定位置
 static void paste_line(char ***lines_ptr, size_t *line_count_ptr, size_t *cap_ptr, size_t pos, const char *yank) {
     if (!yank) return;
     insert_line(lines_ptr, line_count_ptr, cap_ptr, pos, yank);
 }
 
+//在指定位置插入字符，将原位置及后续字符向右移动
 static void insert_char(char **line_ptr, size_t col, char ch) {
     char *s = *line_ptr;
     size_t len = strlen(s);
@@ -143,6 +196,7 @@ static void insert_char(char **line_ptr, size_t col, char ch) {
     *line_ptr = ns;
 }
 
+//删除指定位置的字符，将原位置及后续字符向左移动
 static void delete_char(char **line_ptr, size_t col) {
     char *s = *line_ptr;
     size_t len = strlen(s);
@@ -155,6 +209,7 @@ static void delete_char(char **line_ptr, size_t col) {
     *line_ptr = ns;
 }
 
+//将指定行分为两行，在指定位置插入换行符，换行操作函数
 static void split_line(char ***lines_ptr, size_t *line_count_ptr, size_t *cap_ptr, size_t row, size_t col) {
     char **lines = *lines_ptr;
     size_t line_count = *line_count_ptr;
@@ -177,6 +232,7 @@ static void split_line(char ***lines_ptr, size_t *line_count_ptr, size_t *cap_pt
     *cap_ptr = cap;
 }
 
+//将当前行与前一行合并，删除换行符，合并操作函数
 static void join_with_prev(char ***lines_ptr, size_t *line_count_ptr, size_t row, size_t *col_ptr) {
     size_t line_count = *line_count_ptr;
     if (row == 0 || row >= line_count) return;
@@ -195,6 +251,7 @@ static void join_with_prev(char ***lines_ptr, size_t *line_count_ptr, size_t row
     *col_ptr = lenp;
 }
 
+//将当前缓冲区内容保存到文件
 static void save_file(const char *filename, char **lines, size_t line_count) {
     FILE *out = fopen(filename, "w");
     if (out == NULL) { error("无法打开文件写入"); return; }
@@ -202,7 +259,8 @@ static void save_file(const char *filename, char **lines, size_t line_count) {
     fclose(out);
 }
 
-static int myvi_exit(struct termios *orig, int use_raw, char **lines, size_t line_count, char *yank, int code) {
+//退出编辑器，释放资源，返回退出码
+static int myvi_exit(void *orig, int use_raw, char **lines, size_t line_count, char *yank, int code) {
     disable_raw(orig, use_raw);
     printf("\x1b[2J");
     printf("\x1b[H");
@@ -213,6 +271,13 @@ static int myvi_exit(struct termios *orig, int use_raw, char **lines, size_t lin
     return code;
 }
 
+//myvi工作流程：
+// 1. 解析路径：支持 ~ 展开，并把相对路径转换为绝对路径。
+// 2. 打开文件：使用 fopen 打开文件，检查是否成功。
+// 3. 读取文件内容：使用 fgets 逐行读取文件内容，避免直接输出到标准输出。
+// 4. 输出文件内容：使用 printf 输出文件内容。
+// 5. 关闭文件：使用 fclose 关闭文件。
+// 返回 0 成功，非 0 失败。
 int cmd_myvi(int argc, char *argv[]) {
     if (argc < 2) {
         error("使用方法: myvi <文件名>");
@@ -223,7 +288,9 @@ int cmd_myvi(int argc, char *argv[]) {
     size_t line_count = 0;
     char **lines = (char **)malloc(sizeof(char *) * cap);
     if (!lines) { error("内存分配失败"); return 1; }
+    
     FILE *f = fopen(filename, "r");
+    // 读取文件内容
     if (f) {
         char buf[4096];
         while (fgets(buf, sizeof(buf), f)) {
@@ -237,7 +304,11 @@ int cmd_myvi(int argc, char *argv[]) {
         ensure_cap(&lines, &cap, 1);
         lines[line_count++] = strdup("");
     }
+#ifdef _WIN32
+    DWORD orig;
+#else
     struct termios orig;
+#endif
     int use_raw = 0;
     enable_raw(&orig, &use_raw);
     get_window_size();
@@ -316,7 +387,9 @@ int cmd_myvi(int argc, char *argv[]) {
                         char *last = NULL; char *s = lines[r]; size_t sl = strlen(s);
                         for (char *q = strstr(s, search_pat); q; q = strstr(q + 1, search_pat)) { if ((size_t)(q - s) < c) last = q; }
                         if (last) { row = r; col = (size_t)(last - s); found = 1; break; }
-                        if (r == 0) break; r--; c = sl;
+                        if (r == 0) break;
+                        r--;
+                        c = sl;
                     }
                     if (!found) strcpy(status, "未找到"); else status[0] = '\0';
                 }

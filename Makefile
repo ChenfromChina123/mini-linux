@@ -11,32 +11,44 @@ OBJ_DIR = obj
 
 # 编译选项 - 添加 -Iinclude 搜索路径
 # 设置控制台编码为 UTF-8
-CFLAGS = -Wall -g -I$(INC_DIR) -finput-charset=UTF-8 -fexec-charset=UTF-8
+CFLAGS = -Wall -g -I$(INC_DIR) -finput-charset=UTF-8 -fexec-charset=UTF-8 -D__USE_MINGW_ANSI_STDIO=1
 
 # 目标文件
 TARGET = mini_linux_shell
 
 # 核心源文件
 CORE_SRCS = $(wildcard $(SRC_CORE_DIR)/*.c)
+#wildcard函数用于获取指定目录下的所有匹配文件，返回一个空格分隔的文件列表
+#具体是将核心源文件目录下的所有.c文件获取到，存储在CORE_SRCS变量中
+
 # 命令源文件
 CMD_SRCS = $(wildcard $(SRC_CMD_DIR)/*.c)
+#具体是将命令源文件目录下的所有.c文件获取到，存储在CMD_SRCS变量中   
 
 # 合并所有源文件
 ALL_SRCS = $(CORE_SRCS) $(CMD_SRCS)
 
 # 目标文件列表
 CORE_OBJS = $(patsubst $(SRC_CORE_DIR)/%.c, $(OBJ_DIR)/%.o, $(CORE_SRCS))
+# 具体是将核心源文件中的每个.c文件转换为对应的.o文件，存储在OBJ_DIR目录下
+
+# 命令目标文件
 CMD_OBJS = $(patsubst $(SRC_CMD_DIR)/%.c, $(OBJ_DIR)/%.o, $(CMD_SRCS))
+# 具体是将命令源文件中的每个.c文件转换为对应的.o文件，存储在OBJ_DIR目录下
+
+# 合并所有目标文件
 OBJS = $(CORE_OBJS) $(CMD_OBJS)
 
 # 平台判断与命令定义
 ifeq ($(OS),Windows_NT)
+# Windows 平台
     MKDIR = if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
     RM = rmdir /s /q
     DEL = del /q
     EXE = $(TARGET).exe
     CLEAN_CMD = if exist $(OBJ_DIR) $(RM) $(OBJ_DIR) & if exist $(EXE) $(DEL) $(EXE) & if exist $(TARGET) $(DEL) $(TARGET)
 else
+# Unix 平台
     MKDIR = mkdir -p $(OBJ_DIR)
     RM = rm -rf
     DEL = rm -f
