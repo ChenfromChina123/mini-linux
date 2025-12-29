@@ -12,7 +12,10 @@
 HistoryItem history[MAX_HISTORY];
 int history_count = 0;
 
-// 初始化命令历史记录
+/**
+ * @brief 初始化命令历史记录
+ * 从用户主目录加载持久化的历史记录
+ */
 void history_init() {
     history_count = 0;
 
@@ -110,7 +113,9 @@ void history_add(const char *command, int result) {
     }
 }
 
-// 显示命令历史记录
+/**
+ * @brief 显示命令历史记录
+ */
 void history_show() {
     printf("\033[34m命令历史记录：\033[0m\n");
     printf("%-5s %-20s %-30s %s\n", "序号", "时间", "命令", "结果");

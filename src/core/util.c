@@ -3,12 +3,18 @@
 // 错误信息格式：\033[31mError: %s\033[0m\n
 // 成功信息格式：\033[32mSuccess: %s\033[0m\n
 // 警告信息格式：\033[33mWarning: %s\033[0m\n
-// 显示错误信息
+/**
+ * @brief 显示错误信息
+ * @param message 错误内容
+ */
 void error(const char *message) {
     printf("\033[31mError: %s\033[0m\n", message);
 }
 
-// 显示成功信息
+/**
+ * @brief 显示成功信息
+ * @param message 成功内容
+ */
 void success(const char *message) {
     printf("\033[32mSuccess: %s\033[0m\n", message);
 }
@@ -39,7 +45,10 @@ int split_command(const char *command, char **argv, int max_args) {
     return argc;
 }
 
-// 去除字符串两端的空格和换行符
+/**
+ * @brief 去除字符串两端空白字符
+ * @param str 目标字符串
+ */
 void trim(char *str) {
     int start = 0;
     int end = strlen(str) - 1;

@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mini Computer: include/user.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Mini Computer
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','搜索',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('user_8h_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">user.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="user_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef USER_H</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define USER_H</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;stdio.h&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno"><a class="line" href="user_8h.html#a2c2a303621f66761529e598758d7ef34">    8</a></span><span class="preprocessor">#define MAX_USERS 10</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="user_8h.html#ac32ea00c03c9a9afd1ffc9e1627a8506">    9</a></span><span class="preprocessor">#define MAX_USERNAME_LENGTH 20</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="user_8h.html#a7f264fafe78080f8ea68715854b9bc24">   10</a></span><span class="preprocessor">#define MAX_PASSWORD_LENGTH 20</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// 用户结构体</span></div>
+<div class="foldopen" id="foldopen00013" data-start="{" data-end="};">
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="struct_user.html">   13</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="struct_user.html#a3b7328baf0559600f463770a531d87ac">   14</a></span>    <span class="keywordtype">char</span> <a class="code hl_variable" href="struct_user.html#a3b7328baf0559600f463770a531d87ac">username</a>[<a class="code hl_define" href="user_8h.html#ac32ea00c03c9a9afd1ffc9e1627a8506">MAX_USERNAME_LENGTH</a>];</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="struct_user.html#ab5be5b926bfd6a2bb4fc67d2387f6762">   15</a></span>    <span class="keywordtype">char</span> <a class="code hl_variable" href="struct_user.html#ab5be5b926bfd6a2bb4fc67d2387f6762">password</a>[<a class="code hl_define" href="user_8h.html#a7f264fafe78080f8ea68715854b9bc24">MAX_PASSWORD_LENGTH</a>];</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="struct_user.html#ad5d330c62ec173743529c016ecba4687">   16</a></span>    <span class="keywordtype">int</span> <a class="code hl_variable" href="struct_user.html#ad5d330c62ec173743529c016ecba4687">is_root</a>; <span class="comment">// 1表示root用户，0表示普通用户</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>} <a class="code hl_struct" href="struct_user.html">User</a>;</div>
+</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// 当前登录用户</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">extern</span> <a class="code hl_struct" href="struct_user.html">User</a> <a class="code hl_variable" href="user_8c.html#abeb9ba6f8ed9e5d6cd2dc564d5418d49">current_user</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// 声明函数</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keywordtype">int</span> <a class="code hl_function" href="user_8h.html#ac3d487d2b1b2f09e4e762775e611a8ce">user_login</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *username, <span class="keyword">const</span> <span class="keywordtype">char</span> *password);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="keywordtype">int</span> <a class="code hl_function" href="user_8h.html#a3f0f4199a18c63045c5ef0ea3c3ff200">user_create</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *username, <span class="keyword">const</span> <span class="keywordtype">char</span> *password, <span class="keywordtype">int</span> is_root);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="keywordtype">int</span> <a class="code hl_function" href="user_8h.html#a436bd8141e54f0b78a8f0d5eb03bf0ea">user_delete</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *username);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keywordtype">int</span> <a class="code hl_function" href="user_8h.html#a187f30ea6b39d5bd38bd3441eb3980e4">is_root_user</a>();</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="keywordtype">void</span> <a class="code hl_function" href="user_8h.html#a0f7e420aa0bb3f27f652cc133ed4d26a">user_init</a>();</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="keywordtype">int</span> <a class="code hl_function" href="user_8h.html#a8ebcc70a2024aab70883f094fc35849e">get_user_count</a>();</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="keyword">const</span> <a class="code hl_struct" href="struct_user.html">User</a>* <a class="code hl_function" href="user_8h.html#a5535303ce8edc5b127fd7574d717264a">get_user</a>(<span class="keywordtype">int</span> index);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="keyword">const</span> <a class="code hl_struct" href="struct_user.html">User</a>* <a class="code hl_function" href="user_8h.html#a28cdf4b08c518ed3bea3107c02eed9d7">get_current_user</a>();</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="keywordtype">void</span> <a class="code hl_function" href="user_8h.html#ad10ca913c20e3c4ae062cd780e2d176d">user_list_all</a>();</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="keywordtype">void</span> <a class="code hl_function" href="user_8h.html#a9646a08111fbe4e4cfb032a36d827352">user_list_active</a>();</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="keywordtype">void</span> <a class="code hl_function" href="user_8h.html#acc3f20653564098871b73fe8dfe9e45f">user_session_register</a>();</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="keywordtype">void</span> <a class="code hl_function" href="user_8h.html#a5f656daf06878c620161c17e1e9c6202">user_session_unregister</a>();</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="keywordtype">int</span> <a class="code hl_function" href="user_8h.html#a379c833323246de218b7ad05621f2675">user_change_password</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *username, <span class="keyword">const</span> <span class="keywordtype">char</span> *old_password, <span class="keyword">const</span> <span class="keywordtype">char</span> *new_password, <span class="keywordtype">int</span> force);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="preprocessor">#endif </span><span class="comment">// USER_H</span></div>
+<div class="ttc" id="astruct_user_html"><div class="ttname"><a href="struct_user.html">User</a></div><div class="ttdef"><b>定义</b> user.h:13</div></div>
+<div class="ttc" id="astruct_user_html_a3b7328baf0559600f463770a531d87ac"><div class="ttname"><a href="struct_user.html#a3b7328baf0559600f463770a531d87ac">User::username</a></div><div class="ttdeci">char username[MAX_USERNAME_LENGTH]</div><div class="ttdef"><b>定义</b> user.h:14</div></div>
+<div class="ttc" id="astruct_user_html_ab5be5b926bfd6a2bb4fc67d2387f6762"><div class="ttname"><a href="struct_user.html#ab5be5b926bfd6a2bb4fc67d2387f6762">User::password</a></div><div class="ttdeci">char password[MAX_PASSWORD_LENGTH]</div><div class="ttdef"><b>定义</b> user.h:15</div></div>
+<div class="ttc" id="astruct_user_html_ad5d330c62ec173743529c016ecba4687"><div class="ttname"><a href="struct_user.html#ad5d330c62ec173743529c016ecba4687">User::is_root</a></div><div class="ttdeci">int is_root</div><div class="ttdef"><b>定义</b> user.h:16</div></div>
+<div class="ttc" id="auser_8c_html_abeb9ba6f8ed9e5d6cd2dc564d5418d49"><div class="ttname"><a href="user_8c.html#abeb9ba6f8ed9e5d6cd2dc564d5418d49">current_user</a></div><div class="ttdeci">User current_user</div><div class="ttdef"><b>定义</b> user.c:21</div></div>
+<div class="ttc" id="auser_8h_html_a0f7e420aa0bb3f27f652cc133ed4d26a"><div class="ttname"><a href="user_8h.html#a0f7e420aa0bb3f27f652cc133ed4d26a">user_init</a></div><div class="ttdeci">void user_init()</div><div class="ttdoc">初始化用户管理</div><div class="ttdef"><b>定义</b> user.c:139</div></div>
+<div class="ttc" id="auser_8h_html_a187f30ea6b39d5bd38bd3441eb3980e4"><div class="ttname"><a href="user_8h.html#a187f30ea6b39d5bd38bd3441eb3980e4">is_root_user</a></div><div class="ttdeci">int is_root_user()</div><div class="ttdoc">检查当前用户是否为管理员</div><div class="ttdef"><b>定义</b> user.c:372</div></div>
+<div class="ttc" id="auser_8h_html_a28cdf4b08c518ed3bea3107c02eed9d7"><div class="ttname"><a href="user_8h.html#a28cdf4b08c518ed3bea3107c02eed9d7">get_current_user</a></div><div class="ttdeci">const User * get_current_user()</div><div class="ttdoc">获取当前登录用户</div><div class="ttdef"><b>定义</b> user.c:389</div></div>
+<div class="ttc" id="auser_8h_html_a379c833323246de218b7ad05621f2675"><div class="ttname"><a href="user_8h.html#a379c833323246de218b7ad05621f2675">user_change_password</a></div><div class="ttdeci">int user_change_password(const char *username, const char *old_password, const char *new_password, int force)</div><div class="ttdoc">修改用户密码</div><div class="ttdef"><b>定义</b> user.c:461</div></div>
+<div class="ttc" id="auser_8h_html_a3f0f4199a18c63045c5ef0ea3c3ff200"><div class="ttname"><a href="user_8h.html#a3f0f4199a18c63045c5ef0ea3c3ff200">user_create</a></div><div class="ttdeci">int user_create(const char *username, const char *password, int is_root)</div><div class="ttdoc">创建用户</div><div class="ttdef"><b>定义</b> user.c:272</div></div>
+<div class="ttc" id="auser_8h_html_a436bd8141e54f0b78a8f0d5eb03bf0ea"><div class="ttname"><a href="user_8h.html#a436bd8141e54f0b78a8f0d5eb03bf0ea">user_delete</a></div><div class="ttdeci">int user_delete(const char *username)</div><div class="ttdoc">删除用户</div><div class="ttdef"><b>定义</b> user.c:303</div></div>
+<div class="ttc" id="auser_8h_html_a5535303ce8edc5b127fd7574d717264a"><div class="ttname"><a href="user_8h.html#a5535303ce8edc5b127fd7574d717264a">get_user</a></div><div class="ttdeci">const User * get_user(int index)</div><div class="ttdoc">获取指定索引的用户</div><div class="ttdef"><b>定义</b> user.c:384</div></div>
+<div class="ttc" id="auser_8h_html_a5f656daf06878c620161c17e1e9c6202"><div class="ttname"><a href="user_8h.html#a5f656daf06878c620161c17e1e9c6202">user_session_unregister</a></div><div class="ttdeci">void user_session_unregister()</div><div class="ttdoc">注销用户会话</div><div class="ttdef"><b>定义</b> user.c:205</div></div>
+<div class="ttc" id="auser_8h_html_a7f264fafe78080f8ea68715854b9bc24"><div class="ttname"><a href="user_8h.html#a7f264fafe78080f8ea68715854b9bc24">MAX_PASSWORD_LENGTH</a></div><div class="ttdeci">#define MAX_PASSWORD_LENGTH</div><div class="ttdef"><b>定义</b> user.h:10</div></div>
+<div class="ttc" id="auser_8h_html_a8ebcc70a2024aab70883f094fc35849e"><div class="ttname"><a href="user_8h.html#a8ebcc70a2024aab70883f094fc35849e">get_user_count</a></div><div class="ttdeci">int get_user_count()</div><div class="ttdoc">获取用户总数</div><div class="ttdef"><b>定义</b> user.c:379</div></div>
+<div class="ttc" id="auser_8h_html_a9646a08111fbe4e4cfb032a36d827352"><div class="ttname"><a href="user_8h.html#a9646a08111fbe4e4cfb032a36d827352">user_list_active</a></div><div class="ttdeci">void user_list_active()</div><div class="ttdoc">列出当前活跃用户</div><div class="ttdef"><b>定义</b> user.c:406</div></div>
+<div class="ttc" id="auser_8h_html_ac32ea00c03c9a9afd1ffc9e1627a8506"><div class="ttname"><a href="user_8h.html#ac32ea00c03c9a9afd1ffc9e1627a8506">MAX_USERNAME_LENGTH</a></div><div class="ttdeci">#define MAX_USERNAME_LENGTH</div><div class="ttdef"><b>定义</b> user.h:9</div></div>
+<div class="ttc" id="auser_8h_html_ac3d487d2b1b2f09e4e762775e611a8ce"><div class="ttname"><a href="user_8h.html#ac3d487d2b1b2f09e4e762775e611a8ce">user_login</a></div><div class="ttdeci">int user_login(const char *username, const char *password)</div><div class="ttdoc">用户登录</div><div class="ttdef"><b>定义</b> user.c:252</div></div>
+<div class="ttc" id="auser_8h_html_acc3f20653564098871b73fe8dfe9e45f"><div class="ttname"><a href="user_8h.html#acc3f20653564098871b73fe8dfe9e45f">user_session_register</a></div><div class="ttdeci">void user_session_register()</div><div class="ttdoc">注册用户会话</div><div class="ttdef"><b>定义</b> user.c:149</div></div>
+<div class="ttc" id="auser_8h_html_ad10ca913c20e3c4ae062cd780e2d176d"><div class="ttname"><a href="user_8h.html#ad10ca913c20e3c4ae062cd780e2d176d">user_list_all</a></div><div class="ttdeci">void user_list_all()</div><div class="ttdoc">列出所有用户</div><div class="ttdef"><b>定义</b> user.c:394</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a href="user_8h.html">user.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

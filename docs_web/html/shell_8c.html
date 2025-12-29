@@ -1,0 +1,686 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mini Computer: src/core/shell.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Mini Computer
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','搜索',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('shell_8c.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">shell.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="shell_8h_source.html">shell.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="user_8h_source.html">user.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="command_8h_source.html">command.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="history_8h_source.html">history.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="util_8h_source.html">util.h</a>&quot;</code><br />
+<code>#include &lt;unistd.h&gt;</code><br />
+<code>#include &lt;sys/wait.h&gt;</code><br />
+<code>#include &lt;termios.h&gt;</code><br />
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:ab1083223d0977959f77e7788908c83b2" id="r_ab1083223d0977959f77e7788908c83b2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab1083223d0977959f77e7788908c83b2">enable_raw</a> (struct termios *orig, int *use_raw)</td></tr>
+<tr class="memdesc:ab1083223d0977959f77e7788908c83b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">启用终端原始模式  <br /></td></tr>
+<tr class="memitem:ab38d5fb7b6ea781699f6a10cb8071b47" id="r_ab38d5fb7b6ea781699f6a10cb8071b47"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab38d5fb7b6ea781699f6a10cb8071b47">cmd_users</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:ab38d5fb7b6ea781699f6a10cb8071b47"><td class="mdescLeft">&#160;</td><td class="mdescRight">显示系统用户与活跃用户  <br /></td></tr>
+<tr class="memitem:a58a1332b9c16a0041e9e4ad9c1ab27ca" id="r_a58a1332b9c16a0041e9e4ad9c1ab27ca"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a58a1332b9c16a0041e9e4ad9c1ab27ca">disable_raw</a> (struct termios *orig, int use_raw)</td></tr>
+<tr class="memdesc:a58a1332b9c16a0041e9e4ad9c1ab27ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">禁用终端原始模式  <br /></td></tr>
+<tr class="memitem:a1ce4a0931184cf9e5c83ac9faf5425fc" id="r_a1ce4a0931184cf9e5c83ac9faf5425fc"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1ce4a0931184cf9e5c83ac9faf5425fc">read_key</a> ()</td></tr>
+<tr class="memitem:ad5c3b16c971167a661469b2ee6c381ed" id="r_ad5c3b16c971167a661469b2ee6c381ed"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad5c3b16c971167a661469b2ee6c381ed">read_line_edit</a> (const char *prompt, char *out, size_t out_size)</td></tr>
+<tr class="memitem:a342e667f3884979ff14aae4108214421" id="r_a342e667f3884979ff14aae4108214421"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_command.html">Command</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a342e667f3884979ff14aae4108214421">find_command</a> (const char *name)</td></tr>
+<tr class="memdesc:a342e667f3884979ff14aae4108214421"><td class="mdescLeft">&#160;</td><td class="mdescRight">查找内置命令  <br /></td></tr>
+<tr class="memitem:a9e3fe8e3f02a12c9ad955f3fcabe8baa" id="r_a9e3fe8e3f02a12c9ad955f3fcabe8baa"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9e3fe8e3f02a12c9ad955f3fcabe8baa">cmd_exit</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:a9e3fe8e3f02a12c9ad955f3fcabe8baa"><td class="mdescLeft">&#160;</td><td class="mdescRight">退出 Shell  <br /></td></tr>
+<tr class="memitem:aa759f31f9d2716d228d2e3aae3b6415d" id="r_aa759f31f9d2716d228d2e3aae3b6415d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa759f31f9d2716d228d2e3aae3b6415d">cmd_clear</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:aa759f31f9d2716d228d2e3aae3b6415d"><td class="mdescLeft">&#160;</td><td class="mdescRight">清除屏幕  <br /></td></tr>
+<tr class="memitem:ae8df6ffbad338b8766182268e97c9cf6" id="r_ae8df6ffbad338b8766182268e97c9cf6"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae8df6ffbad338b8766182268e97c9cf6">cmd_help</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:ae8df6ffbad338b8766182268e97c9cf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">help 命令实现  <br /></td></tr>
+<tr class="memitem:a7c21aa9b964f2b34af11e513f6c51586" id="r_a7c21aa9b964f2b34af11e513f6c51586"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7c21aa9b964f2b34af11e513f6c51586">cmd_passwd</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:a7c21aa9b964f2b34af11e513f6c51586"><td class="mdescLeft">&#160;</td><td class="mdescRight">修改用户密码  <br /></td></tr>
+<tr class="memitem:a725e7cf40a7035fbab27e878fd280150" id="r_a725e7cf40a7035fbab27e878fd280150"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a725e7cf40a7035fbab27e878fd280150">cmd_history</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:a725e7cf40a7035fbab27e878fd280150"><td class="mdescLeft">&#160;</td><td class="mdescRight">history 命令实现  <br /></td></tr>
+<tr class="memitem:a82292b4a0e1f6a01375fc4d0097e5027" id="r_a82292b4a0e1f6a01375fc4d0097e5027"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a82292b4a0e1f6a01375fc4d0097e5027">cmd_useradd</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:a82292b4a0e1f6a01375fc4d0097e5027"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建新用户  <br /></td></tr>
+<tr class="memitem:aa5f9add13384d9f8227e5ee9493d7516" id="r_aa5f9add13384d9f8227e5ee9493d7516"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa5f9add13384d9f8227e5ee9493d7516">cmd_userdel</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:aa5f9add13384d9f8227e5ee9493d7516"><td class="mdescLeft">&#160;</td><td class="mdescRight">userdel 命令实现  <br /></td></tr>
+<tr class="memitem:a4db0197cdd2f0bb1c1e23f8c841d582e" id="r_a4db0197cdd2f0bb1c1e23f8c841d582e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4db0197cdd2f0bb1c1e23f8c841d582e">shell_init</a> ()</td></tr>
+<tr class="memdesc:a4db0197cdd2f0bb1c1e23f8c841d582e"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化 Shell  <br /></td></tr>
+<tr class="memitem:a984e25e066094f19d79da551067960a9" id="r_a984e25e066094f19d79da551067960a9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a984e25e066094f19d79da551067960a9">execute_command</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:a984e25e066094f19d79da551067960a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行命令  <br /></td></tr>
+<tr class="memitem:a940d9b9c5d7bdaa30d53076f1939acf4" id="r_a940d9b9c5d7bdaa30d53076f1939acf4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a940d9b9c5d7bdaa30d53076f1939acf4">shell_loop</a> ()</td></tr>
+<tr class="memdesc:a940d9b9c5d7bdaa30d53076f1939acf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shell 主循环 处理登录验证和命令循环执行  <br /></td></tr>
+<tr class="memitem:ae66f6b31b5ad750f1fe042a706a4e3d4" id="r_ae66f6b31b5ad750f1fe042a706a4e3d4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae66f6b31b5ad750f1fe042a706a4e3d4">main</a> ()</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a0e78d30041c35b9a6a020d95aa6d6089" id="r_a0e78d30041c35b9a6a020d95aa6d6089"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_command.html">Command</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e78d30041c35b9a6a020d95aa6d6089">commands</a> []</td></tr>
+</table>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">函数说明</h2>
+<a id="aa759f31f9d2716d228d2e3aae3b6415d" name="aa759f31f9d2716d228d2e3aae3b6415d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa759f31f9d2716d228d2e3aae3b6415d">&#9670;&#160;</a></span>cmd_clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cmd_clear </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>清除屏幕 </p>
+<p>clear 命令实现 </p>
+
+</div>
+</div>
+<a id="a9e3fe8e3f02a12c9ad955f3fcabe8baa" name="a9e3fe8e3f02a12c9ad955f3fcabe8baa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e3fe8e3f02a12c9ad955f3fcabe8baa">&#9670;&#160;</a></span>cmd_exit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cmd_exit </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>退出 Shell </p>
+<p>exit 命令实现 </p>
+
+</div>
+</div>
+<a id="ae8df6ffbad338b8766182268e97c9cf6" name="ae8df6ffbad338b8766182268e97c9cf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8df6ffbad338b8766182268e97c9cf6">&#9670;&#160;</a></span>cmd_help()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cmd_help </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>help 命令实现 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">argc</td><td>参数个数 </td></tr>
+    <tr><td class="paramname">argv</td><td>参数数组 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>成功返回0，失败返回非0 </dd></dl>
+
+</div>
+</div>
+<a id="a725e7cf40a7035fbab27e878fd280150" name="a725e7cf40a7035fbab27e878fd280150"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a725e7cf40a7035fbab27e878fd280150">&#9670;&#160;</a></span>cmd_history()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cmd_history </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>history 命令实现 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">argc</td><td>参数个数 </td></tr>
+    <tr><td class="paramname">argv</td><td>参数数组 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>成功返回0，失败返回非0 </dd></dl>
+
+</div>
+</div>
+<a id="a7c21aa9b964f2b34af11e513f6c51586" name="a7c21aa9b964f2b34af11e513f6c51586"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c21aa9b964f2b34af11e513f6c51586">&#9670;&#160;</a></span>cmd_passwd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cmd_passwd </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>修改用户密码 </p>
+<p>passwd 命令实现 </p>
+
+</div>
+</div>
+<a id="a82292b4a0e1f6a01375fc4d0097e5027" name="a82292b4a0e1f6a01375fc4d0097e5027"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82292b4a0e1f6a01375fc4d0097e5027">&#9670;&#160;</a></span>cmd_useradd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cmd_useradd </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>创建新用户 </p>
+<p>useradd 命令实现 </p>
+
+</div>
+</div>
+<a id="aa5f9add13384d9f8227e5ee9493d7516" name="aa5f9add13384d9f8227e5ee9493d7516"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5f9add13384d9f8227e5ee9493d7516">&#9670;&#160;</a></span>cmd_userdel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cmd_userdel </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>userdel 命令实现 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">argc</td><td>参数个数 </td></tr>
+    <tr><td class="paramname">argv</td><td>参数数组 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>成功返回0，失败返回非0 </dd></dl>
+
+</div>
+</div>
+<a id="ab38d5fb7b6ea781699f6a10cb8071b47" name="ab38d5fb7b6ea781699f6a10cb8071b47"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab38d5fb7b6ea781699f6a10cb8071b47">&#9670;&#160;</a></span>cmd_users()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cmd_users </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>显示系统用户与活跃用户 </p>
+<p>users 命令实现</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">argc</td><td>参数个数 </td></tr>
+    <tr><td class="paramname">argv</td><td>参数数组 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>成功返回0 </dd></dl>
+
+</div>
+</div>
+<a id="a58a1332b9c16a0041e9e4ad9c1ab27ca" name="a58a1332b9c16a0041e9e4ad9c1ab27ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58a1332b9c16a0041e9e4ad9c1ab27ca">&#9670;&#160;</a></span>disable_raw()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void disable_raw </td>
+          <td>(</td>
+          <td class="paramtype">struct termios *</td>          <td class="paramname"><span class="paramname"><em>orig</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>use_raw</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>禁用终端原始模式 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">orig</td><td>原始终端属性 </td></tr>
+    <tr><td class="paramname">use_raw</td><td>是否处于原始模式 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab1083223d0977959f77e7788908c83b2" name="ab1083223d0977959f77e7788908c83b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1083223d0977959f77e7788908c83b2">&#9670;&#160;</a></span>enable_raw()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void enable_raw </td>
+          <td>(</td>
+          <td class="paramtype">struct termios *</td>          <td class="paramname"><span class="paramname"><em>orig</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>use_raw</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>启用终端原始模式 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">orig</td><td>原始终端属性存储 </td></tr>
+    <tr><td class="paramname">use_raw</td><td>是否成功启用的标志 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a984e25e066094f19d79da551067960a9" name="a984e25e066094f19d79da551067960a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a984e25e066094f19d79da551067960a9">&#9670;&#160;</a></span>execute_command()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int execute_command </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>执行命令 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">argc</td><td>参数个数 </td></tr>
+    <tr><td class="paramname">argv</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>执行结果状态码 </dd></dl>
+
+</div>
+</div>
+<a id="a342e667f3884979ff14aae4108214421" name="a342e667f3884979ff14aae4108214421"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a342e667f3884979ff14aae4108214421">&#9670;&#160;</a></span>find_command()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_command.html">Command</a> * find_command </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>查找内置命令 </p>
+<p>查找并返回命令</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>命令名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>命令结构体指针，未找到返回NULL </dd></dl>
+
+</div>
+</div>
+<a id="ae66f6b31b5ad750f1fe042a706a4e3d4" name="ae66f6b31b5ad750f1fe042a706a4e3d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae66f6b31b5ad750f1fe042a706a4e3d4">&#9670;&#160;</a></span>main()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int main </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1ce4a0931184cf9e5c83ac9faf5425fc" name="a1ce4a0931184cf9e5c83ac9faf5425fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ce4a0931184cf9e5c83ac9faf5425fc">&#9670;&#160;</a></span>read_key()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int read_key </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad5c3b16c971167a661469b2ee6c381ed" name="ad5c3b16c971167a661469b2ee6c381ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5c3b16c971167a661469b2ee6c381ed">&#9670;&#160;</a></span>read_line_edit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int read_line_edit </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>prompt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>out_size</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4db0197cdd2f0bb1c1e23f8c841d582e" name="a4db0197cdd2f0bb1c1e23f8c841d582e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4db0197cdd2f0bb1c1e23f8c841d582e">&#9670;&#160;</a></span>shell_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void shell_init </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化 Shell </p>
+
+</div>
+</div>
+<a id="a940d9b9c5d7bdaa30d53076f1939acf4" name="a940d9b9c5d7bdaa30d53076f1939acf4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a940d9b9c5d7bdaa30d53076f1939acf4">&#9670;&#160;</a></span>shell_loop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void shell_loop </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Shell 主循环 处理登录验证和命令循环执行 </p>
+<p>运行 Shell 主循环 </p>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">变量说明</h2>
+<a id="a0e78d30041c35b9a6a020d95aa6d6089" name="a0e78d30041c35b9a6a020d95aa6d6089"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e78d30041c35b9a6a020d95aa6d6089">&#9670;&#160;</a></span>commands</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_command.html">Command</a> commands[]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">= {</div>
+<div class="line">    {<span class="stringliteral">&quot;mycat&quot;</span>, <a class="code hl_function" href="mycat_8c.html#a3b8a049142668feb27ad6f44d00c5ee6">cmd_mycat</a>, <span class="stringliteral">&quot;读取并显示文件内容&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;myrm&quot;</span>, <a class="code hl_function" href="myrm_8c.html#ae6e3b2f74d7324d613db7e2cab314a08">cmd_myrm</a>, <span class="stringliteral">&quot;删除指定文件&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;myvi&quot;</span>, <a class="code hl_function" href="myvi_8c.html#a65a54e946b89c4e47965556a97066146">cmd_myvi</a>, <span class="stringliteral">&quot;简单的文件编辑器&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;mytouch&quot;</span>, <a class="code hl_function" href="mytouch_8c.html#a0f4637b0f1970f1e4aeb81169a8a18a7">cmd_mytouch</a>, <span class="stringliteral">&quot;创建空文件&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;myecho&quot;</span>, <a class="code hl_function" href="myecho_8c.html#a2ccfbc4e1b01cdbeee5dde870d310c1d">cmd_myecho</a>, <span class="stringliteral">&quot;向文件写入内容&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;mycp&quot;</span>, <a class="code hl_function" href="mycp_8c.html#a5389a864aa27e399b410950f15550b5c">cmd_mycp</a>, <span class="stringliteral">&quot;复制文件&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;myls&quot;</span>, <a class="code hl_function" href="myls_8c.html#ab2a07c693b25ddb041feab61ec635fc2">cmd_myls</a>, <span class="stringliteral">&quot;显示目录内容&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;mycd&quot;</span>, <a class="code hl_function" href="mycd_8c.html#ac62d4bc279f2f1ffbdbcec408a40feea">cmd_mycd</a>, <span class="stringliteral">&quot;切换当前目录&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;mymkdir&quot;</span>, <a class="code hl_function" href="mymkdir_8c.html#ac6ca7f399c01ec3f71538390b92b7875">cmd_mymkdir</a>, <span class="stringliteral">&quot;创建目录&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;myps&quot;</span>, <a class="code hl_function" href="myps_8c.html#a4a4b234f57a542d20706bdd29846202d">cmd_myps</a>, <span class="stringliteral">&quot;显示进程信息&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;users&quot;</span>, <a class="code hl_function" href="#ab38d5fb7b6ea781699f6a10cb8071b47">cmd_users</a>, <span class="stringliteral">&quot;显示系统用户与活跃用户&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;passwd&quot;</span>, <a class="code hl_function" href="#a7c21aa9b964f2b34af11e513f6c51586">cmd_passwd</a>, <span class="stringliteral">&quot;修改密码&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;agent&quot;</span>, <a class="code hl_function" href="myagent_8c.html#a39473c223e3d10a481784563c33bdbd9">cmd_agent</a>, <span class="stringliteral">&quot;启动小晨AI终端助手&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;exit&quot;</span>, <a class="code hl_function" href="#a9e3fe8e3f02a12c9ad955f3fcabe8baa">cmd_exit</a>, <span class="stringliteral">&quot;退出shell&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;clear&quot;</span>, <a class="code hl_function" href="#aa759f31f9d2716d228d2e3aae3b6415d">cmd_clear</a>, <span class="stringliteral">&quot;清屏&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;help&quot;</span>, <a class="code hl_function" href="#ae8df6ffbad338b8766182268e97c9cf6">cmd_help</a>, <span class="stringliteral">&quot;显示帮助信息&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;history&quot;</span>, <a class="code hl_function" href="#a725e7cf40a7035fbab27e878fd280150">cmd_history</a>, <span class="stringliteral">&quot;显示命令历史记录&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;useradd&quot;</span>, <a class="code hl_function" href="#a82292b4a0e1f6a01375fc4d0097e5027">cmd_useradd</a>, <span class="stringliteral">&quot;创建新用户&quot;</span>},</div>
+<div class="line">    {<span class="stringliteral">&quot;userdel&quot;</span>, <a class="code hl_function" href="#aa5f9add13384d9f8227e5ee9493d7516">cmd_userdel</a>, <span class="stringliteral">&quot;删除用户&quot;</span>},</div>
+<div class="line">    {NULL, NULL, NULL} </div>
+<div class="line">}</div>
+<div class="ttc" id="amyagent_8c_html_a39473c223e3d10a481784563c33bdbd9"><div class="ttname"><a href="myagent_8c.html#a39473c223e3d10a481784563c33bdbd9">cmd_agent</a></div><div class="ttdeci">int cmd_agent(int argc, char *argv[])</div><div class="ttdoc">agent 命令实现</div><div class="ttdef"><b>定义</b> myagent.c:23</div></div>
+<div class="ttc" id="amycat_8c_html_a3b8a049142668feb27ad6f44d00c5ee6"><div class="ttname"><a href="mycat_8c.html#a3b8a049142668feb27ad6f44d00c5ee6">cmd_mycat</a></div><div class="ttdeci">int cmd_mycat(int argc, char *argv[])</div><div class="ttdoc">mycat 命令实现 读取并显示文件内容</div><div class="ttdef"><b>定义</b> mycat.c:111</div></div>
+<div class="ttc" id="amycd_8c_html_ac62d4bc279f2f1ffbdbcec408a40feea"><div class="ttname"><a href="mycd_8c.html#ac62d4bc279f2f1ffbdbcec408a40feea">cmd_mycd</a></div><div class="ttdeci">int cmd_mycd(int argc, char *argv[])</div><div class="ttdoc">mycd 命令实现</div><div class="ttdef"><b>定义</b> mycd.c:18</div></div>
+<div class="ttc" id="amycp_8c_html_a5389a864aa27e399b410950f15550b5c"><div class="ttname"><a href="mycp_8c.html#a5389a864aa27e399b410950f15550b5c">cmd_mycp</a></div><div class="ttdeci">int cmd_mycp(int argc, char *argv[])</div><div class="ttdoc">mycp 命令实现</div><div class="ttdef"><b>定义</b> mycp.c:16</div></div>
+<div class="ttc" id="amyecho_8c_html_a2ccfbc4e1b01cdbeee5dde870d310c1d"><div class="ttname"><a href="myecho_8c.html#a2ccfbc4e1b01cdbeee5dde870d310c1d">cmd_myecho</a></div><div class="ttdeci">int cmd_myecho(int argc, char *argv[])</div><div class="ttdoc">myecho 命令实现</div><div class="ttdef"><b>定义</b> myecho.c:5</div></div>
+<div class="ttc" id="amyls_8c_html_ab2a07c693b25ddb041feab61ec635fc2"><div class="ttname"><a href="myls_8c.html#ab2a07c693b25ddb041feab61ec635fc2">cmd_myls</a></div><div class="ttdeci">int cmd_myls(int argc, char *argv[])</div><div class="ttdoc">myls 命令实现 列出目录下的文件和子目录</div><div class="ttdef"><b>定义</b> myls.c:110</div></div>
+<div class="ttc" id="amymkdir_8c_html_ac6ca7f399c01ec3f71538390b92b7875"><div class="ttname"><a href="mymkdir_8c.html#ac6ca7f399c01ec3f71538390b92b7875">cmd_mymkdir</a></div><div class="ttdeci">int cmd_mymkdir(int argc, char *argv[])</div><div class="ttdoc">mymkdir 命令实现</div><div class="ttdef"><b>定义</b> mymkdir.c:71</div></div>
+<div class="ttc" id="amyps_8c_html_a4a4b234f57a542d20706bdd29846202d"><div class="ttname"><a href="myps_8c.html#a4a4b234f57a542d20706bdd29846202d">cmd_myps</a></div><div class="ttdeci">int cmd_myps(int argc, char *argv[])</div><div class="ttdoc">myps 命令实现 显示当前系统进程信息</div><div class="ttdef"><b>定义</b> myps.c:98</div></div>
+<div class="ttc" id="amyrm_8c_html_ae6e3b2f74d7324d613db7e2cab314a08"><div class="ttname"><a href="myrm_8c.html#ae6e3b2f74d7324d613db7e2cab314a08">cmd_myrm</a></div><div class="ttdeci">int cmd_myrm(int argc, char *argv[])</div><div class="ttdoc">myrm 命令实现</div><div class="ttdef"><b>定义</b> myrm.c:10</div></div>
+<div class="ttc" id="amytouch_8c_html_a0f4637b0f1970f1e4aeb81169a8a18a7"><div class="ttname"><a href="mytouch_8c.html#a0f4637b0f1970f1e4aeb81169a8a18a7">cmd_mytouch</a></div><div class="ttdeci">int cmd_mytouch(int argc, char *argv[])</div><div class="ttdoc">mytouch 命令实现</div><div class="ttdef"><b>定义</b> mytouch.c:12</div></div>
+<div class="ttc" id="amyvi_8c_html_a65a54e946b89c4e47965556a97066146"><div class="ttname"><a href="myvi_8c.html#a65a54e946b89c4e47965556a97066146">cmd_myvi</a></div><div class="ttdeci">int cmd_myvi(int argc, char *argv[])</div><div class="ttdoc">myvi 命令实现</div><div class="ttdef"><b>定义</b> myvi.c:240</div></div>
+<div class="ttc" id="ashell_8c_html_a725e7cf40a7035fbab27e878fd280150"><div class="ttname"><a href="#a725e7cf40a7035fbab27e878fd280150">cmd_history</a></div><div class="ttdeci">int cmd_history(int argc, char *argv[])</div><div class="ttdoc">history 命令实现</div><div class="ttdef"><b>定义</b> shell.c:255</div></div>
+<div class="ttc" id="ashell_8c_html_a7c21aa9b964f2b34af11e513f6c51586"><div class="ttname"><a href="#a7c21aa9b964f2b34af11e513f6c51586">cmd_passwd</a></div><div class="ttdeci">int cmd_passwd(int argc, char *argv[])</div><div class="ttdoc">修改用户密码</div><div class="ttdef"><b>定义</b> shell.c:227</div></div>
+<div class="ttc" id="ashell_8c_html_a82292b4a0e1f6a01375fc4d0097e5027"><div class="ttname"><a href="#a82292b4a0e1f6a01375fc4d0097e5027">cmd_useradd</a></div><div class="ttdeci">int cmd_useradd(int argc, char *argv[])</div><div class="ttdoc">创建新用户</div><div class="ttdef"><b>定义</b> shell.c:264</div></div>
+<div class="ttc" id="ashell_8c_html_a9e3fe8e3f02a12c9ad955f3fcabe8baa"><div class="ttname"><a href="#a9e3fe8e3f02a12c9ad955f3fcabe8baa">cmd_exit</a></div><div class="ttdeci">int cmd_exit(int argc, char *argv[])</div><div class="ttdoc">退出 Shell</div><div class="ttdef"><b>定义</b> shell.c:156</div></div>
+<div class="ttc" id="ashell_8c_html_aa5f9add13384d9f8227e5ee9493d7516"><div class="ttname"><a href="#aa5f9add13384d9f8227e5ee9493d7516">cmd_userdel</a></div><div class="ttdeci">int cmd_userdel(int argc, char *argv[])</div><div class="ttdoc">userdel 命令实现</div><div class="ttdef"><b>定义</b> shell.c:294</div></div>
+<div class="ttc" id="ashell_8c_html_aa759f31f9d2716d228d2e3aae3b6415d"><div class="ttname"><a href="#aa759f31f9d2716d228d2e3aae3b6415d">cmd_clear</a></div><div class="ttdeci">int cmd_clear(int argc, char *argv[])</div><div class="ttdoc">清除屏幕</div><div class="ttdef"><b>定义</b> shell.c:166</div></div>
+<div class="ttc" id="ashell_8c_html_ab38d5fb7b6ea781699f6a10cb8071b47"><div class="ttname"><a href="#ab38d5fb7b6ea781699f6a10cb8071b47">cmd_users</a></div><div class="ttdeci">int cmd_users(int argc, char *argv[])</div><div class="ttdoc">显示系统用户与活跃用户</div><div class="ttdef"><b>定义</b> shell.c:34</div></div>
+<div class="ttc" id="ashell_8c_html_ae8df6ffbad338b8766182268e97c9cf6"><div class="ttname"><a href="#ae8df6ffbad338b8766182268e97c9cf6">cmd_help</a></div><div class="ttdeci">int cmd_help(int argc, char *argv[])</div><div class="ttdoc">help 命令实现</div><div class="ttdef"><b>定义</b> shell.c:179</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_aebb8dcc11953d78e620bbef0b9e2183.html">core</a></li><li class="navelem"><a href="shell_8c.html">shell.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

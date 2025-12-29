@@ -36,7 +36,11 @@ void print_permissions(mode_t mode) {
            (mode & S_IXOTH) ? 'x' : '-');
 }
 
-// 显示目录内容
+/**
+ * @brief 列出目录内容
+ * @param dir_path 目录路径
+ * @param long_format 是否使用长格式显示
+ */
 void list_directory(const char *dir_path, int long_format) {
     DIR *dir = opendir(dir_path);
     if (dir == NULL) {
@@ -99,13 +103,18 @@ void list_directory(const char *dir_path, int long_format) {
     closedir(dir);
 }
 
-// myls命令实现：显示目录内容
+/**
+ * @brief myls 命令实现
+ * 列出目录下的文件和子目录
+ */
 int cmd_myls(int argc, char *argv[]) {
     int long_format = 0;
     const char *dir_path = ".";
     
     // 解析命令行参数
     for (int i = 1; i < argc; i++) {
+        //strcmp(argv[i], "-l") == 0 检查当前参数是否为 -l。
+        //如果是，将 long_format 设置为 1，否则将 dir_path 设置为当前参数。
         if (strcmp(argv[i], "-l") == 0) {
             long_format = 1;
         } else {
@@ -127,6 +136,9 @@ int cmd_myls(int argc, char *argv[]) {
     }
     
     // 显示目录内容
+    //list_directory 函数用于显示目录内容。
+    //dir_path 是目录路径。
+    //long_format 是一个标志，用于指定是否使用长格式显示。
     list_directory(dir_path, long_format);
     
     return 0;

@@ -19,8 +19,21 @@ typedef struct {
 } Command;
 
 // 声明函数
+/**
+ * @brief 初始化 Shell
+ */
 void shell_init();
+
+/**
+ * @brief 运行 Shell 主循环
+ */
 void shell_loop();
+
+/**
+ * @brief 查找并返回命令
+ * @param name 命令名称
+ * @return 找到的命令结构体指针，未找到返回 NULL
+ */
 Command* find_command(const char *name);
 
 #endif // SHELL_H

@@ -1,0 +1,12 @@
+var searchData=
+[
+  ['user_5fchange_5fpassword_0',['user_change_password',['../user_8c.html#a379c833323246de218b7ad05621f2675',1,'user_change_password(const char *username, const char *old_password, const char *new_password, int force):&#160;user.c'],['../user_8h.html#a379c833323246de218b7ad05621f2675',1,'user_change_password(const char *username, const char *old_password, const char *new_password, int force):&#160;user.c']]],
+  ['user_5fcreate_1',['user_create',['../user_8c.html#a3f0f4199a18c63045c5ef0ea3c3ff200',1,'user_create(const char *username, const char *password, int is_root):&#160;user.c'],['../user_8h.html#a3f0f4199a18c63045c5ef0ea3c3ff200',1,'user_create(const char *username, const char *password, int is_root):&#160;user.c']]],
+  ['user_5fdelete_2',['user_delete',['../user_8c.html#a436bd8141e54f0b78a8f0d5eb03bf0ea',1,'user_delete(const char *username):&#160;user.c'],['../user_8h.html#a436bd8141e54f0b78a8f0d5eb03bf0ea',1,'user_delete(const char *username):&#160;user.c']]],
+  ['user_5finit_3',['user_init',['../user_8c.html#a0f7e420aa0bb3f27f652cc133ed4d26a',1,'user_init():&#160;user.c'],['../user_8h.html#a0f7e420aa0bb3f27f652cc133ed4d26a',1,'user_init():&#160;user.c']]],
+  ['user_5flist_5factive_4',['user_list_active',['../user_8c.html#a9646a08111fbe4e4cfb032a36d827352',1,'user_list_active():&#160;user.c'],['../user_8h.html#a9646a08111fbe4e4cfb032a36d827352',1,'user_list_active():&#160;user.c']]],
+  ['user_5flist_5fall_5',['user_list_all',['../user_8c.html#ad10ca913c20e3c4ae062cd780e2d176d',1,'user_list_all():&#160;user.c'],['../user_8h.html#ad10ca913c20e3c4ae062cd780e2d176d',1,'user_list_all():&#160;user.c']]],
+  ['user_5flogin_6',['user_login',['../user_8c.html#ac3d487d2b1b2f09e4e762775e611a8ce',1,'user_login(const char *username, const char *password):&#160;user.c'],['../user_8h.html#ac3d487d2b1b2f09e4e762775e611a8ce',1,'user_login(const char *username, const char *password):&#160;user.c']]],
+  ['user_5fsession_5fregister_7',['user_session_register',['../user_8c.html#acc3f20653564098871b73fe8dfe9e45f',1,'user_session_register():&#160;user.c'],['../user_8h.html#acc3f20653564098871b73fe8dfe9e45f',1,'user_session_register():&#160;user.c']]],
+  ['user_5fsession_5funregister_8',['user_session_unregister',['../user_8c.html#a5f656daf06878c620161c17e1e9c6202',1,'user_session_unregister():&#160;user.c'],['../user_8h.html#a5f656daf06878c620161c17e1e9c6202',1,'user_session_unregister():&#160;user.c']]]
+];

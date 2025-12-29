@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mini Computer: include/command.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Mini Computer
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','搜索',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('command_8h_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">command.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="command_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef COMMAND_H</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define COMMAND_H</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// 命令函数声明</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a3b8a049142668feb27ad6f44d00c5ee6">cmd_mycat</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#ae6e3b2f74d7324d613db7e2cab314a08">cmd_myrm</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a65a54e946b89c4e47965556a97066146">cmd_myvi</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a0f4637b0f1970f1e4aeb81169a8a18a7">cmd_mytouch</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a2ccfbc4e1b01cdbeee5dde870d310c1d">cmd_myecho</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a5389a864aa27e399b410950f15550b5c">cmd_mycp</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#ab2a07c693b25ddb041feab61ec635fc2">cmd_myls</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a4a4b234f57a542d20706bdd29846202d">cmd_myps</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a9e3fe8e3f02a12c9ad955f3fcabe8baa">cmd_exit</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#aa759f31f9d2716d228d2e3aae3b6415d">cmd_clear</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#ae8df6ffbad338b8766182268e97c9cf6">cmd_help</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a725e7cf40a7035fbab27e878fd280150">cmd_history</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a82292b4a0e1f6a01375fc4d0097e5027">cmd_useradd</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#aa5f9add13384d9f8227e5ee9493d7516">cmd_userdel</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#ac62d4bc279f2f1ffbdbcec408a40feea">cmd_mycd</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#ac6ca7f399c01ec3f71538390b92b7875">cmd_mymkdir</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#ab38d5fb7b6ea781699f6a10cb8071b47">cmd_users</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a7c21aa9b964f2b34af11e513f6c51586">cmd_passwd</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><span class="keywordtype">int</span> <a class="code hl_function" href="command_8h.html#a39473c223e3d10a481784563c33bdbd9">cmd_agent</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="preprocessor">#endif </span><span class="comment">// COMMAND_H</span></div>
+<div class="ttc" id="acommand_8h_html_a0f4637b0f1970f1e4aeb81169a8a18a7"><div class="ttname"><a href="command_8h.html#a0f4637b0f1970f1e4aeb81169a8a18a7">cmd_mytouch</a></div><div class="ttdeci">int cmd_mytouch(int argc, char *argv[])</div><div class="ttdoc">mytouch 命令实现</div><div class="ttdef"><b>定义</b> mytouch.c:12</div></div>
+<div class="ttc" id="acommand_8h_html_a2ccfbc4e1b01cdbeee5dde870d310c1d"><div class="ttname"><a href="command_8h.html#a2ccfbc4e1b01cdbeee5dde870d310c1d">cmd_myecho</a></div><div class="ttdeci">int cmd_myecho(int argc, char *argv[])</div><div class="ttdoc">myecho 命令实现</div><div class="ttdef"><b>定义</b> myecho.c:5</div></div>
+<div class="ttc" id="acommand_8h_html_a39473c223e3d10a481784563c33bdbd9"><div class="ttname"><a href="command_8h.html#a39473c223e3d10a481784563c33bdbd9">cmd_agent</a></div><div class="ttdeci">int cmd_agent(int argc, char *argv[])</div><div class="ttdoc">agent 命令实现</div><div class="ttdef"><b>定义</b> myagent.c:23</div></div>
+<div class="ttc" id="acommand_8h_html_a3b8a049142668feb27ad6f44d00c5ee6"><div class="ttname"><a href="command_8h.html#a3b8a049142668feb27ad6f44d00c5ee6">cmd_mycat</a></div><div class="ttdeci">int cmd_mycat(int argc, char *argv[])</div><div class="ttdoc">mycat 命令实现</div><div class="ttdef"><b>定义</b> mycat.c:111</div></div>
+<div class="ttc" id="acommand_8h_html_a4a4b234f57a542d20706bdd29846202d"><div class="ttname"><a href="command_8h.html#a4a4b234f57a542d20706bdd29846202d">cmd_myps</a></div><div class="ttdeci">int cmd_myps(int argc, char *argv[])</div><div class="ttdoc">myps 命令实现</div><div class="ttdef"><b>定义</b> myps.c:98</div></div>
+<div class="ttc" id="acommand_8h_html_a5389a864aa27e399b410950f15550b5c"><div class="ttname"><a href="command_8h.html#a5389a864aa27e399b410950f15550b5c">cmd_mycp</a></div><div class="ttdeci">int cmd_mycp(int argc, char *argv[])</div><div class="ttdoc">mycp 命令实现</div><div class="ttdef"><b>定义</b> mycp.c:16</div></div>
+<div class="ttc" id="acommand_8h_html_a65a54e946b89c4e47965556a97066146"><div class="ttname"><a href="command_8h.html#a65a54e946b89c4e47965556a97066146">cmd_myvi</a></div><div class="ttdeci">int cmd_myvi(int argc, char *argv[])</div><div class="ttdoc">myvi 命令实现</div><div class="ttdef"><b>定义</b> myvi.c:240</div></div>
+<div class="ttc" id="acommand_8h_html_a725e7cf40a7035fbab27e878fd280150"><div class="ttname"><a href="command_8h.html#a725e7cf40a7035fbab27e878fd280150">cmd_history</a></div><div class="ttdeci">int cmd_history(int argc, char *argv[])</div><div class="ttdoc">history 命令实现</div><div class="ttdef"><b>定义</b> shell.c:255</div></div>
+<div class="ttc" id="acommand_8h_html_a7c21aa9b964f2b34af11e513f6c51586"><div class="ttname"><a href="command_8h.html#a7c21aa9b964f2b34af11e513f6c51586">cmd_passwd</a></div><div class="ttdeci">int cmd_passwd(int argc, char *argv[])</div><div class="ttdoc">passwd 命令实现</div><div class="ttdef"><b>定义</b> shell.c:227</div></div>
+<div class="ttc" id="acommand_8h_html_a82292b4a0e1f6a01375fc4d0097e5027"><div class="ttname"><a href="command_8h.html#a82292b4a0e1f6a01375fc4d0097e5027">cmd_useradd</a></div><div class="ttdeci">int cmd_useradd(int argc, char *argv[])</div><div class="ttdoc">useradd 命令实现</div><div class="ttdef"><b>定义</b> shell.c:264</div></div>
+<div class="ttc" id="acommand_8h_html_a9e3fe8e3f02a12c9ad955f3fcabe8baa"><div class="ttname"><a href="command_8h.html#a9e3fe8e3f02a12c9ad955f3fcabe8baa">cmd_exit</a></div><div class="ttdeci">int cmd_exit(int argc, char *argv[])</div><div class="ttdoc">exit 命令实现</div><div class="ttdef"><b>定义</b> shell.c:156</div></div>
+<div class="ttc" id="acommand_8h_html_aa5f9add13384d9f8227e5ee9493d7516"><div class="ttname"><a href="command_8h.html#aa5f9add13384d9f8227e5ee9493d7516">cmd_userdel</a></div><div class="ttdeci">int cmd_userdel(int argc, char *argv[])</div><div class="ttdoc">userdel 命令实现</div><div class="ttdef"><b>定义</b> shell.c:294</div></div>
+<div class="ttc" id="acommand_8h_html_aa759f31f9d2716d228d2e3aae3b6415d"><div class="ttname"><a href="command_8h.html#aa759f31f9d2716d228d2e3aae3b6415d">cmd_clear</a></div><div class="ttdeci">int cmd_clear(int argc, char *argv[])</div><div class="ttdoc">clear 命令实现</div><div class="ttdef"><b>定义</b> shell.c:166</div></div>
+<div class="ttc" id="acommand_8h_html_ab2a07c693b25ddb041feab61ec635fc2"><div class="ttname"><a href="command_8h.html#ab2a07c693b25ddb041feab61ec635fc2">cmd_myls</a></div><div class="ttdeci">int cmd_myls(int argc, char *argv[])</div><div class="ttdoc">myls 命令实现</div><div class="ttdef"><b>定义</b> myls.c:110</div></div>
+<div class="ttc" id="acommand_8h_html_ab38d5fb7b6ea781699f6a10cb8071b47"><div class="ttname"><a href="command_8h.html#ab38d5fb7b6ea781699f6a10cb8071b47">cmd_users</a></div><div class="ttdeci">int cmd_users(int argc, char *argv[])</div><div class="ttdoc">users 命令实现</div><div class="ttdef"><b>定义</b> shell.c:34</div></div>
+<div class="ttc" id="acommand_8h_html_ac62d4bc279f2f1ffbdbcec408a40feea"><div class="ttname"><a href="command_8h.html#ac62d4bc279f2f1ffbdbcec408a40feea">cmd_mycd</a></div><div class="ttdeci">int cmd_mycd(int argc, char *argv[])</div><div class="ttdoc">mycd 命令实现</div><div class="ttdef"><b>定义</b> mycd.c:18</div></div>
+<div class="ttc" id="acommand_8h_html_ac6ca7f399c01ec3f71538390b92b7875"><div class="ttname"><a href="command_8h.html#ac6ca7f399c01ec3f71538390b92b7875">cmd_mymkdir</a></div><div class="ttdeci">int cmd_mymkdir(int argc, char *argv[])</div><div class="ttdoc">mymkdir 命令实现</div><div class="ttdef"><b>定义</b> mymkdir.c:71</div></div>
+<div class="ttc" id="acommand_8h_html_ae6e3b2f74d7324d613db7e2cab314a08"><div class="ttname"><a href="command_8h.html#ae6e3b2f74d7324d613db7e2cab314a08">cmd_myrm</a></div><div class="ttdeci">int cmd_myrm(int argc, char *argv[])</div><div class="ttdoc">myrm 命令实现</div><div class="ttdef"><b>定义</b> myrm.c:10</div></div>
+<div class="ttc" id="acommand_8h_html_ae8df6ffbad338b8766182268e97c9cf6"><div class="ttname"><a href="command_8h.html#ae8df6ffbad338b8766182268e97c9cf6">cmd_help</a></div><div class="ttdeci">int cmd_help(int argc, char *argv[])</div><div class="ttdoc">help 命令实现</div><div class="ttdef"><b>定义</b> shell.c:179</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a href="command_8h.html">command.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -8,11 +8,11 @@
 #include <termios.h>
 
 
-// 启用原始模式
-// 原始模式下，终端输入的每个字符都会立即被读取，而不会等待用户按下 Enter 键。
-// 这使得我们可以实现实时读取用户输入，而不是等待用户按下 Enter 键。
-// 原始模式下，终端输入的每个字符都会立即被读取，而不会等待用户按下 Enter 键。
-// 这使得我们可以实现实时读取用户输入，而不是等待用户按下 Enter 键。
+/**
+ * @brief 启用终端原始模式
+ * @param orig 原始终端属性存储
+ * @param use_raw 是否成功启用的标志
+ */
 static void enable_raw(struct termios *orig, int *use_raw) {
     *use_raw = 0;
     if (tcgetattr(STDIN_FILENO, orig) == 0) {
@@ -25,19 +25,23 @@ static void enable_raw(struct termios *orig, int *use_raw) {
     }
 }
 
-// users命令实现：显示所有用户和活动用户
-// users 工作流程：
-// 1. 调用 user_list_all 函数显示所有用户。
-// 2. 调用 user_list_active 函数显示活动用户。
+/**
+ * @brief 显示系统用户与活跃用户
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 成功返回0
+ */
 int cmd_users(int argc, char *argv[]) {
     user_list_all();
     user_list_active();
     return 0;
 }
 
-// 禁用原始模式
-// 禁用原始模式后，终端输入的每个字符都会等待用户按下 Enter 键后才被读取。
-// 这是默认的终端模式，用于处理用户输入。
+/**
+ * @brief 禁用终端原始模式
+ * @param orig 原始终端属性
+ * @param use_raw 是否处于原始模式
+ */
 static void disable_raw(struct termios *orig, int use_raw) {
     if (use_raw) tcsetattr(STDIN_FILENO, TCSAFLUSH, orig);
 }
@@ -132,9 +136,11 @@ Command commands[] = {
     {NULL, NULL, NULL} // 命令列表结束标记
 };
 
-// 查找命令
-// 查找命令列表中名称为 name 的命令。
-// 如果找到，返回指向该命令的指针；否则，返回 NULL。
+/**
+ * @brief 查找内置命令
+ * @param name 命令名称
+ * @return 命令结构体指针，未找到返回NULL
+ */
 Command* find_command(const char *name) {
     for (int i = 0; commands[i].name != NULL; i++) {
         if (strcmp(commands[i].name, name) == 0) {
@@ -144,11 +150,9 @@ Command* find_command(const char *name) {
     return NULL;
 }
 
-// 退出命令实现
-// 退出 Mini Linux Shell 程序。
-// 1. 打印退出提示信息。
-// 2. 注销当前用户会话。
-// 3. 调用 exit 函数退出程序。
+/**
+ * @brief 退出 Shell
+ */
 int cmd_exit(int argc, char *argv[]) {
     printf("\033[34m感谢使用Mini Linux Shell！\033[0m\n");
     user_session_unregister();
@@ -156,10 +160,9 @@ int cmd_exit(int argc, char *argv[]) {
     return 0;
 }
 
-// 清屏命令实现
-// 清屏命令实现：清除终端屏幕。
-// 1. 根据操作系统类型（Windows 或类 Unix）调用不同的清屏命令。
-// 2. 调用 system 函数执行清屏命令。
+/**
+ * @brief 清除屏幕
+ */
 int cmd_clear(int argc, char *argv[]) {
 #ifdef _WIN32
     system("cls");
@@ -218,15 +221,9 @@ int cmd_help(int argc, char *argv[]) {
     return 0;
 }
 
-// 密码修改命令实现
-// 密码修改命令实现：允许用户修改自己的密码或root用户修改其他用户的密码。
-// 1. 检查参数数量：如果没有参数，提示输入旧密码、新密码和确认新密码。
-// 2. 如果有参数，检查是否为root用户：
-//    a. 如果是root用户，检查是否提供了目标用户名和新密码。
-//    b. 如果不是root用户，检查是否提供了新密码。
-// 3. 验证旧密码：调用 user_check_password 函数验证旧密码是否正确。
-// 4. 验证新密码：检查新密码是否与确认新密码匹配。
-// 5. 调用 user_change_password 函数修改密码。
+/**
+ * @brief 修改用户密码
+ */
 int cmd_passwd(int argc, char *argv[]) {
     if (argc == 1) {
         char oldpw[MAX_PASSWORD_LENGTH];
@@ -261,12 +258,9 @@ int cmd_history(int argc, char *argv[]) {
 }
 
 
-// 创建用户命令实现：允许root用户创建新用户。
-// 1. 检查是否为root用户：如果不是，提示错误并返回。
-// 2. 检查参数数量：如果参数不足，提示使用方法并返回。
-// 3. 解析参数：获取用户名、密码和是否为root用户的标志。
-// 4. 调用 user_create 函数创建用户。
-// 5. 根据创建结果打印成功或失败消息。  
+/**
+ * @brief 创建新用户
+ */
 int cmd_useradd(int argc, char *argv[]) {
     if (!is_root_user()) {
         error("只有root用户可以创建用户");
@@ -329,7 +323,12 @@ void shell_init() {
     printf("\033[34m输入 'help' 查看可用命令。\033[0m\n");
 }
 
-// 执行命令
+/**
+ * @brief 执行命令
+ * @param argc 参数个数
+ * @param argv 参数列表
+ * @return 执行结果状态码
+ */
 int execute_command(int argc, char *argv[]) {
     if (argc == 0) {
         return 0;
@@ -395,12 +394,10 @@ int execute_command(int argc, char *argv[]) {
     return 1;
 }
 
-// 主循环
-// 1. 显示登录提示
-// 2. 读取用户名和密码
-// 3. 调用 user_login 函数验证登录
-// 4. 如果登录成功，注册用户会话
-// 5. 进入主命令循环
+/**
+ * @brief Shell 主循环
+ * 处理登录验证和命令循环执行
+ */
 void shell_loop() {
     // 用户登录
     char username[MAX_USERNAME_LENGTH];

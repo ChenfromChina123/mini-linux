@@ -53,7 +53,10 @@ int read_process_info(pid_t pid, struct ProcessInfo *info) {
     return 0;
 }
 
-// 显示进程列表
+/**
+ * @brief 显示进程列表
+ * @param show_all 是否显示所有进程
+ */
 void display_process_list(int show_all) {
     // 打印表头
     printf("%-6s %-6s %-2s %-15s %-10s %-10s\n", 
@@ -88,7 +91,10 @@ void display_process_list(int show_all) {
     closedir(dir);
 }
 
-// myps命令实现：显示进程信息
+/**
+ * @brief myps 命令实现
+ * 显示当前系统进程信息
+ */
 int cmd_myps(int argc, char *argv[]) {
     int show_all = 0;
     pid_t target_pid = 0;
