@@ -1,42 +1,61 @@
-*
-!*.c
-!*.h
-!Makefile
-!README.md
-!*.md
-!.gitignore
-!tests/
-!tests/**
-!requirements.txt
-!requirements/
-!requirements/**
-!xiaochen_agent_v2/
-!xiaochen_agent_v2/**
-!*.bat
-!*.ps1
-!*.py
-!分工说明.md
-
-# 编译产物（确保不提交）
+# 编译产物
 *.o
-*.obj
-*.out
 *.exe
+*.out
 mini_linux_shell
 mini_linux_shell.exe
 
-# IDE 和编辑器
-.trae/
-.vscode/
-.idea/
+# Python 相关
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+ENV/
+env/
+.venv
+
+# 敏感配置文件
+xiaochen_agent_v2/config.json
+config.json
 
 # 日志文件
 *.log
+xiaochen_agent_v2/logs/
+logs/
 
-# 临时文件
-*.tmp
+# 用户数据
+.mini_users
+.mini_sessions
+.mini_history
+
+# IDE
+.vscode/
+.idea/
 *.swp
+*.swo
 *~
+
+# 操作系统
+.DS_Store
+Thumbs.db

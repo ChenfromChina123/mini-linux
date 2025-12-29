@@ -6,6 +6,31 @@ import re
 from typing import Dict, List, Optional, Tuple
 
 
+DEFAULT_MAX_READ_LINES = 250
+DEFAULT_MAX_READ_CHARS = 20000
+
+
+import sys
+
+def get_repo_root() -> str:
+    """获取项目的根目录。如果是打包后的 EXE，则返回 EXE 所在的目录。"""
+    if getattr(sys, 'frozen', False):
+        # 打包环境：sys.executable 是 EXE 的完整路径
+        return os.path.dirname(os.path.abspath(sys.executable))
+    
+    # 源码环境：基于当前文件的位置推算
+    pkg_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    return os.path.abspath(os.path.join(pkg_dir, ".."))
+
+
+def get_logs_root() -> str:
+    return os.path.join(get_repo_root(), "logs")
+
+
+def get_sessions_dir() -> str:
+    return os.path.join(get_logs_root(), "sessions")
+
+
 def search_files(pattern: str, root_dir: str, limit: int = 50) -> List[str]:
     results: List[str] = []
     for root, dirs, files in os.walk(root_dir):
@@ -111,9 +136,14 @@ def read_lines_robust(path_of_file: str) -> List[str]:
 def read_range(path_of_file: str, start_line: int = 1, end_line: Optional[int] = None) -> Tuple[int, int, str]:
     lines_all = read_lines_robust(path_of_file)
     total_lines = len(lines_all)
-    actual_end = end_line if end_line and end_line <= total_lines else total_lines
+    if end_line is None:
+        actual_end = min(total_lines, max(1, start_line) + DEFAULT_MAX_READ_LINES - 1)
+    else:
+        actual_end = end_line if end_line <= total_lines else total_lines
     lines_target = lines_all[start_line - 1 : actual_end]
     content = "\n".join(lines_target)
+    if len(content) > DEFAULT_MAX_READ_CHARS:
+        content = content[:DEFAULT_MAX_READ_CHARS] + "\n... (truncated)"
     return total_lines, actual_end, content
 
 
@@ -121,33 +151,67 @@ def read_range_numbered(
     path_of_file: str,
     start_line: int = 1,
     end_line: Optional[int] = None,
+    indent_mode: str = "smart",
 ) -> Tuple[int, int, str]:
     lines_all = read_lines_robust(path_of_file)
     total_lines = len(lines_all)
-    actual_end = end_line if end_line and end_line <= total_lines else total_lines
+    if end_line is None:
+        actual_end = min(total_lines, max(1, start_line) + DEFAULT_MAX_READ_LINES - 1)
+    else:
+        actual_end = end_line if end_line <= total_lines else total_lines
     lines_target = lines_all[start_line - 1 : actual_end]
     width = len(str(actual_end if actual_end > 0 else 1))
     ext = os.path.splitext(path_of_file)[1].lower()
-    if ext in {".py", ".pyw"}:
-        numbered: List[str] = []
-        for i, line in enumerate(lines_target, start=start_line):
-            spaces = 0
-            tabs = 0
-            for ch in line:
-                if ch == " ":
-                    spaces += 1
-                elif ch == "\t":
-                    tabs += 1
-                else:
-                    break
-            if line and line.strip() == "":
-                shown = "<WS_ONLY>"
-            else:
-                shown = line
-            numbered.append(f"{i:>{width}}: [s={spaces} t={tabs}] {shown}")
+    mode = str(indent_mode or "smart").strip().lower()
+
+    def _analyze_python_indent(lines: List[str]) -> Tuple[str, int, bool]:
+        has_tab = False
+        has_space = False
+        has_mixed = False
+        widths: List[int] = []
+        for ln in lines:
+            if not ln or ln.strip() == "":
+                continue
+            ws = re.match(r"[ \t]*", ln).group(0)
+            if "\t" in ws and " " in ws:
+                has_mixed = True
+            if "\t" in ws:
+                has_tab = True
+            if " " in ws:
+                has_space = True
+            width_est = len(ws.replace("\t", "    "))
+            if width_est > 0:
+                widths.append(width_est)
+        mixed = has_mixed or (has_tab and has_space)
+        if mixed:
+            style = "mixed"
+        elif has_tab:
+            style = "tabs"
+        else:
+            style = "spaces"
+        indent_size = 4
+        if widths:
+            widths = sorted(set(widths))
+            indent_size = widths[0] if widths[0] > 0 else 4
+        return style, indent_size, mixed
+
+    if ext in {".py", ".pyw"} and mode in {"smart", "header", "always", "level"}:
+        style, indent_size, mixed = _analyze_python_indent(lines_all)
+        header = f"indent_style: {style}; indent_size: {indent_size}; mixed: {mixed}"
+
+        numbered = [f"{i:>{width}}: {line if line.strip() != '' else '<WS_ONLY>'}" for i, line in enumerate(lines_target, start=start_line)]
+        if mode in {"always", "level"}:
+            numbered = numbered
+        if mode in {"smart", "header", "always", "level"}:
+            numbered = [header] + numbered
     else:
         numbered = [f"{i:>{width}}: {line}" for i, line in enumerate(lines_target, start=start_line)]
-    return total_lines, actual_end, "\n".join(numbered)
+    content = "\n".join(numbered)
+    if len(content) > DEFAULT_MAX_READ_CHARS:
+        content = content[:DEFAULT_MAX_READ_CHARS] + "\n... (truncated)"
+    if end_line is None and actual_end < total_lines:
+        content = content + f"\n... (truncated lines, showing {start_line}-{actual_end} of {total_lines})"
+    return total_lines, actual_end, content
 
 
 def edit_lines(
@@ -219,11 +283,20 @@ def edit_lines(
             indent_prefix = ""
             if original_lines:
                 start_idx = ins_line - 1
+                found_idx = None
                 for j in range(start_idx, -1, -1):
                     line = original_lines[j]
                     if line.strip() != "":
-                        indent_prefix = re.match(r"[ \t]*", line).group(0)
+                        found_idx = j
                         break
+                if found_idx is None:
+                    for j in range(start_idx, len(original_lines)):
+                        line = original_lines[j]
+                        if line.strip() != "":
+                            found_idx = j
+                            break
+                if found_idx is not None:
+                    indent_prefix = re.match(r"[ \t]*", original_lines[found_idx]).group(0)
 
             min_ws = None
             for line in insert_lines:
@@ -248,8 +321,86 @@ def edit_lines(
         # 如果指定了删除但没指定插入位置，且有内容，则默认在删除位置插入（即替换）
         lines[ds - 1 : ds - 1] = content.splitlines()
 
+    def _strip_python_module_header(remain_lines: List[str]) -> List[str]:
+        """
+        移除 Python 文件开头的模块头部块（shebang/encoding/模块 docstring），用于避免重复头部。
+        """
+        i = 0
+        n = len(remain_lines)
+        if i < n and remain_lines[i].startswith("#!"):
+            i += 1
+        while i < n and remain_lines[i].lstrip().startswith("#") and "coding" in remain_lines[i]:
+            i += 1
+        if i < n and remain_lines[i].strip() in {'"""', "'''"}:
+            quote = remain_lines[i].strip()
+            i += 1
+            while i < n:
+                if remain_lines[i].strip() == quote:
+                    i += 1
+                    break
+                i += 1
+        while i < n and remain_lines[i].strip() == "":
+            i += 1
+        return remain_lines[i:]
+
+    ext = os.path.splitext(path_of_file)[1].lower()
+    if ext in {".py", ".pyw"} and insert_at == 1 and ds == 1 and de <= 3 and content:
+        has_new_header = False
+        head_lines = content.splitlines()[:10]
+        if any(l.startswith("#!") for l in head_lines) or any("coding" in l for l in head_lines):
+            has_new_header = True
+        if any(l.strip() in {'"""', "'''"} for l in head_lines):
+            has_new_header = True
+        if has_new_header:
+            inserted_len = len(content.splitlines()) if content else 0
+            if inserted_len > 0 and inserted_len <= len(lines):
+                tail = lines[inserted_len:]
+                if tail and (tail[0].startswith("#!") or "coding" in tail[0] or tail[0].strip() in {'"""', "'''"}):
+                    lines = lines[:inserted_len] + _strip_python_module_header(tail)
+
     after = "\n".join(lines)
     return before, after
+
+
+def cleanup_directory(directory: str, max_files: int = 50, pattern: str = "*") -> int:
+    """
+    清理指定目录中的文件，如果文件数量超过 max_files，则删除最早的文件。
+    
+    Args:
+        directory: 要清理的目录路径
+        max_files: 允许保留的最大文件数量
+        pattern: 匹配文件的通配符模式
+        
+    Returns:
+        已删除的文件数量
+    """
+    if not os.path.exists(directory):
+        return 0
+    
+    files = []
+    for filename in os.listdir(directory):
+        if not fnmatch.fnmatch(filename, pattern):
+            continue
+        filepath = os.path.join(directory, filename)
+        if os.path.isfile(filepath):
+            files.append((filepath, os.path.getmtime(filepath)))
+    
+    if len(files) <= max_files:
+        return 0
+    
+    # 按修改时间升序排列（最早的在前）
+    files.sort(key=lambda x: x[1])
+    
+    to_delete = files[:len(files) - max_files]
+    deleted_count = 0
+    for filepath, _ in to_delete:
+        try:
+            os.remove(filepath)
+            deleted_count += 1
+        except Exception:
+            pass
+            
+    return deleted_count
 
 
 def search_in_files(

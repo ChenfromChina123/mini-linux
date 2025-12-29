@@ -1,101 +1,121 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 依赖检查和自动安装脚本
-
-功能：
-1. 检查必需的 Python 包是否已安装
-2. 如果缺失，自动安装依赖
-3. 提供友好的错误提示
+用于检查 xiaochen_agent_v2 所需的 Python 依赖包
 """
 
 import sys
 import subprocess
-import os
+from pathlib import Path
 
 
 def check_and_install_dependencies():
     """
-    检查并安装项目所需的依赖包
+    检查并安装 requirements.txt 中列出的依赖包
     
     Returns:
-        bool: 所有依赖是否成功安装
+        bool: 所有依赖已安装返回 True，否则返回 False
     """
-    # 必需的依赖包
-    required_packages = {
-        'requests': 'requests>=2.28.0',
-        'urllib3': 'urllib3>=1.26.0',
-        'colorama': 'colorama>=0.4.6',
-    }
+    # 获取 requirements.txt 路径
+    script_dir = Path(__file__).parent
+    requirements_file = script_dir / "requirements.txt"
     
+    if not requirements_file.exists():
+        print(f"❌ 未找到 requirements.txt 文件: {requirements_file}")
+        return False
+    
+    # 读取依赖列表
+    try:
+        with open(requirements_file, 'r', encoding='utf-8') as f:
+            dependencies = [
+                line.strip() 
+                for line in f 
+                if line.strip() and not line.strip().startswith('#')
+            ]
+    except Exception as e:
+        print(f"❌ 读取 requirements.txt 失败: {e}")
+        return False
+    
+    if not dependencies:
+        print("✓ 无需安装依赖")
+        return True
+    
+    # 检查每个依赖包
     missing_packages = []
-    
-    # 检查每个包是否已安装
-    for package_name, package_spec in required_packages.items():
+    for dep in dependencies:
+        package_name = dep.split('>=')[0].split('==')[0].strip()
         try:
             __import__(package_name)
         except ImportError:
-            missing_packages.append(package_spec)
+            missing_packages.append(dep)
     
-    # 如果没有缺失的包，直接返回
     if not missing_packages:
+        print("✓ 所有依赖已安装")
         return True
     
-    # 提示用户需要安装依赖
-    print("\n" + "="*60)
-    print("检测到缺失的 Python 依赖包")
-    print("="*60)
-    print(f"缺失的包: {', '.join(missing_packages)}")
-    print("\n正在自动安装依赖...")
-    print("="*60 + "\n")
+    # 提示需要安装的包
+    print(f"⚠️  检测到 {len(missing_packages)} 个缺失的依赖包:")
+    for pkg in missing_packages:
+        print(f"   - {pkg}")
     
-    # 尝试自动安装
+    # 询问是否自动安装
     try:
-        # 获取 requirements.txt 路径
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        requirements_file = os.path.join(script_dir, 'requirements.txt')
-        
-        if os.path.exists(requirements_file):
-            # 使用 requirements.txt 安装
-            cmd = [sys.executable, '-m', 'pip', 'install', '-r', requirements_file]
-        else:
-            # 直接安装缺失的包
-            cmd = [sys.executable, '-m', 'pip', 'install'] + missing_packages
-        
-        # 执行安装命令
-        result = subprocess.run(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
+        response = input("\n是否自动安装缺失的依赖? (y/n, 默认 y): ").strip().lower()
+        if not response:
+            response = 'y'
+    except (EOFError, KeyboardInterrupt):
+        response = 'y'
+        print()
+    
+    if response != 'y':
+        print("❌ 用户取消安装")
+        return False
+    
+    # 自动安装依赖
+    print(f"\n正在安装依赖包...")
+    try:
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "-q", "--upgrade", "pip"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
         )
         
-        if result.returncode == 0:
-            print("\n" + "="*60)
-            print("✓ 依赖安装成功！")
-            print("="*60 + "\n")
-            return True
-        else:
-            print("\n" + "="*60)
-            print("✗ 依赖安装失败")
-            print("="*60)
-            print(f"错误信息: {result.stderr}")
-            print("\n请手动安装依赖：")
-            print(f"  pip install {' '.join(missing_packages)}")
-            print("="*60 + "\n")
-            return False
-            
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "-q", "-r", str(requirements_file)]
+        )
+        
+        print("✓ 依赖安装成功")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"❌ 依赖安装失败: {e}")
+        print(f"\n请手动运行以下命令安装依赖:")
+        print(f"  pip install -r {requirements_file}")
+        return False
     except Exception as e:
-        print("\n" + "="*60)
-        print("✗ 自动安装依赖时出错")
-        print("="*60)
-        print(f"错误: {str(e)}")
-        print("\n请手动安装依赖：")
-        print(f"  pip install {' '.join(missing_packages)}")
-        print("="*60 + "\n")
+        print(f"❌ 安装过程出错: {e}")
         return False
 
 
-if __name__ == "__main__":
+def main():
+    """
+    主函数：检查并安装依赖
+    
+    Returns:
+        int: 成功返回 0，失败返回 1
+    """
+    print("=" * 50)
+    print("小晨 AI 终端助手 - 依赖检查")
+    print("=" * 50)
+    
     success = check_and_install_dependencies()
-    sys.exit(0 if success else 1)
+    
+    if success:
+        return 0
+    else:
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
 

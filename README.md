@@ -52,8 +52,10 @@
 ### AI助手工具
 - **agent**：启动小晨AI终端助手（xiaochen_agent_v2）
   - 支持交互式对话模式
+  - 支持单条命令快速执行
   - 可执行文件操作、代码编写、项目管理等任务
   - 基于大语言模型的智能终端助手
+  - 自动检查和安装 Python 依赖
 
 ## 文件结构
 
@@ -78,6 +80,9 @@ Mini_computer/
 ├── myps.c           # myps命令实现
 ├── myagent.c        # agent命令实现（AI助手）
 ├── xiaochen_agent_v2/ # 小晨AI终端助手（Python）
+│   ├── check_deps.py  # 依赖检查脚本
+│   ├── run_once.py    # 单条命令执行脚本
+│   └── ...            # 其他 Agent 模块
 ├── Makefile         # 编译规则
 ├── build.bat        # Windows 编译脚本
 ├── start_agent.bat  # Agent 独立启动脚本（批处理）
@@ -323,8 +328,18 @@ root@mini-linux:$
   - 🔍 代码搜索：在项目中查找代码片段
   - 🛠️ 命令执行：自动执行终端命令（需要确认）
   - 📝 任务管理：跟踪和管理多个任务
-  - 💾 历史记录：保存操作历史，支持回滚
+  - 💾 会话管理：保存和加载对话历史
+  - ⚡ 中断控制：支持 Ctrl+C 中断执行
+  - 🔄 操作回滚：支持撤销文件修改
   - 🔧 自动安装依赖：首次运行自动检查并安装所需 Python 包
+
+  **实现架构**：
+  - `myagent.c`: C 语言接口，负责从 shell 调用 Python Agent
+  - `check_deps.py`: 自动检查并安装 Python 依赖包
+  - `run_once.py`: 单条命令执行脚本，避免字符串转义问题
+  - `xiaochen_agent_v2/`: 完整的 Python AI Agent 系统
+  
+  详细使用说明请参考 `xiaochen_agent_v2/README.md`
 
 ## 实现细节
 

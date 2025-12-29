@@ -95,15 +95,9 @@ int cmd_agent(int argc, char *argv[]) {
         printf("\033[34m正在启动小晨AI终端助手...\033[0m\n");
         printf("\033[34m指令: %s\033[0m\n\n", full_query);
         
-        // 使用 Python 的 -c 参数直接执行单条指令
+        // 使用 run_once.py 脚本执行单条指令（更安全，避免字符串转义问题）
         snprintf(command, sizeof(command), 
-                 "cd %s && %s -c \"from xiaochen_agent_v2 import VoidAgent, Config; "
-                 "import os; "
-                 "config = Config(apiKey=os.environ.get('VOID_API_KEY', ''), "
-                 "baseUrl=os.environ.get('VOID_BASE_URL', 'https://api.deepseek.com'), "
-                 "modelName=os.environ.get('VOID_MODEL', 'deepseek-chat')); "
-                 "agent = VoidAgent(config); "
-                 "agent.chat('%s')\"", 
+                 "cd %s && %s xiaochen_agent_v2/run_once.py \"%s\"", 
                  cwd, python_cmd, full_query);
     }
 
