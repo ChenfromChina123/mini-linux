@@ -1,5 +1,8 @@
 #include "util.h"
-
+//统一错误信息格式
+// 错误信息格式：\033[31mError: %s\033[0m\n
+// 成功信息格式：\033[32mSuccess: %s\033[0m\n
+// 警告信息格式：\033[33mWarning: %s\033[0m\n
 // 显示错误信息
 void error(const char *message) {
     printf("\033[31mError: %s\033[0m\n", message);
@@ -23,7 +26,13 @@ int split_command(const char *command, char **argv, int max_args) {
     
     while (token != NULL && argc < max_args) {
         argv[argc++] = strdup(token);
+        //strdup 函数用于复制字符串。
+        //token 是当前分割出的参数。
+        //argv[argc++] 是参数数组的当前位置，用于存储复制后的参数。
+        //argc++ 用于增加参数计数器，指向下一个参数位置。
         token = strtok(NULL, " ");
+        //strtok(NULL, " ") 用于继续分割字符串，从当前位置开始。
+        //token 会更新为下一个参数，直到没有更多参数或达到最大参数数。
     }
     
     free(cmd_copy);

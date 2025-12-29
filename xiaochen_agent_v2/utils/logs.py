@@ -108,6 +108,22 @@ def _read_history_lines(history_file: str) -> List[str]:
         return [line.rstrip("\n") for line in f.readlines() if line.strip()]
 
 
+def get_edit_history(history_file: Optional[str] = None) -> List[Dict[str, Any]]:
+    """获取所有修改历史记录"""
+    if not history_file:
+        from .files import get_logs_root
+        history_file = os.path.join(get_logs_root(), "void_edit_history.jsonl")
+    
+    lines = _read_history_lines(history_file)
+    history = []
+    for line in lines:
+        try:
+            history.append(json.loads(line))
+        except Exception:
+            continue
+    return history
+
+
 def rollback_last_edit(
     history_file: Optional[str] = None,
 ) -> Tuple[bool, str]:

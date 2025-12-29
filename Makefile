@@ -11,7 +11,7 @@ OBJ_DIR = obj
 
 # 编译选项 - 添加 -Iinclude 搜索路径
 # 设置控制台编码为 UTF-8
-CFLAGS = -Wall -g -I$(INC_DIR) -finput-charset=UTF-8 -fexec-charset=UTF-8 -D__USE_MINGW_ANSI_STDIO=1
+CFLAGS = -Wall -g -I$(INC_DIR) -finput-charset=UTF-8 -fexec-charset=UTF-8
 
 # 目标文件
 TARGET = mini_linux_shell

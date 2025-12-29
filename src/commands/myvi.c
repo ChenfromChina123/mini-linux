@@ -4,15 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef _WIN32
-#include <windows.h>
-#include <conio.h>
-#define STDIN_FILENO 0
-#else
 #include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#endif
 
 typedef enum { MODE_NORMAL, MODE_INSERT, MODE_COMMAND, MODE_SEARCH } Mode;//定义整数常量，别名Mode
 //定义枚举常量，分别对应不同的操作模式：正常模式、插入模式、命令模式、搜索模式
@@ -23,66 +17,32 @@ static int screen_rows = 24;
 static int screen_cols = 80;
 //初始化屏幕尺寸，获取终端窗口大小，后面会有更新的操作
 static void get_window_size() {
-#ifdef _WIN32
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
-        screen_cols = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-        screen_rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-    }
-#else
     struct winsize ws;
     if (ioctl(STDIN_FILENO, TIOCGWINSZ, &ws) == 0) {
         if (ws.ws_row > 0) screen_rows = ws.ws_row;
         if (ws.ws_col > 0) screen_cols = ws.ws_col;
     }
-#endif
 }
 //保留终端的当前状态，获取终端控制权
-static void enable_raw(void *orig, int *use_raw) {
+static void enable_raw(struct termios *orig, int *use_raw) {
     *use_raw = 0;
-#ifdef _WIN32
-    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD mode;
-    GetConsoleMode(hStdin, &mode);
-    *((DWORD*)orig) = mode;
-    mode &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT);
-    SetConsoleMode(hStdin, mode);
-    *use_raw = 1;
-#else
-    struct termios *t = (struct termios *)orig;
-    if (tcgetattr(STDIN_FILENO, t) == 0) {
-        struct termios raw = *t;
+    //STDIN_FILENO正常为0，控制标准输入流
+    if (tcgetattr(STDIN_FILENO, orig) == 0) {
+        struct termios raw = *orig;
         raw.c_lflag &= ~(ECHO | ICANON);
         raw.c_cc[VMIN] = 1;
         raw.c_cc[VTIME] = 0;
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
         *use_raw = 1;
     }
-#endif
 }
 //恢复终端状态函数，将终端设置回原始状态
-static void disable_raw(void *orig, int use_raw) {
-    if (!use_raw) return;
-#ifdef _WIN32
-    SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), *((DWORD*)orig));
-#else
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, (struct termios *)orig);
-#endif
+static void disable_raw(struct termios *orig, int use_raw) {
+    if (use_raw) tcsetattr(STDIN_FILENO, TCSAFLUSH, orig);
 }
 
 //读取用户输入，处理特殊按键（如方向键）
 static int read_key() {
-#ifdef _WIN32
-    int c = getch();
-    if (c == 0 || c == 0xE0) {
-        int c2 = getch();
-        if (c2 == 72) return KEY_UP;
-        if (c2 == 80) return KEY_DOWN;
-        if (c2 == 77) return KEY_RIGHT;
-        if (c2 == 75) return KEY_LEFT;
-    }
-    return c;
-#else
     int c = getchar();
     //27为转义字符，用于表示特殊按键（如方向键）
     if (c == 27) {
@@ -103,7 +63,6 @@ static int read_key() {
         return 27;
     }
     return c;
-#endif
 }
 
 static void render(char **lines, size_t line_count, size_t top, size_t row, size_t col, int show_numbers, Mode mode, const char *status) {
@@ -260,7 +219,7 @@ static void save_file(const char *filename, char **lines, size_t line_count) {
 }
 
 //退出编辑器，释放资源，返回退出码
-static int myvi_exit(void *orig, int use_raw, char **lines, size_t line_count, char *yank, int code) {
+static int myvi_exit(struct termios *orig, int use_raw, char **lines, size_t line_count, char *yank, int code) {
     disable_raw(orig, use_raw);
     printf("\x1b[2J");
     printf("\x1b[H");
@@ -304,11 +263,7 @@ int cmd_myvi(int argc, char *argv[]) {
         ensure_cap(&lines, &cap, 1);
         lines[line_count++] = strdup("");
     }
-#ifdef _WIN32
-    DWORD orig;
-#else
     struct termios orig;
-#endif
     int use_raw = 0;
     enable_raw(&orig, &use_raw);
     get_window_size();
@@ -387,9 +342,7 @@ int cmd_myvi(int argc, char *argv[]) {
                         char *last = NULL; char *s = lines[r]; size_t sl = strlen(s);
                         for (char *q = strstr(s, search_pat); q; q = strstr(q + 1, search_pat)) { if ((size_t)(q - s) < c) last = q; }
                         if (last) { row = r; col = (size_t)(last - s); found = 1; break; }
-                        if (r == 0) break;
-                        r--;
-                        c = sl;
+                        if (r == 0) break; r--; c = sl;
                     }
                     if (!found) strcpy(status, "未找到"); else status[0] = '\0';
                 }

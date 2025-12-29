@@ -11,6 +11,7 @@ def test_login_and_help():
         'root',
         'root',
         'help',
+        'whoami',
         'exit',
     ]
     out, err, code = run_shell_script(lines)
@@ -20,7 +21,7 @@ def test_login_and_help():
     assert out is not None
     assert '可用命令' in out
     assert 'mycat' in out and 'myls' in out and 'passwd' in out
-
+    assert 'root' in out  # 验证 whoami 输出
 
 def test_file_ops_touch_echo_cat_cp_rm(tmp_path: Path):
     a = tmp_path / 'a.txt'

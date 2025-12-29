@@ -46,6 +46,12 @@ def run_cli() -> None:
             "baseUrl": "https://ark.cn-beijing.volces.com/api/v3",
             "modelName": "doubao-seed-1-6-251015",
             "verifySsl": False  # 基于测试脚本设置为 False
+        },
+        "3": {
+            "name": "Tongyi Qianwen (Qwen)",
+            "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+            "modelName": "qwen-plus",
+            "verifySsl": True
         }
     }
 
@@ -159,17 +165,27 @@ def run_cli() -> None:
     autosaveTitle = ""
     firstUserInput = ""
     titleLock = threading.Lock()
-    try:
-        autosaveFilename = sessionManager.create_autosave_session()
-    except Exception:
-        autosaveFilename = ""
-    
+
+    def sync_agent_session_files(filename: str):
+        """同步 Agent 的持久化操作记录文件路径"""
+        nonlocal autosaveFilename
+        autosaveFilename = filename
+        if filename:
+            base = os.path.basename(filename)
+            # 将 .json 会话文件路径转换为 .jsonl 操作记录文件路径
+            # 例如: 20251229_194033_autosave.json -> 20251229_194033_history.jsonl
+            history_name = base.replace("_autosave.json", "_history.jsonl").replace(".json", "_history.jsonl")
+            agent.sessionHistoryFile = os.path.join(sessionManager.sessions_dir, history_name)
+        else:
+            agent.sessionHistoryFile = None
+
     # 询问是否加载历史会话
     print(f"\n{Fore.CYAN}{'='*50}{Style.RESET_ALL}")
     print(f"{Fore.CYAN}会话管理{Style.RESET_ALL}")
     print(f"{Fore.CYAN}{'='*50}{Style.RESET_ALL}")
     load_choice = input(f"是否加载历史会话? (y=是 / n=否，默认n): ").strip().lower()
     
+    session_loaded = False
     if load_choice == "y":
         sessions = sessionManager.list_sessions(limit=10)
         if sessions:
@@ -193,6 +209,10 @@ def run_cli() -> None:
                             else:
                                 agent.historyOfMessages = messages
                             
+                            # 使用加载的会话文件作为当前活跃会话，实现 append 逻辑
+                            sync_agent_session_files(selected_session['filename'])
+                            session_loaded = True
+
                             try:
                                 if autosaveFilename:
                                     sessionManager.update_session(autosaveFilename, agent.getFullHistory())
@@ -206,6 +226,13 @@ def run_cli() -> None:
                 print(f"{Fore.RED}✗ 加载会话出错: {str(e)}{Style.RESET_ALL}")
         else:
             print(f"{Fore.YELLOW}没有找到历史会话{Style.RESET_ALL}")
+    
+    # 如果没有加载会话，则创建一个新的自动保存会话
+    if not session_loaded:
+        try:
+            sync_agent_session_files(sessionManager.create_autosave_session())
+        except Exception:
+            autosaveFilename = ""
     
     print(f"\n{Fore.CYAN}{'='*50}{Style.RESET_ALL}")
     print(f"{Fore.CYAN}开始对话 (输入 'exit' 退出, 'save' 保存会话, 'clear' 清空历史){Style.RESET_ALL}")
@@ -256,7 +283,9 @@ def run_cli() -> None:
         print("sessions -help        会话管理（查看/加载/新建）")
         print("model -help           模型管理（查看/切换/配置）")
         print("whitelist -help       白名单管理（查看/修改）")
-        print("rollback              回退最近一次文件修改")
+        print("back                  回退最近一次文件修改")
+        print("back -ls              列出当前会话的修改历史")
+        print("back -a               回滚到上一次对话（含文件修改）")
         print("undo                  一键回退到上一次对话（含文件修改）")
         print("save                  保存当前会话")
         print("clear                 清空当前会话历史")
@@ -349,7 +378,18 @@ def run_cli() -> None:
                 print_help_main()
                 continue
 
-            if cmd == "rollback":
+            if cmd == "back":
+                if args and args[0].lower() == "-ls":
+                    agent.listModificationHistory()
+                    continue
+                if args and args[0].lower() == "-a":
+                    agent.rollbackLastChat()
+                    try:
+                        if autosaveFilename:
+                            sessionManager.update_session(autosaveFilename, agent.getFullHistory())
+                    except Exception:
+                        pass
+                    continue
                 agent.rollbackLastOperation()
                 try:
                     if autosaveFilename:
@@ -409,7 +449,8 @@ def run_cli() -> None:
                 if hasattr(agent, "_chatMarkers"):
                     agent._chatMarkers = []
                 try:
-                    autosaveFilename = sessionManager.create_autosave_session()
+                    # 使用加载的会话文件作为当前活跃会话，实现 append 逻辑
+                    sync_agent_session_files(selected_session['filename'])
                     sessionManager.update_session(autosaveFilename, agent.getFullHistory())
                 except Exception:
                     pass
@@ -424,7 +465,7 @@ def run_cli() -> None:
                 if hasattr(agent, "_chatMarkers"):
                     agent._chatMarkers = []
                 try:
-                    autosaveFilename = sessionManager.create_autosave_session()
+                    sync_agent_session_files(sessionManager.create_autosave_session())
                     sessionManager.update_session(autosaveFilename, agent.getFullHistory())
                 except Exception:
                     pass

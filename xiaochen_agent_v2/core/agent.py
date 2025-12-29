@@ -37,7 +37,13 @@ from ..utils.files import (
     suggest_similar_patterns,
 )
 from ..utils.interrupt import InterruptHandler
-from ..utils.logs import append_edit_history, append_usage_history, log_request, rollback_last_edit
+from ..utils.logs import (
+    append_edit_history,
+    append_usage_history,
+    get_edit_history,
+    log_request,
+    rollback_last_edit,
+)
 from .metrics import CacheStats
 from ..utils.tags import parse_stack_of_tags
 from ..utils.terminal import TerminalManager
@@ -167,6 +173,7 @@ class Agent:
         self.endpointOfChat = f"{self.config.baseUrl.rstrip('/')}/chat/completions"
         self.historyOfOperations: List[Tuple[str, int, int]] = []
         self.cacheOfBackups: Dict[str, str] = {}
+        self.sessionHistoryFile: Optional[str] = None # 持久化操作记录文件
         self.cacheOfSystemMessage: Optional[Dict[str, str]] = None
         self.statsOfCache = CacheStats()
         self.terminalManager = TerminalManager()
@@ -296,10 +303,30 @@ class Agent:
         self.endpointOfChat = f"{self.config.baseUrl.rstrip('/')}/chat/completions"
 
     def estimateTokensOfMessages(self, messages: List[Dict[str, str]]) -> int:
-        totalChars = 0
+        """
+        根据字符类型（中英文混排）更精确地估算 Token 数量。
+        权重参考：
+        - 中文字符/全角标点: ~0.6 - 1.0 token
+        - ASCII字符（英文字母/数字/半角标点）: ~0.25 - 0.5 token
+        """
+        totalTokens = 0.0
         for msg in messages:
-            totalChars += len(msg["role"]) + len(msg["content"]) + 8
-        return int(totalChars / 3)
+            content = str(msg.get("content") or "")
+            role = str(msg.get("role") or "")
+            
+            # 基础结构开销 (role + metadata)
+            totalTokens += 4 
+            
+            for char in content + role:
+                # 判断是否为中文字符或全角符号 (简单范围判断)
+                if '\u4e00' <= char <= '\u9fff' or '\u3000' <= char <= '\u303f' or '\uff00' <= char <= '\uffef':
+                    totalTokens += 0.8  # 中文权重
+                else:
+                    totalTokens += 0.3  # ASCII权重
+            
+            totalTokens += 2 # 消息间分隔符
+        
+        return int(totalTokens + 2) # 整体结尾开销
 
     def _get_token_threshold(self) -> int:
         raw = getattr(self.config, "tokenThreshold", 30000)
@@ -631,8 +658,52 @@ class Agent:
             with open(pathOfFile, "r", encoding="utf-8") as f:
                 self.cacheOfBackups[pathOfFile] = f.read()
 
+    def listModificationHistory(self) -> None:
+        """
+        列出当前会话的所有修改历史记录。
+        """
+        history = get_edit_history(history_file=self.sessionHistoryFile)
+        if not history:
+            print(f"{Fore.YELLOW}当前会话没有修改历史{Style.RESET_ALL}")
+            return
+
+        print(f"\n{Fore.CYAN}当前会话修改历史 (共 {len(history)} 条):{Style.RESET_ALL}")
+        print(f"{Fore.CYAN}{'='*60}{Style.RESET_ALL}")
+        
+        for i, record in enumerate(history, 1):
+            ts = record.get("ts", "N/A")
+            path = record.get("path", "N/A")
+            meta = record.get("meta", {})
+            op_type = meta.get("type", "unknown")
+            
+            # 简化路径显示
+            try:
+                display_path = os.path.relpath(path, os.getcwd())
+            except Exception:
+                display_path = os.path.basename(path)
+            
+            color = Fore.GREEN
+            if op_type == "write_file":
+                op_desc = "新建/覆盖文件"
+            elif op_type == "replace_in_file":
+                op_desc = f"替换内容 (匹配 {meta.get('replaced', 0)} 次)"
+                color = Fore.BLUE
+            elif op_type == "edit_lines":
+                op_desc = f"行编辑 (删除 {meta.get('delete_start')}-{meta.get('delete_end')}, 插入于 {meta.get('insert_at')})"
+                color = Fore.MAGENTA
+            else:
+                op_desc = op_type
+
+            print(f"{i}. [{ts}] {color}{op_desc}{Style.RESET_ALL}")
+            print(f"   文件: {display_path}")
+        
+        print(f"{Fore.CYAN}{'='*60}{Style.RESET_ALL}\n")
+
     def rollbackLastOperation(self):
-        ok, msg = rollback_last_edit()
+        """
+        回滚上一次文件操作。优先使用会话隔离的持久化记录。
+        """
+        ok, msg = rollback_last_edit(history_file=self.sessionHistoryFile)
         if ok:
             print(f"{Fore.GREEN}{msg}{Style.RESET_ALL}")
             if self.historyOfOperations:
@@ -667,7 +738,7 @@ class Agent:
         ops_to_rollback = max(0, len(self.historyOfOperations) - op_len)
         rolled = 0
         for _ in range(ops_to_rollback):
-            ok, _ = rollback_last_edit()
+            ok, _ = rollback_last_edit(history_file=self.sessionHistoryFile)
             if not ok:
                 break
             rolled += 1
@@ -926,7 +997,9 @@ class Agent:
                         # 备用方案：如果 API 返回 0 但本地计算有重复前缀，则使用本地估算值
                         isEstimated = False
                         if hit == 0 and localHitEstimate > 0:
-                            hit = localHitEstimate
+                            prompt = int(usageOfRequest.get("prompt_tokens") or 0)
+                            # 确保估算的命中数不超过实际总 Prompt 数
+                            hit = min(localHitEstimate, prompt)
                             isEstimated = True
                             # 更新 usage 对象以便后续统计使用
                             if "prompt_tokens_details" not in usageOfRequest:
@@ -1162,6 +1235,7 @@ class Agent:
                                 before_content=before_content,
                                 after_content=content,
                                 meta={"type": "write_file"},
+                                history_file=self.sessionHistoryFile,
                             )
                             self.invalidateProjectTreeCache()
                             self._invalidate_read_cache_for_path(path)
@@ -1268,6 +1342,7 @@ class Agent:
                                     "auto_indent": auto_indent,
                                     "replaced": replaced_times,
                                 },
+                                history_file=self.sessionHistoryFile,
                             )
                             self.invalidateProjectTreeCache()
                             self._invalidate_read_cache_for_path(path)
@@ -1319,6 +1394,7 @@ class Agent:
                                     "delete_end": delete_end,
                                     "insert_at": insert_at,
                                 },
+                                history_file=self.sessionHistoryFile,
                             )
                             self.invalidateProjectTreeCache()
                             self._invalidate_read_cache_for_path(path)

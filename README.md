@@ -95,36 +95,9 @@ Mini_computer/
 
 ### 前置条件
 
-- **Windows 系统**：安装 MinGW-w64 (推荐使用 MSYS2 或独立版 MinGW)
-- **Linux 系统**：GCC 编译器、Make 工具
-
-### 编译步骤
-
-#### Windows (PowerShell/CMD)
-```powershell
-# 使用 mingw32-make 编译
-mingw32-make clean
-mingw32-make
-```
-
-#### Linux / WSL
-```bash
-# 使用 make 编译
-make clean
-make
-```
-
-## 使用指南
-
-### 运行
-编译完成后，运行生成的可执行文件：
-- Windows: `.\mini_linux_shell.exe`
-- Linux: `./mini_linux_shell`
-
-### 登录
-默认提供以下用户：
-- **root**: 密码 `root` (管理员权限)
-- **user**: 密码 `user` (普通用户权限)
+- **Linux 系统或兼容环境**（WSL、Cygwin、MSYS2）
+- GCC编译器
+- Make 工具
 - Python 3.x（用于 `agent` AI助手命令，可选）
 - Python依赖包（首次运行 `agent` 命令时会自动安装）：
   - requests>=2.28.0

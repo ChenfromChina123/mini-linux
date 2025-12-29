@@ -2,32 +2,20 @@
 #include "util.h"
 #include <dirent.h>
 #include <sys/stat.h>
-#ifndef _WIN32
 #include <pwd.h>
 #include <grp.h>
-#endif
 #include <time.h>
 
 // 显示文件权限
 void print_permissions(mode_t mode) {
     // 文件类型
     if (S_ISDIR(mode)) printf("d");
-#ifdef S_ISLNK
     else if (S_ISLNK(mode)) printf("l");
-#endif
     else if (S_ISREG(mode)) printf("-");
-#ifdef S_ISBLK
     else if (S_ISBLK(mode)) printf("b");
-#endif
-#ifdef S_ISCHR
     else if (S_ISCHR(mode)) printf("c");
-#endif
-#ifdef S_ISFIFO
     else if (S_ISFIFO(mode)) printf("p");
-#endif
-#ifdef S_ISSOCK
     else if (S_ISSOCK(mode)) printf("s");
-#endif
     
     // 用户权限
     printf("%c%c%c",
@@ -36,24 +24,16 @@ void print_permissions(mode_t mode) {
            (mode & S_IXUSR) ? 'x' : '-');
     
     // 组权限
-#ifdef S_IRGRP
     printf("%c%c%c",
            (mode & S_IRGRP) ? 'r' : '-',
            (mode & S_IWGRP) ? 'w' : '-',
            (mode & S_IXGRP) ? 'x' : '-');
-#else
-    printf("---");
-#endif
     
     // 其他用户权限
-#ifdef S_IROTH
     printf("%c%c%c",
            (mode & S_IROTH) ? 'r' : '-',
            (mode & S_IWOTH) ? 'w' : '-',
            (mode & S_IXOTH) ? 'x' : '-');
-#else
-    printf("---");
-#endif
 }
 
 // 显示目录内容
@@ -89,20 +69,12 @@ void list_directory(const char *dir_path, int long_format) {
             printf(" %2lu", (unsigned long)file_stat.st_nlink);
             
             // 用户名
-#ifndef _WIN32
             struct passwd *pwd = getpwuid(file_stat.st_uid);
             printf(" %-8s", pwd ? pwd->pw_name : "unknown");
-#else
-            printf(" %-8s", "user");
-#endif
             
             // 组名
-#ifndef _WIN32
             struct group *grp = getgrgid(file_stat.st_gid);
             printf(" %-8s", grp ? grp->gr_name : "unknown");
-#else
-            printf(" %-8s", "group");
-#endif
             
             // 文件大小
             printf(" %8ld", (long)file_stat.st_size);
