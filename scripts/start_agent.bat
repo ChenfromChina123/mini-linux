@@ -1,13 +1,8 @@
 @echo off
 REM 小晨AI终端助手启动脚本 (Windows)
-REM 
-REM 使用说明：
-REM 1. 首先安装 Python 3.x
-REM 2. 安装依赖：pip install requests urllib3
-REM 3. 设置环境变量：
-REM    set VOID_API_KEY=你的API密钥
-REM    set VOID_BASE_URL=https://api.deepseek.com
-REM    set VOID_MODEL=deepseek-chat
+
+REM 切换到项目根目录
+cd /d "%~dp0.."
 
 echo ====================================
 echo   小晨AI终端助手 (XIAOCHEN_TERMINAL)

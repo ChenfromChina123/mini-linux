@@ -1,9 +1,7 @@
 # 小晨AI终端助手启动脚本 (PowerShell)
-# 
-# 使用说明：
-# 1. 首先安装 Python 3.x
-# 2. 安装依赖：pip install requests urllib3
-# 3. 设置环境变量（在脚本中或系统环境变量）
+
+# 切换到项目根目录
+Set-Location "$PSScriptRoot\.."
 
 Write-Host "====================================" -ForegroundColor Cyan
 Write-Host "  小晨AI终端助手 (XIAOCHEN_TERMINAL)" -ForegroundColor Cyan

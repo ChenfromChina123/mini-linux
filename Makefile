@@ -3,40 +3,66 @@
 # 编译器
 CC = gcc
 
-# 编译选项
-CFLAGS = -Wall -g
+# 目录定义
+INC_DIR = include
+SRC_CORE_DIR = src/core
+SRC_CMD_DIR = src/commands
+OBJ_DIR = obj
+
+# 编译选项 - 添加 -Iinclude 搜索路径
+# 设置控制台编码为 UTF-8
+CFLAGS = -Wall -g -I$(INC_DIR) -finput-charset=UTF-8 -fexec-charset=UTF-8
 
 # 目标文件
 TARGET = mini_linux_shell
 
-# C语言程序源文件
-C_SRCS = mycat.c myrm.c myvi.c mytouch.c myecho.c mycp.c myls.c myps.c mycd.c mymkdir.c myagent.c
+# 核心源文件
+CORE_SRCS = $(wildcard $(SRC_CORE_DIR)/*.c)
+# 命令源文件
+CMD_SRCS = $(wildcard $(SRC_CMD_DIR)/*.c)
+
+# 合并所有源文件
+ALL_SRCS = $(CORE_SRCS) $(CMD_SRCS)
 
 # 目标文件列表
-C_OBJS = $(C_SRCS:.c=.o)
+CORE_OBJS = $(patsubst $(SRC_CORE_DIR)/%.c, $(OBJ_DIR)/%.o, $(CORE_SRCS))
+CMD_OBJS = $(patsubst $(SRC_CMD_DIR)/%.c, $(OBJ_DIR)/%.o, $(CMD_SRCS))
+OBJS = $(CORE_OBJS) $(CMD_OBJS)
 
 # 默认目标
-all: $(TARGET)
+all: $(OBJ_DIR) $(TARGET)
 
-# 生成shell主程序，包含所有命令实现
-$(TARGET): shell.o user.o history.o util.o $(C_OBJS)
+# 创建 obj 目录
+$(OBJ_DIR):
+	@if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+
+# 生成shell主程序
+$(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-# 编译源文件为目标文件
-%.o: %.c
+# 编译核心源文件
+$(OBJ_DIR)/%.o: $(SRC_CORE_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# 编译命令源文件
+$(OBJ_DIR)/%.o: $(SRC_CMD_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # 清理生成的文件
 ifeq ($(OS),Windows_NT)
-RM = del
+RM = rmdir /s /q
+DEL = del /q
 EXE = $(TARGET).exe
 else
-RM = rm -f
+RM = rm -rf
+DEL = rm -f
 EXE = $(TARGET)
 endif
 
 clean:
-	$(RM) $(C_OBJS) shell.o user.o history.o util.o $(EXE)
+	@if exist $(OBJ_DIR) $(RM) $(OBJ_DIR)
+	@if exist $(EXE) $(DEL) $(EXE)
+	@if exist $(TARGET) $(DEL) $(TARGET)
 
 # 伪目标
 .PHONY: all clean
