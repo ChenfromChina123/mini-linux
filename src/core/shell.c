@@ -311,10 +311,6 @@ void shell_init() {
     
     // 初始化命令历史记录
     history_init();
-    
-    // 显示欢迎信息
-    printf("\033[34m欢迎使用Mini Linux Shell！\033[0m\n");
-    printf("\033[34m输入 'help' 查看可用命令。\033[0m\n");
 }
 
 /**
@@ -400,6 +396,8 @@ void shell_loop() {
     
     printf("\n\033[1;36m========================================\033[0m\n");
     printf("\033[1;36m       欢迎登录 Mini Linux Shell        \033[0m\n");
+    printf("\033[1;36m       输入 'help' 查看可用命令         \033[0m\n");
+    printf("\033[1;36m       输入 'exit' 退出 Shell           \033[0m\n");
     printf("\033[1;36m========================================\033[0m\n");
     
     for (int i = 0; i < 3; i++) {

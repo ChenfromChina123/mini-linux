@@ -10,7 +10,7 @@ BIN_DIR = bin
 OBJ_DIR = obj
 SCRIPT_DIR = scripts
 
-TARGET = mini_linux_shell
+TARGET = bin/mini_shell
 
 CORE_SOURCES = \
 	$(CORE_DIR)/shell.c \
