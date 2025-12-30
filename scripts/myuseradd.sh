@@ -14,6 +14,26 @@ check_root() {
     fi
 }
 
+# 更新 Mini Shell 的 .mini_users 数据库
+update_mini_users() {
+    local username="$1"
+    local password="$2"
+    local is_root="${3:-0}"
+    local db_file="$HOME/.mini_users"
+    
+    # 确保数据库文件存在
+    touch "$db_file"
+    
+    # 检查是否已存在于 .mini_users
+    if grep -q "^$username	" "$db_file"; then
+        # 更新密码和 root 状态
+        sed -i "s/^$username	.*/$username	$password	$is_root/" "$db_file"
+    else
+        # 追加新用户
+        echo -e "$username\t$password\t$is_root" >> "$db_file"
+    fi
+}
+
 # 交互式创建单个用户
 create_user_interactive() {
     echo "========================================"
@@ -64,6 +84,9 @@ create_user_interactive() {
         userdel -r "$username"
         return 1
     fi
+    
+    # 同步到 Mini Shell 数据库
+    update_mini_users "$username" "$password" 0
     
     echo "成功: 用户 '$username' 创建成功"
     echo "  - 主目录: /home/$username"
@@ -129,9 +152,13 @@ create_users_batch() {
             fi
         else
             # 如果没有提供密码，设置默认密码
-            echo "$username:123456" | chpasswd &>/dev/null
+            password="123456"
+            echo "$username:$password" | chpasswd &>/dev/null
             echo "成功（使用默认密码: 123456）"
         fi
+        
+        # 同步到 Mini Shell 数据库
+        update_mini_users "$username" "$password" 0
         
         echo "成功"
         ((success_count++))

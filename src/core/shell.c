@@ -33,14 +33,11 @@ Command commands[] = {
     {"mymkdir", cmd_mymkdir, "创建目录"},
     {"myps", cmd_myps, "显示进程信息"},
     {"users", cmd_users, "显示系统用户与活跃用户"},
-    {"passwd", cmd_passwd, "修改密码"},
     {"agent", cmd_agent, "启动小晨AI终端助手"},
     {"exit", cmd_exit, "退出shell"},
     {"clear", cmd_clear, "清屏"},
     {"help", cmd_help, "显示帮助信息"},
     {"history", cmd_history, "显示命令历史记录"},
-    {"useradd", cmd_useradd, "创建新用户"},
-    {"userdel", cmd_userdel, "删除用户"},
     {NULL, NULL, NULL} // 命令列表结束标记
 };
 
@@ -108,11 +105,11 @@ int cmd_help(int argc, char *argv[]) {
     printf("  myps                       - 显示当前系统进程快照\n");
     printf("  mykill <PID>               - 终止指定进程\n");
 
-    printf("\n\033[1;33m用户管理：\033[0m\n");
+    printf("\n\033[1;33m用户管理 (脚本实现)：\033[0m\n");
     printf("  users                      - 列出系统中所有用户\n");
-    printf("  passwd [用户名]            - 修改用户密码 (root 可修改他人)\n");
-    printf("  useradd <名> <密> [--root] - 创建新用户 (仅限 root)\n");
-    printf("  userdel <用户名>           - 删除指定用户 (仅限 root)\n");
+    printf("  mypasswd [用户名]          - 修改用户密码 (root 可修改他人)\n");
+    printf("  myuseradd                  - 创建新用户 (支持交互/批量)\n");
+    printf("  myuserdel <用户名>         - 删除指定用户\n");
 
     printf("\n\033[1;33mAI 助手：\033[0m\n");
     printf("  agent [指令...]            - 启动小晨AI助手 (无参数进入交互模式)\n");
@@ -281,10 +278,36 @@ int execute_command(int argc, char *argv[]) {
     
     // 4. 检查是否为shell脚本文件
     char sh_filename[256];
+    
+    // 首先尝试在当前目录找 .sh
     sprintf(sh_filename, "%s.sh", argv[0]);
     if (access(sh_filename, R_OK) == 0) {
-        // 使用system函数执行shell脚本
         return system(sh_filename);
+    }
+    
+    // 尝试在 scripts/ 目录找 .sh
+    sprintf(sh_filename, "scripts/%s.sh", argv[0]);
+    if (access(sh_filename, R_OK) == 0) {
+        // 构建完整命令行字符串
+        char full_cmd[1024] = {0};
+        strcat(full_cmd, sh_filename);
+        for (int i = 1; i < argc; i++) {
+            strcat(full_cmd, " ");
+            strcat(full_cmd, argv[i]);
+        }
+        return system(full_cmd);
+    }
+
+    // 尝试在 bin/ 目录找 .sh (Makefile 复制后的位置)
+    sprintf(sh_filename, "bin/%s.sh", argv[0]);
+    if (access(sh_filename, R_OK) == 0) {
+        char full_cmd[1024] = {0};
+        strcat(full_cmd, sh_filename);
+        for (int i = 1; i < argc; i++) {
+            strcat(full_cmd, " ");
+            strcat(full_cmd, argv[i]);
+        }
+        return system(full_cmd);
     }
     
     // 5. 命令不存在

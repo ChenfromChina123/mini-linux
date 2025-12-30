@@ -33,6 +33,7 @@ STANDALONE_TARGETS = $(addprefix $(BIN_DIR)/,$(STANDALONE_COMMANDS))
 STANDALONE_COMMON_SOURCES = $(CORE_DIR)/util.c $(CORE_DIR)/input.c
 
 SHELL_SCRIPTS = $(wildcard $(SCRIPT_DIR)/*.sh)
+USER_SCRIPTS = myuseradd.sh myuserdel.sh mypasswd.sh
 
 .PHONY: all
 all: directories $(TARGET) standalone scripts
@@ -79,6 +80,12 @@ scripts: $(SHELL_SCRIPTS) | $(BIN_DIR)
 		cp $$script $(BIN_DIR)/$$base; \
 		chmod +x $(BIN_DIR)/$$base; \
 		echo "  - $$base"; \
+	done
+	@# 确保用户管理脚本可以通过去掉 .sh 的方式调用
+	@cd $(BIN_DIR) && for s in $(USER_SCRIPTS); do \
+		base=$${s%.sh}; \
+		cp $$s $$base 2>/dev/null || true; \
+		chmod +x $$base 2>/dev/null || true; \
 	done
 
 .PHONY: agent

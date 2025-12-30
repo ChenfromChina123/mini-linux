@@ -14,6 +14,15 @@ check_root() {
     fi
 }
 
+# 从 Mini Shell 数据库删除
+remove_from_mini_users() {
+    local username="$1"
+    local db_file="$HOME/.mini_users"
+    if [ -f "$db_file" ]; then
+        sed -i "/^$username	/d" "$db_file"
+    fi
+}
+
 # 删除用户
 delete_user() {
     local username="$1"
@@ -27,6 +36,12 @@ delete_user() {
     # 检查是否为当前登录用户
     if [ "$username" = "$SUDO_USER" ] || [ "$username" = "$(whoami)" ]; then
         echo "错误: 不能删除当前登录的用户"
+        return 1
+    fi
+    
+    # 检查是否尝试删除 root
+    if [ "$username" = "root" ]; then
+        echo "错误: 禁止删除 root 用户"
         return 1
     fi
     
@@ -58,6 +73,7 @@ delete_user() {
         # 删除用户及其主目录
         userdel -r "$username"
         if [ $? -eq 0 ]; then
+            remove_from_mini_users "$username"
             echo "成功: 用户 '$username' 及其主目录已删除"
         else
             echo "错误: 删除用户失败"
@@ -67,6 +83,7 @@ delete_user() {
         # 仅删除用户，保留主目录
         userdel "$username"
         if [ $? -eq 0 ]; then
+            remove_from_mini_users "$username"
             echo "成功: 用户 '$username' 已删除（主目录保留在 $home_dir）"
         else
             echo "错误: 删除用户失败"

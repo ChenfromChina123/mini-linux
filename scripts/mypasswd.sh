@@ -5,6 +5,20 @@
 # 使用：./change_password.sh [username]
 #
 
+# 更新 Mini Shell 数据库中的密码
+update_mini_users_password() {
+    local username="$1"
+    local new_password="$2"
+    local db_file="$HOME/.mini_users"
+    if [ -f "$db_file" ]; then
+        # 获取原有的 is_root 状态
+        local is_root=$(grep "^$username	" "$db_file" | cut -f3)
+        if [ -n "$is_root" ]; then
+            sed -i "s/^$username	.*/$username	$new_password	$is_root/" "$db_file"
+        fi
+    fi
+}
+
 # 普通用户修改自己的密码
 change_own_password() {
     local username=$(whoami)
@@ -47,6 +61,7 @@ change_own_password() {
     # 修改密码
     echo "$username:$new_password" | sudo chpasswd
     if [ $? -eq 0 ]; then
+        update_mini_users_password "$username" "$new_password"
         echo "成功: 密码已修改"
     else
         echo "错误: 修改密码失败"
@@ -97,6 +112,7 @@ change_other_password() {
     # 修改密码
     echo "$target_user:$new_password" | chpasswd
     if [ $? -eq 0 ]; then
+        update_mini_users_password "$target_user" "$new_password"
         echo "成功: 用户 '$target_user' 的密码已修改"
     else
         echo "错误: 修改密码失败"
