@@ -30,9 +30,13 @@ int cmd_agent(int argc, char *argv[]) {
 
     // 检查 xiaochen_agent_v2 目录是否存在
     char agent_path[1280];
-    snprintf(agent_path, sizeof(agent_path), "%s/xiaochen_agent_v2", cwd);
-    
-    if (access(agent_path, F_OK) != 0) {
+    // 假设 agent 目录在程序运行目录的上一级或同级
+    // 在分层架构中，如果从 bin/ 运行，可能需要寻找 ../xiaochen_agent_v2
+    if (access("xiaochen_agent_v2", F_OK) == 0) {
+        snprintf(agent_path, sizeof(agent_path), "xiaochen_agent_v2");
+    } else if (access("../xiaochen_agent_v2", F_OK) == 0) {
+        snprintf(agent_path, sizeof(agent_path), "../xiaochen_agent_v2");
+    } else {
         error("未找到 xiaochen_agent_v2 目录");
         printf("请确保 xiaochen_agent_v2 目录存在于当前项目根目录下\n");
         return 1;
@@ -57,8 +61,8 @@ int cmd_agent(int argc, char *argv[]) {
     printf("\033[34m正在检查 Python 依赖...\033[0m\n");
     char check_cmd[1280];
     snprintf(check_cmd, sizeof(check_cmd), 
-             "cd %s && %s xiaochen_agent_v2/check_deps.py", 
-             cwd, python_cmd);
+             "%s %s/check_deps.py", 
+             python_cmd, agent_path);
     
     int check_result = system(check_cmd);
     if (check_result != 0) {
@@ -77,8 +81,8 @@ int cmd_agent(int argc, char *argv[]) {
         printf("\033[34m提示：输入 'exit' 或 'quit' 退出助手\033[0m\n\n");
         
         snprintf(command, sizeof(command), 
-                 "cd %s && %s -m xiaochen_agent_v2", 
-                 cwd, python_cmd);
+                 "%s -m xiaochen_agent_v2", 
+                 python_cmd);
     } else {
         // 有参数：将所有参数合并为一条指令
         // 构建参数字符串
@@ -93,8 +97,8 @@ int cmd_agent(int argc, char *argv[]) {
         
         // 使用 run_once.py 脚本执行单条指令（更安全，避免字符串转义问题）
         snprintf(command, sizeof(command), 
-                 "cd %s && %s xiaochen_agent_v2/run_once.py \"%s\"", 
-                 cwd, python_cmd, full_query);
+                 "%s %s/run_once.py \"%s\"", 
+                 python_cmd, agent_path, full_query);
     }
 
     // 执行命令

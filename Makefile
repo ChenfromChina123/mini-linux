@@ -7,6 +7,7 @@ APP_DIR = $(SRC_DIR)/app
 CORE_DIR = $(SRC_DIR)/core
 CMD_DIR = $(SRC_DIR)/commands
 BIN_DIR = bin
+OBJ_DIR = obj
 SCRIPT_DIR = scripts
 
 TARGET = mini_linux_shell
@@ -22,6 +23,9 @@ INTEGRATED_CMD_SOURCES = $(addprefix $(CMD_DIR)/,$(addsuffix .c,$(INTEGRATED_COM
 
 APP_SOURCES = $(wildcard $(APP_DIR)/*.c)
 SOURCES = $(APP_SOURCES) $(CORE_SOURCES) $(INTEGRATED_CMD_SOURCES)
+
+# 将源文件映射到对象文件
+OBJECTS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SOURCES))
 
 STANDALONE_COMMANDS = $(INTEGRATED_COMMANDS) mychmod mykill myhistory
 STANDALONE_TARGETS = $(addprefix $(BIN_DIR)/,$(STANDALONE_COMMANDS))
@@ -39,9 +43,14 @@ all: directories $(TARGET) standalone scripts
 	@echo "Shell脚本: $(BIN_DIR)/*.sh"
 	@echo "========================================="
 
-$(TARGET): $(SOURCES)
-	@echo "编译主程序: $@"
+$(TARGET): $(OBJECTS)
+	@echo "链接主程序: $@"
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | directories
+	@mkdir -p $(dir $@)
+	@echo "编译: $< -> $@"
+	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: standalone
 standalone: directories $(STANDALONE_TARGETS)
@@ -53,10 +62,13 @@ $(BIN_DIR)/%: $(CMD_DIR)/%.c $(STANDALONE_COMMON_SOURCES) | $(BIN_DIR)
 
 .PHONY: directories
 directories:
-	@mkdir -p $(BIN_DIR)
+	@mkdir -p $(BIN_DIR) $(OBJ_DIR)
 
 $(BIN_DIR):
 	@mkdir -p $(BIN_DIR)
+
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
 
 .PHONY: scripts
 scripts: $(SHELL_SCRIPTS) | $(BIN_DIR)
@@ -89,7 +101,7 @@ all-with-agent: all agent
 .PHONY: clean
 clean:
 	@echo "清理编译产物..."
-	rm -rf $(BIN_DIR) $(TARGET)
+	rm -rf $(BIN_DIR) $(OBJ_DIR) $(TARGET)
 	@echo "清理完成。"
 
 .PHONY: rebuild

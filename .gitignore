@@ -4,6 +4,8 @@
 *.out
 mini_linux_shell
 mini_linux_shell.exe
+bin/
+obj/
 
 # Python 相关
 __pycache__/
