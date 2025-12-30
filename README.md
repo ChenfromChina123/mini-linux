@@ -80,7 +80,11 @@ Mini_computer/
 │   ├── command.h
 │   └── util.h
 ├── src/              # 源代码目录
-│   ├── core/         # 核心系统实现 (shell, user, history, util)
+│   ├── core/         # 核心系统实现
+│   │   ├── user/     # 用户管理模块 (拆分为独立函数文件)
+│   │   ├── shell.c
+│   │   ├── history.c
+│   │   └── util.c
 │   └── commands/     # 独立命令实现 (mycat, myvi, myls, myps, etc.)
 ├── scripts/          # 脚本目录
 │   ├── build.bat     # Windows 编译脚本
