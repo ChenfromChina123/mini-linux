@@ -408,8 +408,8 @@ system(script_path);
 
 ### 动态提示符
 
-- 获取当前用户名：`getpwuid(getuid())`
-- 获取主机名：`gethostname()`
+- 获取当前用户名：内部用户系统 `current_user.username`
+- 获取主机名：固定为 `mini-linux`
 - 获取当前目录：`getcwd()`
 - 颜色输出：使用ANSI转义序列
 

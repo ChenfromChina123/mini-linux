@@ -6,6 +6,7 @@
 #include "input.h"
 #include <unistd.h>
 #include <sys/wait.h>
+#include <limits.h>
 
 
 /**
@@ -367,7 +368,15 @@ void shell_loop() {
     char command[MAX_CMD_LENGTH];
     
     while (1) {
-        char prompt[128]; snprintf(prompt, sizeof(prompt), "\033[32m%s@mini-linux\033[0m:\033[34m$\033[0m ", current_user.username);
+        char cwd[PATH_MAX];
+        if (getcwd(cwd, sizeof(cwd)) == NULL) {
+            strcpy(cwd, "?");
+        }
+        
+        char prompt[512]; 
+        snprintf(prompt, sizeof(prompt), "\033[32m%s@mini-linux\033[0m:\033[34m%s\033[0m\033[34m$\033[0m ", 
+                 current_user.username, cwd);
+        
         int L = read_line_with_edit(prompt, command, sizeof(command));
         if (L <= 0) continue;
         
