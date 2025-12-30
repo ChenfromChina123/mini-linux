@@ -1,0 +1,17 @@
+# 用户批量创建示例文件
+# 格式：username:password
+# 每行一个用户，冒号分隔用户名和密码
+# 以#开头的行为注释
+
+# 普通用户
+alice:alice123
+bob:bob456
+charlie:charlie789
+
+# 测试用户
+testuser1:test123
+testuser2:test123
+
+# 注意：如果不提供密码，系统将使用默认密码123456
+# 例如：newuser（将使用默认密码）
+
