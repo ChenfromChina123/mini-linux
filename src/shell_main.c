@@ -124,6 +124,15 @@ int execute_c_program(char **args) {
         return -1;
     } else if (pid == 0) {
         // 子进程：执行命令
+        // 如果命令不包含路径分隔符，尝试在bin目录查找
+        if (strchr(args[0], '/') == NULL) {
+            char bin_path[1024];
+            snprintf(bin_path, sizeof(bin_path), "./bin/%s", args[0]);
+            if (access(bin_path, X_OK) == 0) {
+                args[0] = bin_path;
+            }
+        }
+        
         if (execvp(args[0], args) == -1) {
             perror("execvp");
             exit(EXIT_FAILURE);
