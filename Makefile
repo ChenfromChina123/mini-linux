@@ -3,7 +3,7 @@
 # 编译器：GCC
 
 CC = gcc
-CFLAGS = -Wall -Wextra -g -std=c11
+CFLAGS = -Wall -Wextra -g -std=c11 -D_POSIX_C_SOURCE=200809L
 LDFLAGS =
 
 # 目录定义
