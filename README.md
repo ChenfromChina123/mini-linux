@@ -48,16 +48,30 @@
   - `-n <count>`：显示最近N条记录
   - `-c`：清空历史记录
 
-### 用户管理命令（Shell脚本实现）
-- **myuseradd.sh**：创建用户
-  - 交互式模式：逐步输入用户信息
-  - 批量模式：从文件读取用户列表批量创建
-- **myuserdel.sh**：删除用户，提供交互确认
-- **mypasswd.sh**：修改密码
-  - 普通用户：只能修改自己的密码（需验证旧密码）
-  - root用户：可以修改任何用户的密码
+### 用户管理命令 (Shell 脚本实现)
+- **myuseradd.sh**：创建 Mini Shell 内部用户
+  - 交互式模式：逐步输入用户名和密码
+  - 批量模式：从文件读取 `username:password` 列表批量创建
+  - 数据存储：统一保存至 `$HOME/.mini_users`
+- **myuserdel.sh**：删除 Mini Shell 内部用户
+  - 安全检查：禁止删除 root 用户
+  - 交互确认：删除前进行二次确认
+- **mypasswd.sh**：修改 Mini Shell 内部用户密码
+  - 交互模式：显示用户列表并选择
+  - 参数模式：直接指定用户名进行修改
+  - 安全检查：密码长度至少 6 位
 
 ## 系统架构
+
+### 用户管理架构
+
+本项目采用了**解耦的内部用户管理系统**，不再依赖 Linux 系统级用户：
+
+1. **统一存储**：所有用户信息（用户名、密码、管理员权限）均保存在 `$HOME/.mini_users` 文件中。
+2. **轻量化**：不创建 `/home/user` 目录，不修改 `/etc/passwd`，不依赖 `sudo` 权限。
+3. **双重实现**：
+   - **C 语言内核**：`src/core/user/` 模块负责登录验证、会话管理和数据库同步。
+   - **Shell 脚本**：`scripts/` 下的 `myuseradd.sh` 等脚本提供便捷的命令行管理工具。
 
 ### 多进程架构
 
@@ -77,7 +91,7 @@
            │                   (mytouch/mycat/mycp/myrm/myls/myps/mycd/mymkdir/myecho/myvi/agent)
            │
            └─── Shell脚本 ──> system()调用
-                               (create_user.sh, delete_user.sh...)
+                               (myuseradd.sh, myuserdel.sh...)
 ```
 
 ### 命令执行流程
@@ -119,9 +133,9 @@ Mini_computer/
 │       ├── myvi.c                # 简易编辑器
 │       └── myagent.c             # AI终端助手
 ├── scripts/                      # Shell脚本（用户管理）
-│   ├── create_user.sh            # 创建用户
-│   ├── delete_user.sh            # 删除用户
-│   └── change_password.sh        # 修改密码
+│   ├── myuseradd.sh              # 创建内部用户
+│   ├── myuserdel.sh              # 删除内部用户
+│   └── mypasswd.sh               # 修改内部用户密码
 ├── bin/                          # 独立命令与脚本输出目录
 │   ├── mytouch                   # 各命令可执行文件（可选）
 │   ├── mycat
@@ -140,7 +154,7 @@ Mini_computer/
 - **操作系统**：Linux（推荐Ubuntu 20.04+）
 - **编译器**：GCC
 - **工具**：Make
-- **权限**：部分功能需要root权限（用户管理脚本）
+- **权限**：普通用户权限即可（内部用户管理不再需要 root）
 
 ### 编译步骤
 
@@ -234,7 +248,7 @@ user@hostname:~$
 - **pwd** - 显示当前目录
   ```bash
   user@hostname:~$ pwd
-  /home/user
+  /home/administrator/Mini_computer
   ```
 
 ### 文件操作

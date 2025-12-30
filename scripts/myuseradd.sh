@@ -1,18 +1,9 @@
 #!/bin/bash
 #
-# create_user.sh - 创建用户脚本
+# myuseradd.sh - 创建用户脚本 (Mini Shell 内部用户系统)
 # 功能：创建新用户，支持交互式和批量创建
-# 使用：./create_user.sh [--batch <file>]
+# 使用：myuseradd [--batch <file>]
 #
-
-# 检查是否为root用户
-check_root() {
-    if [ "$EUID" -ne 0 ]; then
-        echo "错误: 此脚本需要root权限运行"
-        echo "请使用: sudo $0"
-        exit 1
-    fi
-}
 
 # 更新 Mini Shell 的 .mini_users 数据库
 update_mini_users() {
@@ -34,10 +25,21 @@ update_mini_users() {
     fi
 }
 
+# 检查用户是否已在数据库中存在
+check_user_exists() {
+    local username="$1"
+    local db_file="$HOME/.mini_users"
+    if [ -f "$db_file" ]; then
+        grep -q "^$username	" "$db_file"
+        return $?
+    fi
+    return 1
+}
+
 # 交互式创建单个用户
 create_user_interactive() {
     echo "========================================"
-    echo "  交互式创建用户"
+    echo "  交互式创建 Mini Shell 用户"
     echo "========================================"
     
     # 输入用户名
@@ -49,7 +51,7 @@ create_user_interactive() {
     fi
     
     # 检查用户是否已存在
-    if id "$username" &>/dev/null; then
+    if check_user_exists "$username"; then
         echo "错误: 用户 '$username' 已存在"
         return 1
     fi
@@ -70,28 +72,10 @@ create_user_interactive() {
         return 1
     fi
     
-    # 创建用户
-    useradd -m -s /bin/bash "$username"
-    if [ $? -ne 0 ]; then
-        echo "错误: 创建用户失败"
-        return 1
-    fi
-    
-    # 设置密码
-    echo "$username:$password" | chpasswd
-    if [ $? -ne 0 ]; then
-        echo "错误: 设置密码失败"
-        userdel -r "$username"
-        return 1
-    fi
-    
     # 同步到 Mini Shell 数据库
     update_mini_users "$username" "$password" 0
     
-    echo "成功: 用户 '$username' 创建成功"
-    echo "  - 主目录: /home/$username"
-    echo "  - Shell: /bin/bash"
-    
+    echo "成功: Mini Shell 用户 '$username' 创建成功"
     return 0
 }
 
@@ -105,7 +89,7 @@ create_users_batch() {
     fi
     
     echo "========================================"
-    echo "  批量创建用户"
+    echo "  批量创建 Mini Shell 用户"
     echo "========================================"
     echo "从文件读取用户列表: $user_file"
     echo
@@ -113,7 +97,7 @@ create_users_batch() {
     local success_count=0
     local fail_count=0
     
-    # 读取文件，每行格式：username password
+    # 读取文件，每行格式：username:password
     while IFS=: read -r username password || [ -n "$username" ]; do
         # 跳过空行和注释
         if [ -z "$username" ] || [[ "$username" =~ ^#.* ]]; then
@@ -127,34 +111,16 @@ create_users_batch() {
         echo -n "创建用户 '$username'... "
         
         # 检查用户是否已存在
-        if id "$username" &>/dev/null; then
+    if check_user_exists "$username"; then
             echo "跳过（已存在）"
             ((fail_count++))
             continue
         fi
         
-        # 创建用户
-        useradd -m -s /bin/bash "$username" &>/dev/null
-        if [ $? -ne 0 ]; then
-            echo "失败（创建用户）"
-            ((fail_count++))
-            continue
-        fi
-        
-        # 设置密码
-        if [ -n "$password" ]; then
-            echo "$username:$password" | chpasswd &>/dev/null
-            if [ $? -ne 0 ]; then
-                echo "失败（设置密码）"
-                userdel -r "$username" &>/dev/null
-                ((fail_count++))
-                continue
-            fi
-        else
-            # 如果没有提供密码，设置默认密码
+        # 如果没有提供密码，设置默认密码
+        if [ -z "$password" ]; then
             password="123456"
-            echo "$username:$password" | chpasswd &>/dev/null
-            echo "成功（使用默认密码: 123456）"
+            echo -n "(使用默认密码) "
         fi
         
         # 同步到 Mini Shell 数据库
@@ -174,17 +140,10 @@ create_users_batch() {
 
 # 主函数
 main() {
-    check_root
-    
     if [ "$1" = "--batch" ]; then
         if [ -z "$2" ]; then
             echo "错误: 请指定用户列表文件"
-            echo "用法: $0 --batch <user_file>"
-            echo
-            echo "文件格式（每行）："
-            echo "  username:password"
-            echo "  或"
-            echo "  username（使用默认密码123456）"
+            echo "用法: myuseradd --batch <user_file>"
             exit 1
         fi
         create_users_batch "$2"
@@ -194,4 +153,3 @@ main() {
 }
 
 main "$@"
-

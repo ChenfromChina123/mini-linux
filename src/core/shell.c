@@ -33,6 +33,9 @@ Command commands[] = {
     {"mymkdir", cmd_mymkdir, "创建目录"},
     {"myps", cmd_myps, "显示进程信息"},
     {"users", cmd_users, "显示系统用户与活跃用户"},
+    {"myuseradd", cmd_useradd, "创建新用户 (管理员权限)"},
+    {"myuserdel", cmd_userdel, "删除指定用户 (管理员权限)"},
+    {"passwd", cmd_passwd, "修改用户密码"},
     {"agent", cmd_agent, "启动小晨AI终端助手"},
     {"exit", cmd_exit, "退出shell"},
     {"clear", cmd_clear, "清屏"},
@@ -101,18 +104,16 @@ int cmd_help(int argc, char *argv[]) {
     printf("  mycd [目录]                - 切换当前工作目录 (支持 ~ 展开)\n");
     printf("  mymkdir [-p] <目录>        - 创建新目录 (-p 递归创建)\n");
 
-    printf("\n\033[1;33m进程管理：\033[0m\n");
-    printf("  myps                       - 显示当前系统进程快照\n");
-    printf("  mykill <PID>               - 终止指定进程\n");
-
-    printf("\n\033[1;33m用户管理 (脚本实现)：\033[0m\n");
-    printf("  users                      - 列出系统中所有用户\n");
-    printf("  mypasswd [用户名]          - 修改用户密码 (root 可修改他人)\n");
+    printf("\n\033[1;33m用户管理：\033[0m\n");
+    printf("  users                      - 显示所有用户及活跃会话\n");
     printf("  myuseradd                  - 创建新用户 (支持交互/批量)\n");
     printf("  myuserdel <用户名>         - 删除指定用户\n");
+    printf("  passwd [用户名]            - 修改用户密码\n");
 
-    printf("\n\033[1;33mAI 助手：\033[0m\n");
-    printf("  agent [指令...]            - 启动小晨AI助手 (无参数进入交互模式)\n");
+    printf("\n\033[1;33m系统工具：\033[0m\n");
+    printf("  myps                       - 显示当前进程状态\n");
+    printf("  mykill <进程名>            - 终止指定名称的进程\n");
+    printf("  agent                      - 启动小晨AI终端助手\n");
 
     printf("\n\033[1;32m提示：\033[0m本 Shell 支持执行系统命令 (如 ls, top, ping 等)。\n");
     printf("      如果输入的命令不是内置命令，Shell 将尝试从系统 PATH 中寻找并执行。\n\n");
