@@ -115,8 +115,7 @@ int cmd_help(int argc, char *argv[]) {
     printf("  mykill <进程名>            - 终止指定名称的进程\n");
     printf("  agent                      - 启动小晨AI终端助手\n");
 
-    printf("\n\033[1;32m提示：\033[0m本 Shell 支持执行系统命令 (如 ls, top, ping 等)。\n");
-    printf("      如果输入的命令不是内置命令，Shell 将尝试从系统 PATH 中寻找并执行。\n\n");
+    printf("\n");
 
     return 0;
 }
