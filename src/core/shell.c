@@ -168,52 +168,50 @@ int cmd_clear(int argc, char *argv[]) {
     return 0;
 }
 
-// 帮助命令实现
-// 帮助命令实现：显示所有可用命令的名称和简短描述。
-// 1. 遍历命令列表，打印每个命令的名称和描述。
-// 2. 为部分命令添加简短的用法说明。
+/**
+ * @brief 显示帮助信息
+ * 按照功能分类显示命令用法
+ */
 int cmd_help(int argc, char *argv[]) {
-    printf("\033[34m可用命令：\033[0m\n");
-    for (int i = 0; commands[i].name != NULL; i++) {
-        // 默认显示 名称 - 描述
-        printf("%s\t- %s", commands[i].name, commands[i].description);
+    (void)argc; (void)argv;
+    printf("\n\033[1;34mMini Linux Shell - 可用命令：\033[0m\n");
 
-        // 为部分命令添加简短用法说明
-        //strcmp 函数用于比较两个字符串是否相等。
-        //commands[i].name 是当前命令的名称。
-        //"mycat" 等是要匹配的命令名称。
-        if (strcmp(commands[i].name, "mycat") == 0) {
-            printf("，用法: mycat <文件名> [文件名...]");
-        } else if (strcmp(commands[i].name, "myls") == 0) {
-            printf("，用法: myls [目录] 或 myls -l [目录]");
-        } else if (strcmp(commands[i].name, "mycd") == 0) {
-            printf("，用法: mycd [目录]（无参数切换到主目录，支持 ~ 展开）");
-        } else if (strcmp(commands[i].name, "mymkdir") == 0) {
-            printf("，用法: mymkdir [-p] <目录>（-p: 创建父目录）");
-        } else if (strcmp(commands[i].name, "myecho") == 0) {
-            printf("，用法: myecho <文本> [> 文件]（支持重定向）");
-        } else if (strcmp(commands[i].name, "mycp") == 0) {
-            printf("，用法: mycp <源文件> <目标文件>");
-        } else if (strcmp(commands[i].name, "myrm") == 0) {
-            printf("，用法: myrm <文件>");
-        } else if (strcmp(commands[i].name, "mytouch") == 0) {
-            printf("，用法: mytouch <文件>");
-        } else if (strcmp(commands[i].name, "myvi") == 0) {
-            printf("，用法: myvi <文件>");
-        } else if (strcmp(commands[i].name, "myps") == 0) {
-            printf("，用法: myps");
-        } else if (strcmp(commands[i].name, "users") == 0) {
-            printf("，用法: users");
-        } else if (strcmp(commands[i].name, "passwd") == 0) {
-            printf("，用法: passwd [用户名]（root可改他人）");
-        } else if (strcmp(commands[i].name, "history") == 0) {
-            printf("，用法: history");
-        } else if (strcmp(commands[i].name, "agent") == 0) {
-            printf("，用法: agent [指令...]（无参数启动交互式AI助手）");
-        }
+    printf("\n\033[1;33m内置命令：\033[0m\n");
+    printf("  help                       - 显示此帮助信息\n");
+    printf("  clear                      - 清除终端屏幕\n");
+    printf("  exit                       - 退出 Mini Linux Shell\n");
+    printf("  history                    - 显示命令历史记录\n");
 
-        printf("\n");
-    }
+    printf("\n\033[1;33m文件操作：\033[0m\n");
+    printf("  mycat <文件>               - 读取并显示文件内容\n");
+    printf("  mytouch <文件>             - 创建一个空文件\n");
+    printf("  myecho <文本> [> 文件]     - 打印文本或重定向到文件\n");
+    printf("  mycp <源> <目的>           - 复制文件或目录\n");
+    printf("  myrm <文件>                - 删除指定文件\n");
+    printf("  myvi <文件>                - 简单的文本编辑器\n");
+    printf("  mychmod <权限> <文件>      - 修改文件权限 (如: mychmod 777 test.txt)\n");
+
+    printf("\n\033[1;33m目录操作：\033[0m\n");
+    printf("  myls [-l] [目录]           - 列出目录内容 (-l 显示详细信息)\n");
+    printf("  mycd [目录]                - 切换当前工作目录 (支持 ~ 展开)\n");
+    printf("  mymkdir [-p] <目录>        - 创建新目录 (-p 递归创建)\n");
+
+    printf("\n\033[1;33m进程管理：\033[0m\n");
+    printf("  myps                       - 显示当前系统进程快照\n");
+    printf("  mykill <PID>               - 终止指定进程\n");
+
+    printf("\n\033[1;33m用户管理：\033[0m\n");
+    printf("  users                      - 列出系统中所有用户\n");
+    printf("  passwd [用户名]            - 修改用户密码 (root 可修改他人)\n");
+    printf("  useradd <名> <密> [--root] - 创建新用户 (仅限 root)\n");
+    printf("  userdel <用户名>           - 删除指定用户 (仅限 root)\n");
+
+    printf("\n\033[1;33mAI 助手：\033[0m\n");
+    printf("  agent [指令...]            - 启动小晨AI助手 (无参数进入交互模式)\n");
+
+    printf("\n\033[1;32m提示：\033[0m本 Shell 支持执行系统命令 (如 ls, top, ping 等)。\n");
+    printf("      如果输入的命令不是内置命令，Shell 将尝试从系统 PATH 中寻找并执行。\n\n");
+
     return 0;
 }
 
@@ -400,20 +398,26 @@ void shell_loop() {
     char password[MAX_PASSWORD_LENGTH];
     int login_success = 0;
     
+    printf("\n\033[1;36m========================================\033[0m\n");
+    printf("\033[1;36m       欢迎登录 Mini Linux Shell        \033[0m\n");
+    printf("\033[1;36m========================================\033[0m\n");
+    
     for (int i = 0; i < 3; i++) {
         printf("\n用户名: ");
-        fgets(username, sizeof(username), stdin);
+        fflush(stdout);
+        if (fgets(username, sizeof(username), stdin) == NULL) break;
         trim(username);
         
         printf("密码: ");
-        fgets(password, sizeof(password), stdin);
+        fflush(stdout);
+        if (fgets(password, sizeof(password), stdin) == NULL) break;
         trim(password);
         
         if (user_login(username, password)) {
             login_success = 1;
             break;
         } else {
-            error("用户名或密码错误");
+            error("用户名或密码错误，请重试");
         }
     }
     
