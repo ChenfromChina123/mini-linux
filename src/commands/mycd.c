@@ -72,3 +72,15 @@ int cmd_mycd(int argc, char *argv[]) {
 
     return 0;
 }
+
+#ifdef MINI_LINUX_STANDALONE
+/**
+ * @brief 独立可执行程序入口（用于单独编译 mycd）
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 进程退出码
+ */
+int main(int argc, char *argv[]) {
+    return cmd_mycd(argc, argv);
+}
+#endif

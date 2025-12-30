@@ -4,12 +4,18 @@
  * 使用：mycat <filename> [> output] [>> output]
  */
 
+#include "command.h"
+#include "util.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 /**
- * 显示文件内容
+ * @brief 显示文件内容
+ * @param filename 输入文件路径
+ * @param output 输出流
+ * @return 成功返回0，失败返回-1
  */
 int cat_file(const char *filename, FILE *output) {
     FILE *fp = fopen(filename, "r");
@@ -30,44 +36,35 @@ int cat_file(const char *filename, FILE *output) {
 }
 
 /**
- * 主函数
+ * @brief mycat 命令实现
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 成功返回0，失败返回非0
  */
-int main(int argc, char *argv[]) {
+int cmd_mycat(int argc, char *argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "用法: %s <filename> [> output] [>> output]\n", argv[0]);
+        error("使用方法: mycat <文件名> [文件名...]");
         return 1;
     }
     
-    const char *input_file = argv[1];
-    FILE *output = stdout;
-    
-    // 检查是否有重定向
-    if (argc >= 4) {
-        if (strcmp(argv[2], ">") == 0) {
-            // 覆盖输出
-            output = fopen(argv[3], "w");
-            if (!output) {
-                perror("打开输出文件失败");
-                return 1;
-            }
-        } else if (strcmp(argv[2], ">>") == 0) {
-            // 追加输出
-            output = fopen(argv[3], "a");
-            if (!output) {
-                perror("打开输出文件失败");
-                return 1;
-            }
+    int rc = 0;
+    for (int i = 1; i < argc; i++) {
+        if (cat_file(argv[i], stdout) != 0) {
+            rc = 1;
         }
     }
     
-    int ret = cat_file(input_file, output);
-    
-    if (output != stdout) {
-        fclose(output);
-        if (ret == 0) {
-            printf("内容已输出到 '%s'\n", argv[3]);
-        }
-    }
-    
-    return ret;
+    return rc;
 }
+
+#ifdef MINI_LINUX_STANDALONE
+/**
+ * @brief 独立可执行程序入口（用于单独编译 mycat）
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 进程退出码
+ */
+int main(int argc, char *argv[]) {
+    return cmd_mycat(argc, argv);
+}
+#endif

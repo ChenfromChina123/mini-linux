@@ -1,58 +1,73 @@
-# Makefile for Mini Linux Shell
-# 目标环境：Linux
-# 编译器：GCC
-
 CC = gcc
-CFLAGS = -Wall -Wextra -g -std=c11 -D_POSIX_C_SOURCE=200809L
+CFLAGS = -Wall -Wextra -g -std=c11 -D_POSIX_C_SOURCE=200809L -Iinclude
 LDFLAGS =
 
-# 目录定义
 SRC_DIR = src
+APP_DIR = $(SRC_DIR)/app
+CORE_DIR = $(SRC_DIR)/core
 CMD_DIR = $(SRC_DIR)/commands
 BIN_DIR = bin
 SCRIPT_DIR = scripts
 
-# 主Shell程序
-SHELL_MAIN = $(SRC_DIR)/shell_main.c
-SHELL_BIN = $(BIN_DIR)/mini_shell
+TARGET = mini_linux_shell
 
-# C命令程序列表
-CMD_SOURCES = $(wildcard $(CMD_DIR)/*.c)
-CMD_BINS = $(patsubst $(CMD_DIR)/%.c,$(BIN_DIR)/%,$(CMD_SOURCES))
+CORE_SOURCES = \
+	$(CORE_DIR)/shell.c \
+	$(CORE_DIR)/util.c \
+	$(wildcard $(CORE_DIR)/history/*.c) \
+	$(wildcard $(CORE_DIR)/user/*.c)
 
-# Shell脚本列表
+INTEGRATED_COMMANDS = myagent mycat mycd mycp myecho myls mymkdir myps myrm mytouch myvi
+INTEGRATED_CMD_SOURCES = $(addprefix $(CMD_DIR)/,$(addsuffix .c,$(INTEGRATED_COMMANDS)))
+
+APP_SOURCES = $(wildcard $(APP_DIR)/*.c)
+SOURCES = $(APP_SOURCES) $(CORE_SOURCES) $(INTEGRATED_CMD_SOURCES)
+
+STANDALONE_COMMANDS = $(INTEGRATED_COMMANDS) mychmod mykill myhistory
+STANDALONE_TARGETS = $(addprefix $(BIN_DIR)/,$(STANDALONE_COMMANDS))
+STANDALONE_COMMON_SOURCES = $(CORE_DIR)/util.c
+
 SHELL_SCRIPTS = $(wildcard $(SCRIPT_DIR)/*.sh)
 
-# 明确列出所有命令（确保编译）
-COMMANDS = mytouch mycat mycp myrm mychmod myls myps mykill myhistory mycd myecho mymkdir myvi myagent
-CMD_TARGETS = $(addprefix $(BIN_DIR)/,$(COMMANDS))
-
-# 所有目标
-ALL_BINS = $(SHELL_BIN) $(CMD_TARGETS)
-
-# 默认目标
 .PHONY: all
-all: directories $(SHELL_BIN) commands scripts
+all: directories $(TARGET) standalone scripts
 	@echo "========================================="
 	@echo "编译完成！"
 	@echo "========================================="
-	@echo "主程序: $(SHELL_BIN)"
-	@echo "命令程序: $(BIN_DIR)/mytouch, mycat, mycp, ..."
+	@echo "主程序: ./$(TARGET)"
+	@echo "独立命令: $(BIN_DIR)/{mycat,mytouch,mycp,...}"
 	@echo "Shell脚本: $(BIN_DIR)/*.sh"
-	@echo ""
-	@echo "运行方式:"
-	@echo "  ./$(SHELL_BIN)"
-	@echo ""
-	@echo "构建Agent:"
-	@echo "  make agent"
 	@echo "========================================="
 
-# 编译所有命令
-.PHONY: commands
-commands: $(CMD_TARGETS)
-	@echo "所有命令编译完成"
+$(TARGET): $(SOURCES)
+	@echo "编译主程序: $@"
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-# 构建Agent可执行文件
+.PHONY: standalone
+standalone: directories $(STANDALONE_TARGETS)
+	@echo "所有独立命令编译完成"
+
+$(BIN_DIR)/%: $(CMD_DIR)/%.c $(STANDALONE_COMMON_SOURCES) | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -DMINI_LINUX_STANDALONE -o $@ $^ $(LDFLAGS)
+
+.PHONY: directories
+directories:
+	@mkdir -p $(BIN_DIR)
+
+$(BIN_DIR):
+	@mkdir -p $(BIN_DIR)
+
+.PHONY: scripts
+scripts: $(SHELL_SCRIPTS) | $(BIN_DIR)
+	@echo "复制Shell脚本到 $(BIN_DIR)/"
+	@for script in $(SHELL_SCRIPTS); do \
+		base=$$(basename $$script); \
+		cp $$script $(BIN_DIR)/$$base; \
+		chmod +x $(BIN_DIR)/$$base; \
+		echo "  - $$base"; \
+	done
+
 .PHONY: agent
 agent:
 	@echo "========================================="
@@ -65,159 +80,50 @@ agent:
 		exit 1; \
 	fi
 
-# 完整构建（包括Agent）
 .PHONY: all-with-agent
 all-with-agent: all agent
 	@echo "========================================="
 	@echo "完整构建完成（包括Agent）！"
 	@echo "========================================="
 
-# 创建目录
-.PHONY: directories
-directories:
-	@mkdir -p $(BIN_DIR)
-
-# 编译主Shell程序
-$(SHELL_BIN): $(SHELL_MAIN)
-	@echo "编译主Shell程序: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-# 编译C命令程序（每个命令单独规则）
-$(BIN_DIR)/mytouch: $(CMD_DIR)/mytouch.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/mycat: $(CMD_DIR)/mycat.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/mycp: $(CMD_DIR)/mycp.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/myrm: $(CMD_DIR)/myrm.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/mychmod: $(CMD_DIR)/mychmod.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/myls: $(CMD_DIR)/myls.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/myps: $(CMD_DIR)/myps.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/mykill: $(CMD_DIR)/mykill.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/myhistory: $(CMD_DIR)/myhistory.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/mycd: $(CMD_DIR)/mycd.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/myecho: $(CMD_DIR)/myecho.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/mymkdir: $(CMD_DIR)/mymkdir.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/myvi: $(CMD_DIR)/myvi.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR)/myagent: $(CMD_DIR)/myagent.c | $(BIN_DIR)
-	@echo "编译命令: $@"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-# 复制Shell脚本到bin目录并添加执行权限
-.PHONY: scripts
-scripts: $(SHELL_SCRIPTS)
-	@echo "复制Shell脚本到 $(BIN_DIR)/"
-	@for script in $(SHELL_SCRIPTS); do \
-		base=$$(basename $$script); \
-		cp $$script $(BIN_DIR)/$$base; \
-		chmod +x $(BIN_DIR)/$$base; \
-		echo "  - $$base"; \
-	done
-
-# 清理编译产物
 .PHONY: clean
 clean:
 	@echo "清理编译产物..."
-	rm -rf $(BIN_DIR)
+	rm -rf $(BIN_DIR) $(TARGET)
 	@echo "清理完成。"
 
-# 重新编译
 .PHONY: rebuild
 rebuild: clean all
 
-# 安装（可选，将程序安装到系统路径）
-.PHONY: install
-install: all
-	@echo "安装程序到 /usr/local/bin/"
-	sudo cp $(SHELL_BIN) /usr/local/bin/
-	sudo cp $(CMD_BINS) /usr/local/bin/
-	sudo cp $(BIN_DIR)/*.sh /usr/local/bin/
-	@echo "安装完成。"
-
-# 卸载
-.PHONY: uninstall
-uninstall:
-	@echo "卸载程序..."
-	sudo rm -f /usr/local/bin/mini_shell
-	sudo rm -f /usr/local/bin/mytouch
-	sudo rm -f /usr/local/bin/mycat
-	sudo rm -f /usr/local/bin/mycp
-	sudo rm -f /usr/local/bin/myrm
-	sudo rm -f /usr/local/bin/mychmod
-	sudo rm -f /usr/local/bin/myls
-	sudo rm -f /usr/local/bin/myps
-	sudo rm -f /usr/local/bin/mykill
-	sudo rm -f /usr/local/bin/myhistory
-	sudo rm -f /usr/local/bin/create_user.sh
-	sudo rm -f /usr/local/bin/delete_user.sh
-	sudo rm -f /usr/local/bin/change_password.sh
-	@echo "卸载完成。"
-
-# 运行Shell
 .PHONY: run
 run: all
 	@echo "启动Mini Linux Shell..."
-	@$(SHELL_BIN)
+	@./$(TARGET)
 
-# 测试编译（仅编译，不链接）
 .PHONY: test-compile
 test-compile:
 	@echo "测试编译所有源文件..."
-	@for src in $(SHELL_MAIN) $(CMD_SOURCES); do \
+	@for src in $(SOURCES) $(addprefix $(CMD_DIR)/,$(addsuffix .c,$(STANDALONE_COMMANDS))); do \
 		echo "测试: $$src"; \
 		$(CC) $(CFLAGS) -c $$src -o /dev/null; \
 	done
 	@echo "测试编译完成。"
 
-# 显示帮助
 .PHONY: help
 help:
 	@echo "========================================="
 	@echo "Mini Linux Shell - Makefile帮助"
 	@echo "========================================="
 	@echo "可用目标："
-	@echo "  make          - 编译所有程序（默认）"
-	@echo "  make all      - 编译所有程序"
-	@echo "  make clean    - 清理编译产物"
-	@echo "  make rebuild  - 重新编译"
-	@echo "  make run      - 编译并运行Shell"
-	@echo "  make install  - 安装到系统"
+	@echo "  make               - 编译主程序/独立命令/脚本（默认）"
+	@echo "  make clean         - 清理编译产物"
+	@echo "  make rebuild       - 重新编译"
+	@echo "  make run           - 编译并运行主程序"
+	@echo "  make standalone    - 仅编译独立命令到 bin/"
+	@echo "  make scripts       - 仅复制脚本到 bin/"
+	@echo "  make test-compile  - 仅测试编译（不链接）"
+	@echo "  make agent         - 构建小晨Agent可执行文件"
+	@echo "========================================="
 	@echo "  make uninstall - 从系统卸载"
 	@echo "  make test-compile - 测试编译"
 	@echo "  make help     - 显示此帮助信息"

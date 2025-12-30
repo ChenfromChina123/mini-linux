@@ -4,6 +4,9 @@
  * 使用：myls [-l] [directory]
  */
 
+#include "command.h"
+#include "util.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +18,8 @@
 #include <unistd.h>
 
 /**
- * 显示文件权限字符串
+ * @brief 显示文件权限字符串
+ * @param mode 文件模式
  */
 void print_permissions(mode_t mode) {
     printf((S_ISDIR(mode)) ? "d" : "-");
@@ -31,7 +35,8 @@ void print_permissions(mode_t mode) {
 }
 
 /**
- * 显示文件大小（人类可读格式）
+ * @brief 显示文件大小（人类可读格式）
+ * @param size 文件大小
  */
 void print_size(off_t size) {
     if (size < 1024) {
@@ -46,7 +51,9 @@ void print_size(off_t size) {
 }
 
 /**
- * 长格式显示目录内容
+ * @brief 长格式显示目录内容
+ * @param dirname 目录名
+ * @return 成功返回0，失败返回-1
  */
 int list_directory_long(const char *dirname) {
     DIR *dir = opendir(dirname);
@@ -121,7 +128,9 @@ int list_directory_long(const char *dirname) {
 }
 
 /**
- * 简短格式显示目录内容
+ * @brief 简短格式显示目录内容
+ * @param dirname 目录名
+ * @return 成功返回0，失败返回-1
  */
 int list_directory_short(const char *dirname) {
     DIR *dir = opendir(dirname);
@@ -164,9 +173,12 @@ int list_directory_short(const char *dirname) {
 }
 
 /**
- * 主函数
+ * @brief myls 命令实现
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 成功返回0，失败返回非0
  */
-int main(int argc, char *argv[]) {
+int cmd_myls(int argc, char *argv[]) {
     int long_format = 0;
     const char *dirname = ".";
     
@@ -180,8 +192,20 @@ int main(int argc, char *argv[]) {
     }
     
     if (long_format) {
-        return list_directory_long(dirname);
+        return list_directory_long(dirname) == 0 ? 0 : 1;
     } else {
-        return list_directory_short(dirname);
+        return list_directory_short(dirname) == 0 ? 0 : 1;
     }
 }
+
+#ifdef MINI_LINUX_STANDALONE
+/**
+ * @brief 独立可执行程序入口（用于单独编译 myls）
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 进程退出码
+ */
+int main(int argc, char *argv[]) {
+    return cmd_myls(argc, argv);
+}
+#endif

@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_CMD_LENGTH 100
-#define MAX_ARGS 10
+#define MAX_CMD_LENGTH 1024
+#define MAX_ARGS 64
 
 // 命令函数指针类型
 typedef int (*command_func)(int argc, char *argv[]);

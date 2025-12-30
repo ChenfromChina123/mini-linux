@@ -12,9 +12,6 @@
 
 #define GETPID() getpid()
 
-// 最大用户数
-#define MAX_USERS 1024
-
 // 全局变量声明
 extern User users[MAX_USERS];
 extern int user_count;

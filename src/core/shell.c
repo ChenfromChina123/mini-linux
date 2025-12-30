@@ -456,13 +456,4 @@ void shell_loop() {
     }
 }
 
-// 主函数
-int main() {
-    // 初始化shell
-    shell_init();
-    
-    // 启动主循环
-    shell_loop();
-    
-    return 0;
-}
+ 

@@ -4,6 +4,9 @@
  * 使用：mytouch <filename>
  */
 
+#include "command.h"
+#include "util.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +15,9 @@
 #include <unistd.h>
 
 /**
- * 检查文件是否存在
+ * @brief 检查文件是否存在
+ * @param filename 文件名
+ * @return 存在返回1，不存在返回0
  */
 int file_exists(const char *filename) {
     struct stat st;
@@ -20,7 +25,9 @@ int file_exists(const char *filename) {
 }
 
 /**
- * 创建新文件
+ * @brief 创建新文件
+ * @param filename 文件名
+ * @return 成功返回0，失败返回-1
  */
 int create_file(const char *filename) {
     int fd = open(filename, O_CREAT | O_WRONLY, 0644);
@@ -33,43 +40,35 @@ int create_file(const char *filename) {
 }
 
 /**
- * 主函数
+ * @brief mytouch 命令实现
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 成功返回0，失败返回非0
  */
-int main(int argc, char *argv[]) {
+int cmd_mytouch(int argc, char *argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "用法: %s <filename>\n", argv[0]);
+        error("使用方法: mytouch <文件名> [文件名...]");
         return 1;
     }
     
-    const char *filename = argv[1];
-    
-    // 检查文件是否已存在
-    if (file_exists(filename)) {
-        char choice;
-        printf("文件 '%s' 已存在。是否覆盖？(y/n): ", filename);
-        scanf(" %c", &choice);
-        
-        if (choice == 'y' || choice == 'Y') {
-            // 覆盖文件
-            if (create_file(filename) == 0) {
-                printf("文件 '%s' 已覆盖。\n", filename);
-            }
-        } else {
-            // 要求输入新文件名
-            char new_filename[256];
-            printf("请输入新文件名: ");
-            scanf("%s", new_filename);
-            
-            if (create_file(new_filename) == 0) {
-                printf("文件 '%s' 创建成功。\n", new_filename);
-            }
-        }
-    } else {
-        // 文件不存在，直接创建
-        if (create_file(filename) == 0) {
-            printf("文件 '%s' 创建成功。\n", filename);
+    int rc = 0;
+    for (int i = 1; i < argc; i++) {
+        if (create_file(argv[i]) != 0) {
+            rc = 1;
         }
     }
     
-    return 0;
+    return rc;
 }
+
+#ifdef MINI_LINUX_STANDALONE
+/**
+ * @brief 独立可执行程序入口（用于单独编译 mytouch）
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 进程退出码
+ */
+int main(int argc, char *argv[]) {
+    return cmd_mytouch(argc, argv);
+}
+#endif

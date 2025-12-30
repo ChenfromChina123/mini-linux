@@ -59,7 +59,7 @@
 
 ```
 ┌─────────────────────────────────────┐
-│       主Shell进程 (shell_main)      │
+│     主Shell进程 (mini_linux_shell)  │
 │  - 显示提示符                        │
 │  - 读取用户输入                      │
 │  - 解析命令                          │
@@ -67,11 +67,10 @@
 └──────────┬──────────────────────────┘
            │
            ├─── 内置命令 ────> 直接在主进程执行
-           │                   (exit, cd, pwd, help)
+           │                   (help/exit/users/passwd/useradd/userdel/history 等)
            │
-           ├─── C程序 ──────> fork() + execvp()
-           │                   (mytouch, mycat, myls, myps...)
-           │                   子进程执行，父进程waitpid()
+           ├─── 内建命令 ────> 直接在主进程执行（C函数）
+           │                   (mytouch/mycat/mycp/myrm/myls/myps/mycd/mymkdir/myecho/myvi/agent)
            │
            └─── Shell脚本 ──> system()调用
                                (create_user.sh, delete_user.sh...)
@@ -96,24 +95,31 @@
 ```
 Mini_computer/
 ├── src/
-│   ├── shell_main.c              # 主Shell程序
-│   └── commands/                 # C语言命令（独立程序）
+│   ├── app/
+│   │   └── main.c                # 主程序入口
+│   ├── core/                     # Shell核心与公共模块
+│   │   ├── shell.c               # Shell交互与命令分发
+│   │   ├── util.c                # 工具函数
+│   │   ├── history/              # 历史记录模块
+│   │   └── user/                 # 用户模块
+│   └── commands/                 # 内建命令实现（也可单独编译为独立程序）
 │       ├── mytouch.c             # 创建文件
 │       ├── mycat.c               # 显示文件内容
 │       ├── mycp.c                # 复制文件
 │       ├── myrm.c                # 删除文件/目录
-│       ├── mychmod.c             # 修改/查看文件权限
 │       ├── myls.c                # 列出目录
 │       ├── myps.c                # 显示进程信息
-│       ├── mykill.c              # 终止进程
-│       └── myhistory.c           # 命令历史管理
+│       ├── mycd.c                # 切换目录
+│       ├── mymkdir.c             # 创建目录
+│       ├── myecho.c              # 写入文件（重定向）
+│       ├── myvi.c                # 简易编辑器
+│       └── myagent.c             # AI终端助手
 ├── scripts/                      # Shell脚本（用户管理）
 │   ├── create_user.sh            # 创建用户
 │   ├── delete_user.sh            # 删除用户
 │   └── change_password.sh        # 修改密码
-├── bin/                          # 编译输出目录
-│   ├── mini_shell                # 主Shell可执行文件
-│   ├── mytouch                   # 各命令可执行文件
+├── bin/                          # 独立命令与脚本输出目录
+│   ├── mytouch                   # 各命令可执行文件（可选）
 │   ├── mycat
 │   └── ...
 ├── docs/                         # 文档目录
@@ -145,12 +151,13 @@ Mini_computer/
    ```
    
    这将：
-   - 编译主Shell程序到 `bin/mini_shell`
-   - 编译所有C命令到 `bin/` 目录
+   - 编译主程序到 `./mini_linux_shell`
+   - （可选）编译独立命令到 `bin/` 目录
    - 复制Shell脚本到 `bin/` 目录并添加执行权限
 
 3. **查看编译结果**
    ```bash
+   ls -lh .
    ls -lh bin/
    ```
 
@@ -168,7 +175,7 @@ Mini_computer/
    ```bash
    make run
    # 或直接运行
-   ./bin/mini_shell
+   ./mini_linux_shell
    ```
 
 ### Makefile目标

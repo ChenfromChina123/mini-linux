@@ -2,6 +2,13 @@
 #include "util.h"
 
 // myecho命令实现：向文件写入内容
+// myecho工作流程：
+// 1. 检查参数：确保至少有一个内容参数和一个重定向符号。
+// 2. 查找重定向符号：确定是覆盖写入还是追加写入。
+// 3. 打开文件：根据重定向符号打开指定的文件。
+// 4. 写入内容：将参数中的内容写入文件，每个参数之间用空格分隔。
+// 5. 关闭文件：写入完成后关闭文件。
+// 6. 打印成功消息：告知用户内容已成功写入文件。
 int cmd_myecho(int argc, char *argv[]) {
     if (argc < 2) {
         error("使用方法: myecho <内容> > <文件名> 或 myecho <内容> >> <文件名>");
@@ -58,3 +65,15 @@ int cmd_myecho(int argc, char *argv[]) {
     
     return 0;
 }
+
+#ifdef MINI_LINUX_STANDALONE
+/**
+ * @brief 独立可执行程序入口（用于单独编译 myecho）
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 进程退出码
+ */
+int main(int argc, char *argv[]) {
+    return cmd_myecho(argc, argv);
+}
+#endif

@@ -4,6 +4,9 @@
  * 使用：myrm [-i] [-r] <file/directory>
  */
 
+#include "command.h"
+#include "util.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +15,10 @@
 #include <dirent.h>
 
 /**
- * 递归删除目录
+ * @brief 递归删除目录
+ * @param path 目录路径
+ * @param interactive 是否交互确认
+ * @return 成功返回0，失败返回-1
  */
 int remove_directory(const char *path, int interactive) {
     DIR *dir = opendir(path);
@@ -75,7 +81,10 @@ int remove_directory(const char *path, int interactive) {
 }
 
 /**
- * 删除文件
+ * @brief 删除文件
+ * @param path 文件路径
+ * @param interactive 是否交互确认
+ * @return 成功返回0，失败返回-1
  */
 int remove_file(const char *path, int interactive) {
     if (interactive) {
@@ -97,9 +106,12 @@ int remove_file(const char *path, int interactive) {
 }
 
 /**
- * 主函数
+ * @brief myrm 命令实现
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 成功返回0，失败返回非0
  */
-int main(int argc, char *argv[]) {
+int cmd_myrm(int argc, char *argv[]) {
     int interactive = 0;  // -i 选项
     int recursive = 0;    // -r 选项
     const char *path = NULL;
@@ -116,9 +128,7 @@ int main(int argc, char *argv[]) {
     }
     
     if (!path) {
-        fprintf(stderr, "用法: %s [-i] [-r] <file/directory>\n", argv[0]);
-        fprintf(stderr, "  -i  交互式删除（删除前确认）\n");
-        fprintf(stderr, "  -r  递归删除目录\n");
+        error("使用方法: myrm [-i] [-r] <文件/目录>");
         return 1;
     }
     
@@ -131,18 +141,24 @@ int main(int argc, char *argv[]) {
     if (S_ISDIR(st.st_mode)) {
         // 目录
         if (!recursive) {
-            fprintf(stderr, "错误: '%s' 是一个目录，请使用 -r 选项递归删除。\n", path);
+            error("目标是目录，请使用 -r 选项递归删除");
             return 1;
         }
-        if (remove_directory(path, interactive) == 0) {
-            printf("目录 '%s' 已删除。\n", path);
-        }
+        return remove_directory(path, interactive) == 0 ? 0 : 1;
     } else {
         // 文件
-        if (remove_file(path, interactive) == 0) {
-            printf("文件 '%s' 已删除。\n", path);
-        }
+        return remove_file(path, interactive) == 0 ? 0 : 1;
     }
-    
-    return 0;
 }
+
+#ifdef MINI_LINUX_STANDALONE
+/**
+ * @brief 独立可执行程序入口（用于单独编译 myrm）
+ * @param argc 参数个数
+ * @param argv 参数数组
+ * @return 进程退出码
+ */
+int main(int argc, char *argv[]) {
+    return cmd_myrm(argc, argv);
+}
+#endif
