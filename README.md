@@ -49,11 +49,11 @@
   - `-c`：清空历史记录
 
 ### 用户管理命令（Shell脚本实现）
-- **create_user.sh**：创建用户
+- **myuseradd.sh**：创建用户
   - 交互式模式：逐步输入用户信息
   - 批量模式：从文件读取用户列表批量创建
-- **delete_user.sh**：删除用户，提供交互确认
-- **change_password.sh**：修改密码
+- **myuserdel.sh**：删除用户，提供交互确认
+- **mypasswd.sh**：修改密码
   - 普通用户：只能修改自己的密码（需验证旧密码）
   - root用户：可以修改任何用户的密码
 
@@ -328,28 +328,28 @@ user@hostname:~$
 
 - **创建用户（交互式）**
   ```bash
-  user@hostname:~$ sudo ./bin/create_user.sh
+  user@hostname:~$ myuseradd
   ```
 
 - **批量创建用户**
   ```bash
   # 准备用户列表文件 users.txt
   # 格式：username:password（每行一个）
-  user@hostname:~$ sudo ./bin/create_user.sh --batch users.txt
+  user@hostname:~$ myuseradd --batch users.txt
   ```
 
 - **删除用户**
   ```bash
-  user@hostname:~$ sudo ./bin/delete_user.sh username
+  user@hostname:~$ myuserdel username
   ```
 
 - **修改密码**
   ```bash
   # 普通用户修改自己的密码
-  user@hostname:~$ ./bin/change_password.sh
+  user@hostname:~$ mypasswd
   
   # root用户修改他人密码
-  user@hostname:~$ sudo ./bin/change_password.sh username
+  user@hostname:~$ mypasswd username
   ```
 
 ## 实现细节

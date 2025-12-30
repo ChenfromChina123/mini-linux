@@ -282,7 +282,13 @@ int execute_command(int argc, char *argv[]) {
     // 首先尝试在当前目录找 .sh
     sprintf(sh_filename, "%s.sh", argv[0]);
     if (access(sh_filename, R_OK) == 0) {
-        return system(sh_filename);
+        char full_cmd[1024] = {0};
+        sprintf(full_cmd, "sh %s", sh_filename);
+        for (int i = 1; i < argc; i++) {
+            strcat(full_cmd, " ");
+            strcat(full_cmd, argv[i]);
+        }
+        return system(full_cmd);
     }
     
     // 尝试在 scripts/ 目录找 .sh
@@ -290,7 +296,7 @@ int execute_command(int argc, char *argv[]) {
     if (access(sh_filename, R_OK) == 0) {
         // 构建完整命令行字符串
         char full_cmd[1024] = {0};
-        strcat(full_cmd, sh_filename);
+        sprintf(full_cmd, "sh %s", sh_filename);
         for (int i = 1; i < argc; i++) {
             strcat(full_cmd, " ");
             strcat(full_cmd, argv[i]);
@@ -302,7 +308,7 @@ int execute_command(int argc, char *argv[]) {
     sprintf(sh_filename, "bin/%s.sh", argv[0]);
     if (access(sh_filename, R_OK) == 0) {
         char full_cmd[1024] = {0};
-        strcat(full_cmd, sh_filename);
+        sprintf(full_cmd, "sh %s", sh_filename);
         for (int i = 1; i < argc; i++) {
             strcat(full_cmd, " ");
             strcat(full_cmd, argv[i]);
