@@ -4,25 +4,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#ifdef _WIN32
-#include <direct.h>
-#define chdir _chdir
-#else
 #include <unistd.h>
-#endif
 
 // mycd命令实现：切换当前工作目录
 // 用法：mycd [目录]
 // - 无参数：切换到用户主目录（环境变量 HOME 或 USERPROFILE）
 // - 支持以 ~ 开头的路径（仅 ~ 或 ~/...）
 int cmd_mycd(int argc, char *argv[]) {
+
+    // 处理参数
     const char *target = NULL;
     if (argc < 2) {
         // 切换到 HOME
         target = getenv("HOME");
-#ifdef _WIN32
-        if (target == NULL) target = getenv("USERPROFILE");
-#endif
         if (target == NULL) {
             error("无法找到用户主目录");
             return 1;
@@ -32,9 +26,6 @@ int cmd_mycd(int argc, char *argv[]) {
         // 处理 ~ 展开
         if (target[0] == '~') {
             const char *home = getenv("HOME");
-#ifdef _WIN32
-            if (home == NULL) home = getenv("USERPROFILE");
-#endif
             if (home == NULL) {
                 error("无法展开 ~：找不到 HOME");
                 return 1;
@@ -70,6 +61,8 @@ int cmd_mycd(int argc, char *argv[]) {
     }
 
     // 直接 chdir
+    //chdir(target) 用于切换当前工作目录到指定路径。
+    //!= 0 检查是否切换成功。   
     if (chdir(target) != 0) {
         char msg[256];
         snprintf(msg, sizeof(msg), "切换目录失败: %s", strerror(errno));

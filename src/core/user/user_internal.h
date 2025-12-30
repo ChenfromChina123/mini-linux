@@ -10,12 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef _WIN32
-#include <process.h>
-#define GETPID() _getpid()
-#else
 #define GETPID() getpid()
-#endif
 
 // 最大用户数
 #define MAX_USERS 1024

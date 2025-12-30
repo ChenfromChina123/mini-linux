@@ -5,16 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#ifdef _WIN32
-#include <direct.h>
-#define mkdir(path, mode) _mkdir(path)
-#else
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#endif
 
-// 递归创建父目录（类似 mkdir -p）
+
+//函数说明：递归创建路径中的所有父目录。
+//参数：
+//  - path：要创建的目录路径
+//返回值：
+//  - 成功：0
+//  - 失败：-1
 static int make_parents(const char *path) {
     if (path == NULL || *path == '\0') return -1;
 
@@ -31,36 +32,22 @@ static int make_parents(const char *path) {
     for (size_t i = 1; i < len; i++) {
         if (tmp[i] == '/' || tmp[i] == '\\') {
             tmp[i] = '\0';
-            // 跳过根目录位点（例如 Windows 的 C:）
+            // 跳过根目录位点
             if (strlen(tmp) > 0) {
-#ifdef _WIN32
-                if (mkdir(tmp, 0) != 0 && errno != EEXIST) {
-                    free(tmp);
-                    return -1;
-                }
-#else
                 if (mkdir(tmp, 0755) != 0 && errno != EEXIST) {
                     free(tmp);
                     return -1;
                 }
-#endif
             }
             tmp[i] = '/';
         }
     }
 
     // 最后创建完整路径
-#ifdef _WIN32
-    if (mkdir(tmp, 0) != 0 && errno != EEXIST) {
-        free(tmp);
-        return -1;
-    }
-#else
     if (mkdir(tmp, 0755) != 0 && errno != EEXIST) {
         free(tmp);
         return -1;
     }
-#endif
 
     free(tmp);
     return 0;
@@ -68,6 +55,13 @@ static int make_parents(const char *path) {
 
 // mymkdir 命令实现
 // 用法: mymkdir [-p] <目录>
+// -p：递归创建父目录（类似 mkdir -p）
+// mymkdir工作流程：
+// 1. 检查参数：确保至少有一个目录参数。
+// 2. 解析选项：检查是否包含 -p 选项。
+// 3. 递归创建父目录（如果 -p 选项存在）。
+// 4. 创建目录：根据路径创建目录。
+// 5. 打印成功消息：告知用户目录已成功创建。
 int cmd_mymkdir(int argc, char *argv[]) {
     int make_parents_flag = 0;
     const char *path = NULL;
@@ -100,11 +94,7 @@ int cmd_mymkdir(int argc, char *argv[]) {
         success("目录创建成功");
         return 0;
     } else {
-#ifdef _WIN32
-        if (mkdir(path, 0) != 0) {
-#else
         if (mkdir(path, 0755) != 0) {
-#endif
             char msg[256];
             snprintf(msg, sizeof(msg), "创建目录失败: %s", strerror(errno));
             error(msg);

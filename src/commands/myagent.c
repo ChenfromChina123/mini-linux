@@ -52,10 +52,6 @@ int cmd_agent(int argc, char *argv[]) {
         strcpy(python_cmd, "python3");
     }
 
-    // 设置控制台编码为 UTF-8（Windows）
-#ifdef _WIN32
-    system("chcp 65001 > nul");
-#endif
 
     // 检查并安装依赖
     printf("\033[34m正在检查 Python 依赖...\033[0m\n");

@@ -1,405 +1,428 @@
 # Mini Linux Shell
 
-一个轻量级的自定义Linux shell，使用C语言编写，具有基本的命令执行、文件操作、目录管理、进程监控和用户认证功能。
+一个基于Linux的自定义Shell程序，使用C语言编写核心功能，Shell脚本实现用户管理。
+本项目是Linux操作系统综合作业，实现了完整的Shell交互功能。
 
 ## 目录
 
 - [功能特性](#功能特性)
+- [系统架构](#系统架构)
 - [文件结构](#文件结构)
 - [编译说明](#编译说明)
 - [使用指南](#使用指南)
-  - [登录](#登录)
-  - [基本命令](#基本命令)
-  - [文件操作](#文件操作)
-  - [目录操作](#目录操作)
-  - [进程管理](#进程管理)
-  - [用户管理](#用户管理)
-  - [命令历史](#命令历史)
 - [实现细节](#实现细节)
-- [开发者文档](#开发者文档)
-- [未来增强](#未来增强)
-- [许可证](#许可证)
+- [开发文档](#开发文档)
 
 ## 功能特性
 
-### 核心功能
-- **命令行界面**：动态提示符显示当前用户名
-- **行编辑器**：支持方向键左右移动、上下浏览历史、行内插入/删除
-- **命令解析**：将输入标记化为命令和参数
-- **多进程执行**：使用 `fork()` 和 `waitpid()` 执行命令
-- **命令历史**：记录并持久化，包含时间戳和执行结果
-- **用户认证**：支持root和普通用户权限，用户/会话持久化
+### 核心Shell功能
+- **动态命令提示符**：显示用户名@主机名:当前目录格式
+- **命令解析**：支持命令和参数的解析
+- **命令执行**：
+  - C程序：使用fork()创建子进程，execvp()执行命令，waitpid()等待结束
+  - Shell脚本：使用system()函数调用
+- **内置命令**：exit, cd, pwd, help
+- **命令历史**：自动记录到~/.mini_shell_history
 
-### 文件操作
-- **mycat**：显示文件内容
-- **myrm**：删除文件
-- **myvi**：vi风格文本编辑器（NORMAL/INSERT/COMMAND/SEARCH）
-- **mytouch**：创建空文件
-- **myecho**：向文件写入内容
+### 文件操作命令（C语言实现）
+- **mytouch**：创建文件，检查重名并提供覆盖/重命名选项
+- **mycat**：显示文件内容，支持 `>` 和 `>>` 重定向
 - **mycp**：复制文件
+- **myrm**：删除文件/目录，支持 `-i`（交互确认）和 `-r`（递归删除）选项
+- **mychmod**：查看/修改文件权限
 
-### 目录操作
-- **myls**：列出目录内容，支持 `-l` 长格式选项
+### 目录操作命令（C语言实现）
+- **myls**：列出目录内容，支持 `-l` 长格式显示
 
-### 进程管理
-- **myps**：显示进程信息，支持多种选项
+### 进程管理命令（C语言实现）
+- **myps**：显示进程信息，支持 `-a`（所有进程）和 `-u`（当前用户进程）选项
+- **mykill**：通过进程名称终止进程
 
-### 用户管理
-- **useradd**：创建新用户（仅root权限）
-- **userdel**：删除用户（仅root权限）
-- **users**：列出所有用户与活跃用户（跨终端会话）
-- **passwd**：修改密码（本人需验证旧密码；root可修改他人）
+### 历史记录命令（C语言实现）
+- **myhistory**：管理命令历史
+  - `-a`：显示所有历史记录
+  - `-n <count>`：显示最近N条记录
+  - `-c`：清空历史记录
 
-### AI助手工具
-- **agent**：启动小晨AI终端助手（xiaochen_agent_v2）
-  - 支持交互式对话模式
-  - 支持单条命令快速执行
-  - 可执行文件操作、代码编写、项目管理等任务
-  - 基于大语言模型的智能终端助手
-  - 自动检查和安装 Python 依赖
+### 用户管理命令（Shell脚本实现）
+- **create_user.sh**：创建用户
+  - 交互式模式：逐步输入用户信息
+  - 批量模式：从文件读取用户列表批量创建
+- **delete_user.sh**：删除用户，提供交互确认
+- **change_password.sh**：修改密码
+  - 普通用户：只能修改自己的密码（需验证旧密码）
+  - root用户：可以修改任何用户的密码
 
-## 开发者文档
+## 系统架构
 
-更多技术细节请参考以下文档：
-- [C 成员与 Agent 工作流程详细说明](docs/C_MEMBER_AND_AGENT_WORKFLOW.md)
-- [Windows 平台编译说明](docs/WINDOWS_BUILD.md)
-- [分工说明](docs/分工说明.md)
+### 多进程架构
+
+```
+┌─────────────────────────────────────┐
+│       主Shell进程 (shell_main)      │
+│  - 显示提示符                        │
+│  - 读取用户输入                      │
+│  - 解析命令                          │
+│  - 判断命令类型                      │
+└──────────┬──────────────────────────┘
+           │
+           ├─── 内置命令 ────> 直接在主进程执行
+           │                   (exit, cd, pwd, help)
+           │
+           ├─── C程序 ──────> fork() + execvp()
+           │                   (mytouch, mycat, myls, myps...)
+           │                   子进程执行，父进程waitpid()
+           │
+           └─── Shell脚本 ──> system()调用
+                               (create_user.sh, delete_user.sh...)
+```
+
+### 命令执行流程
+
+1. **显示提示符**：`用户名@主机名:当前目录$`
+2. **读取命令**：接收用户输入
+3. **解析命令**：分割成命令和参数
+4. **判断类型**：
+   - exit → 退出Shell
+   - 内置命令 → 直接执行
+   - Shell脚本（以#!/bin/bash开头的可执行文件）→ system()调用
+   - C程序/系统命令 → fork() + execvp()
+   - 无效命令 → 显示"command not found"
+5. **记录历史**：追加到历史文件
+6. **循环**：返回步骤1
 
 ## 文件结构
 
 ```
 Mini_computer/
-├── docs/             # 文档目录
-│   ├── C_MEMBER_AND_AGENT_WORKFLOW.md # C 成员与 Agent 工作流程详细说明
-│   ├── WINDOWS_BUILD.md # Windows 平台编译说明
-│   └── 分工说明.md    # 团队分工说明
-├── include/          # 头文件目录 (.h)
-│   ├── shell.h
-│   ├── user.h
-│   ├── history.h
-│   ├── command.h
-│   └── util.h
-├── src/              # 源代码目录
-│   ├── core/         # 核心系统实现
-│   │   ├── user/     # 用户管理模块 (拆分为独立函数文件)
-│   │   ├── history/  # 历史记录模块 (拆分为独立函数文件)
-│   │   ├── shell.c
-│   │   └── util.c
-│   └── commands/     # 独立命令实现 (mycat, myvi, myls, myps, etc.)
-├── scripts/          # 脚本目录
-│   ├── build.bat     # Windows 编译脚本
-│   ├── start_agent.bat # Agent 启动脚本 (Batch)
-│   └── start_agent.ps1 # Agent 启动脚本 (PowerShell)
-├── xiaochen_agent_v2/ # 小晨AI终端助手 (Python)
-├── Makefile          # 编译规则
-└── README.md         # 此文档
+├── src/
+│   ├── shell_main.c              # 主Shell程序
+│   └── commands/                 # C语言命令（独立程序）
+│       ├── mytouch.c             # 创建文件
+│       ├── mycat.c               # 显示文件内容
+│       ├── mycp.c                # 复制文件
+│       ├── myrm.c                # 删除文件/目录
+│       ├── mychmod.c             # 修改/查看文件权限
+│       ├── myls.c                # 列出目录
+│       ├── myps.c                # 显示进程信息
+│       ├── mykill.c              # 终止进程
+│       └── myhistory.c           # 命令历史管理
+├── scripts/                      # Shell脚本（用户管理）
+│   ├── create_user.sh            # 创建用户
+│   ├── delete_user.sh            # 删除用户
+│   └── change_password.sh        # 修改密码
+├── bin/                          # 编译输出目录
+│   ├── mini_shell                # 主Shell可执行文件
+│   ├── mytouch                   # 各命令可执行文件
+│   ├── mycat
+│   └── ...
+├── docs/                         # 文档目录
+│   ├── 任务说明.md               # 作业要求
+│   └── 分工说明.md               # 团队分工
+├── Makefile                      # 编译脚本
+└── README.md                     # 本文档
 ```
 
 ## 编译说明
 
 ### 前置条件
 
-- **Linux 系统或兼容环境**（WSL、Cygwin、MSYS2）
-- GCC编译器
-- Make 工具
-- Python 3.x（用于 `agent` AI助手命令，可选）
-- Python依赖包（首次运行 `agent` 命令时会自动安装）：
-  - requests>=2.28.0
-  - urllib3>=1.26.0
-  - colorama>=0.4.6
-
-> **Windows 用户请注意**：本项目使用了 Linux 特定的系统调用，建议使用 WSL (Windows Subsystem for Linux) 编译运行。详见 [WINDOWS_BUILD.md](WINDOWS_BUILD.md)。
+- **操作系统**：Linux（推荐Ubuntu 20.04+）
+- **编译器**：GCC
+- **工具**：Make
+- **权限**：部分功能需要root权限（用户管理脚本）
 
 ### 编译步骤
 
-#### Linux / WSL / Mac
-
-1. **克隆或导航到项目目录**
+1. **克隆或进入项目目录**
    ```bash
-   cd mini-linux
+   cd Mini_computer
    ```
 
-2. **使用Makefile编译**
+2. **编译所有程序**
    ```bash
    make
    ```
+   
+   这将：
+   - 编译主Shell程序到 `bin/mini_shell`
+   - 编译所有C命令到 `bin/` 目录
+   - 复制Shell脚本到 `bin/` 目录并添加执行权限
 
-   这将生成主可执行文件 `mini_linux_shell`。
+3. **查看编译结果**
+   ```bash
+   ls -lh bin/
+   ```
 
-3. **清理编译产物**（可选）
+4. **清理编译产物**（可选）
    ```bash
    make clean
    ```
 
-#### Windows 原生环境
-
-Windows 原生环境下无法编译完整的 Shell，但可以单独使用 AI 助手功能：
-
-1. **安装 Python 依赖（可选，首次运行会自动安装）**
-   ```powershell
-   pip install -r requirements.txt
+5. **重新编译**
+   ```bash
+   make rebuild
    ```
 
-2. **使用启动脚本**
-   ```powershell
-   # 方式 1：批处理脚本
-   .\start_agent.bat
-   
-   # 方式 2：PowerShell 脚本
-   .\start_agent.ps1
-   
-   # 方式 3：直接运行
-   python -m xiaochen_agent_v2
+6. **运行Shell**
+   ```bash
+   make run
+   # 或直接运行
+   ./bin/mini_shell
    ```
 
-详细的 Windows 编译说明请参考 [WINDOWS_BUILD.md](WINDOWS_BUILD.md)。
+### Makefile目标
+
+- `make` 或 `make all` - 编译所有程序
+- `make clean` - 清理编译产物
+- `make rebuild` - 重新编译
+- `make run` - 编译并运行
+- `make install` - 安装到系统（/usr/local/bin）
+- `make uninstall` - 从系统卸载
+- `make test-compile` - 测试编译
+- `make help` - 显示帮助信息
 
 ## 使用指南
 
-### 登录
-
-运行shell可执行文件并输入您的凭证：
+### 启动Shell
 
 ```bash
-./mini_linux_shell
-
-欢迎使用Mini Linux Shell！
-输入 'help' 查看可用命令。
-
-用户名: root
-密码: root
-
-root@mini-linux:$ 
+./bin/mini_shell
 ```
 
-**默认用户**:
-- `root` / `root` (超级用户)
-- `user` / `user` (普通用户)
+启动后会显示：
+```
+========================================
+  欢迎使用 Mini Linux Shell
+  输入 'help' 查看可用命令
+  输入 'exit' 退出Shell
+========================================
 
-### 基本命令
+user@hostname:~$
+```
 
-- **help**: 显示可用命令
+### 内置命令
+
+- **help** - 显示帮助信息
   ```bash
-  root@mini-linux:$ help
+  user@hostname:~$ help
   ```
 
-- **exit**: 退出shell
+- **exit** - 退出Shell
   ```bash
-  root@mini-linux:$ exit
+  user@hostname:~$ exit
   ```
 
-- **clear**: 清屏
+- **cd** - 切换目录
   ```bash
-  root@mini-linux:$ clear
+  user@hostname:~$ cd /tmp
+  user@hostname:/tmp$ cd
+  user@hostname:~$
+  ```
+
+- **pwd** - 显示当前目录
+  ```bash
+  user@hostname:~$ pwd
+  /home/user
   ```
 
 ### 文件操作
 
-- **mycat**: 显示文件内容
+- **创建文件**
   ```bash
-  root@mini-linux:$ mycat file.txt
+  user@hostname:~$ mytouch test.txt
   ```
 
-- **myrm**: 删除文件
+- **显示文件内容**
   ```bash
-  root@mini-linux:$ myrm file.txt
+  user@hostname:~$ mycat test.txt
   ```
 
-- **myvi**: 编辑文件（vi风格）
+- **重定向输出**
   ```bash
-  root@mini-linux:$ myvi file.txt
-  ```
-  - NORMAL：`h/j/k/l` 或方向键移动，`dd` 删除行，`p` 粘贴，`x` 删除字符
-  - INSERT：`i/a/I/A/o/O` 进入插入，`ESC` 返回 NORMAL，`Enter` 断行
-  - COMMAND：输入 `:`，支持 `w`/`q`/`q!`/`wq`、`set number`/`set nonumber`
-  - SEARCH：输入 `/pattern`，`n` 下一个，`N` 上一个
-
-- **mytouch**: 创建空文件
-  ```bash
-  root@mini-linux:$ mytouch newfile.txt
+  user@hostname:~$ mycat file1.txt > file2.txt
+  user@hostname:~$ mycat file1.txt >> file2.txt
   ```
 
-- **myecho**: 向文件写入内容
+- **复制文件**
   ```bash
-  # 覆盖文件内容
-  root@mini-linux:$ myecho Hello World > file.txt
-  
-  # 追加内容到文件
-  root@mini-linux:$ myecho More content >> file.txt
+  user@hostname:~$ mycp source.txt dest.txt
   ```
 
-- **mycp**: 复制文件
+- **删除文件**
   ```bash
-  root@mini-linux:$ mycp source.txt destination.txt
+  # 交互式删除
+  user@hostname:~$ myrm -i file.txt
+  # 递归删除目录
+  user@hostname:~$ myrm -r mydir
+  ```
+
+- **查看文件权限**
+  ```bash
+  user@hostname:~$ mychmod test.txt
+  ```
+
+- **修改文件权限**
+  ```bash
+  user@hostname:~$ mychmod 755 test.txt
   ```
 
 ### 目录操作
 
-- **myls**: 列出目录内容
+- **列出目录内容**
   ```bash
-  # 短格式
-  root@mini-linux:$ myls
-  
-  # 长格式（权限、大小等）
-  root@mini-linux:$ myls -l
-  
-  # 列出指定目录
-  root@mini-linux:$ myls /home
+  # 简短格式
+  user@hostname:~$ myls
+  # 长格式
+  user@hostname:~$ myls -l
+  # 指定目录
+  user@hostname:~$ myls /home
   ```
 
 ### 进程管理
 
-- **myps**: 显示进程信息
+- **显示进程信息**
   ```bash
   # 显示所有进程
-  root@mini-linux:$ myps
-  
-  # 显示指定PID的进程
-  root@mini-linux:$ myps -p 1234
+  user@hostname:~$ myps -a
+  # 显示当前用户进程
+  user@hostname:~$ myps -u
   ```
 
-### 用户管理
-
-> **注意**：这些命令需要root权限
-
-- **useradd**: 创建新用户
+- **终止进程**
   ```bash
-  # 创建普通用户
-  root@mini-linux:$ useradd newuser password
-  
-  # 创建root用户（不推荐）
-  root@mini-linux:$ useradd admin password --root
-  ```
-
-- **userdel**: 删除用户
-  ```bash
-  root@mini-linux:$ userdel newuser
-  ```
-
-- **users**: 显示所有用户与活跃用户
-  ```bash
-  root@mini-linux:$ users
-  ```
-
-- **passwd**: 修改密码
-  ```bash
-  # 修改本人密码（需旧密码）
-  user@mini-linux:$ passwd
-  # 以root修改他人密码
-  root@mini-linux:$ passwd otheruser
-  # 以root直接指定新密码
-  root@mini-linux:$ passwd otheruser newpass
+  user@hostname:~$ mykill process_name
   ```
 
 ### 命令历史
 
-- **history**: 显示命令历史，包含时间戳和结果
+- **显示所有历史**
   ```bash
-  root@mini-linux:$ history
+  user@hostname:~$ myhistory
+  # 或
+  user@hostname:~$ myhistory -a
   ```
 
-### AI助手工具
-
-- **agent**: 启动小晨AI终端助手
+- **显示最近N条**
   ```bash
-  # 启动交互式AI助手（需要先设置环境变量）
-  root@mini-linux:$ agent
-  
-  # 直接执行单条指令
-  root@mini-linux:$ agent 帮我创建一个测试文件
-  root@mini-linux:$ agent 显示当前目录结构
+  user@hostname:~$ myhistory -n 10
   ```
 
-  **环境配置**：
-  
-  使用前需要设置以下环境变量（Windows PowerShell）：
-  ```powershell
-  $env:VOID_API_KEY = "你的API密钥"
-  $env:VOID_BASE_URL = "https://api.deepseek.com"  # 可选，默认为DeepSeek
-  $env:VOID_MODEL = "deepseek-chat"  # 可选，默认为deepseek-chat
-  ```
-
-  或在Linux/Mac终端：
+- **清空历史**
   ```bash
-  export VOID_API_KEY="你的API密钥"
-  export VOID_BASE_URL="https://api.deepseek.com"  # 可选
-  export VOID_MODEL="deepseek-chat"  # 可选
+  user@hostname:~$ myhistory -c
   ```
 
-  **功能特性**：
-  - 🤖 智能对话：理解自然语言指令
-  - 📁 文件操作：读取、编写、搜索文件
-  - 🔍 代码搜索：在项目中查找代码片段
-  - 🛠️ 命令执行：自动执行终端命令（需要确认）
-  - 📝 任务管理：跟踪和管理多个任务
-  - 💾 会话管理：保存和加载对话历史
-  - ⚡ 中断控制：支持 Ctrl+C 中断执行
-  - 🔄 操作回滚：支持撤销文件修改
-  - 🔧 自动安装依赖：首次运行自动检查并安装所需 Python 包
+### 用户管理（需要root权限）
 
-  **实现架构**：
-  - `myagent.c`: C 语言接口，负责从 shell 调用 Python Agent
-  - `check_deps.py`: 自动检查并安装 Python 依赖包
-  - `run_once.py`: 单条命令执行脚本，避免字符串转义问题
-  - `xiaochen_agent_v2/`: 完整的 Python AI Agent 系统
+- **创建用户（交互式）**
+  ```bash
+  user@hostname:~$ sudo ./bin/create_user.sh
+  ```
+
+- **批量创建用户**
+  ```bash
+  # 准备用户列表文件 users.txt
+  # 格式：username:password（每行一个）
+  user@hostname:~$ sudo ./bin/create_user.sh --batch users.txt
+  ```
+
+- **删除用户**
+  ```bash
+  user@hostname:~$ sudo ./bin/delete_user.sh username
+  ```
+
+- **修改密码**
+  ```bash
+  # 普通用户修改自己的密码
+  user@hostname:~$ ./bin/change_password.sh
   
-  详细使用说明请参考 `xiaochen_agent_v2/README.md`
+  # root用户修改他人密码
+  user@hostname:~$ sudo ./bin/change_password.sh username
+  ```
 
 ## 实现细节
 
-### 多进程架构
-
-Shell采用经典的Unix风格多进程架构：
-
-1. **父进程**: 读取用户输入，解析命令，创建子进程
-2. **子进程**: 执行命令，返回退出状态
-3. **命令执行**: 使用 `fork()` 创建子进程，`waitpid()` 等待完成
-
 ### 命令解析
 
-1. **内置命令**: 在shell进程中直接执行
-2. **外部命令**: 在子进程中使用 `execvp()` 执行
-3. **路径解析**: 检查命令是否为有效的可执行文件
+使用 `strtok()` 函数将输入字符串按空格和制表符分割成参数数组。
 
-### 用户认证
+### 命令类型判断
 
-- 用户持久化：`~/.mini_users`（用户名、密码、是否root）
-- 会话跟踪：`~/.mini_sessions`（用户名、PID），跨终端显示活跃用户
-- 用户管理操作需要root权限（除本人修改密码）
+1. 检查是否为内置命令（exit, cd, pwd, help）
+2. 检查是否为Shell脚本：
+   - 文件可执行
+   - 第一行包含 `#!/bin/bash` 或 `#!/bin/sh`
+3. 否则视为C程序或系统命令
 
-### 命令历史
+### C程序执行
 
-- 持久化文件：`~/.mini_history`
-- 启动时加载最近记录，执行时追加
-- 记录时间戳、命令字符串和退出状态（最多显示100条）
+```c
+pid_t pid = fork();
+if (pid == 0) {
+    // 子进程
+    execvp(args[0], args);
+} else {
+    // 父进程
+    int status;
+    waitpid(pid, &status, 0);
+}
+```
 
-## 未来增强
+### Shell脚本执行
 
-### 文件操作
-- [ ] **mychmod**: 修改文件权限
-- [ ] **myrm**: 添加确认提示（-i选项）
-- [ ] **mytouch**: 检查文件是否存在，提供覆盖或重命名选项
+```c
+system(script_path);
+```
 
-### 目录操作
-- [ ] **mkdir**: 创建目录
-- [ ] **rmdir**: 删除目录
-- [ ] **cd**: 更改当前目录
-- [ ] **pwd**: 打印当前目录
+### 历史记录
 
-### 进程管理
-- [ ] **kill**: 通过名称或PID终止进程
-- [ ] **top**: 实时进程监控
+- 存储位置：`~/.mini_shell_history`
+- 每次执行命令后自动追加
+- 使用链表或文件读写实现历史管理
 
-### 命令特性
-- [ ] **管道支持**: 支持使用 `|` 连接命令
-- [ ] **重定向增强**: 支持 `<` 输入重定向
-- [ ] **后台执行**: 支持使用 `&` 在后台运行命令
+### 动态提示符
 
-### 用户系统
-- [ ] 持久化用户存储
-- [ ] 密码哈希
-- [ ] 组管理
+- 获取当前用户名：`getpwuid(getuid())`
+- 获取主机名：`gethostname()`
+- 获取当前目录：`getcwd()`
+- 颜色输出：使用ANSI转义序列
+
+## 开发文档
+
+### 项目要求
+
+详细的项目要求请参考：
+- [任务说明文档](docs/任务说明.md)
+
+### 设计原则
+
+1. **每个命令一个独立文件**：不使用函数库形式
+2. **C程序与Shell脚本分离**：文件操作用C，用户管理用Shell
+3. **标准POSIX接口**：使用标准系统调用
+4. **错误处理**：所有命令都有完善的错误处理和提示
+5. **边界条件**：考虑文件不存在、权限不足等情况
+
+### 技术栈
+
+- **编程语言**：C语言（C11标准）、Bash Shell
+- **系统调用**：fork, execvp, waitpid, open, read, write, stat等
+- **编译工具**：GCC, Make
+
+### 扩展功能
+
+- ✅ 动态提示符
+- ✅ 交互式删除确认
+- ✅ 文件重定向支持
+- ✅ 批量用户创建
+- ✅ 颜色输出（目录、可执行文件）
 
 ## 许可证
 
-此项目采用 Apache-2 许可证开源。
+本项目采用 Apache-2.0 许可证开源。
+
+---
+
+**开发团队**：详见 [分工说明](docs/分工说明.md)
+
+**最后更新**：2025年12月

@@ -8,9 +8,6 @@
  */
 int get_sessions_path(char *path, size_t size) {
     const char *home = getenv("HOME");
-#ifdef _WIN32
-    if (home == NULL) home = getenv("USERPROFILE");
-#endif
     if (home == NULL) return 0;
     return snprintf(path, size, "%s/.mini_sessions", home) < (int)size;
 }

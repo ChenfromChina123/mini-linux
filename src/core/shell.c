@@ -164,11 +164,7 @@ int cmd_exit(int argc, char *argv[]) {
  * @brief 清除屏幕
  */
 int cmd_clear(int argc, char *argv[]) {
-#ifdef _WIN32
-    system("cls");
-#else
     system("clear");
-#endif
     return 0;
 }
 

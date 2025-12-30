@@ -1,145 +1,187 @@
-#include "command.h"
-#include "util.h"
+/*
+ * myls.c - 目录列表命令
+ * 功能：显示目录内容，支持长格式显示
+ * 使用：myls [-l] [directory]
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <pwd.h>
 #include <grp.h>
-#include <time.h>
+#include <unistd.h>
 
-// 显示文件权限
+/**
+ * 显示文件权限字符串
+ */
 void print_permissions(mode_t mode) {
-    // 文件类型
-    if (S_ISDIR(mode)) printf("d");
-    else if (S_ISLNK(mode)) printf("l");
-    else if (S_ISREG(mode)) printf("-");
-    else if (S_ISBLK(mode)) printf("b");
-    else if (S_ISCHR(mode)) printf("c");
-    else if (S_ISFIFO(mode)) printf("p");
-    else if (S_ISSOCK(mode)) printf("s");
-    
-    // 用户权限
-    printf("%c%c%c",
-           (mode & S_IRUSR) ? 'r' : '-',
-           (mode & S_IWUSR) ? 'w' : '-',
-           (mode & S_IXUSR) ? 'x' : '-');
-    
-    // 组权限
-    printf("%c%c%c",
-           (mode & S_IRGRP) ? 'r' : '-',
-           (mode & S_IWGRP) ? 'w' : '-',
-           (mode & S_IXGRP) ? 'x' : '-');
-    
-    // 其他用户权限
-    printf("%c%c%c",
-           (mode & S_IROTH) ? 'r' : '-',
-           (mode & S_IWOTH) ? 'w' : '-',
-           (mode & S_IXOTH) ? 'x' : '-');
+    printf((S_ISDIR(mode)) ? "d" : "-");
+    printf((mode & S_IRUSR) ? "r" : "-");
+    printf((mode & S_IWUSR) ? "w" : "-");
+    printf((mode & S_IXUSR) ? "x" : "-");
+    printf((mode & S_IRGRP) ? "r" : "-");
+    printf((mode & S_IWGRP) ? "w" : "-");
+    printf((mode & S_IXGRP) ? "x" : "-");
+    printf((mode & S_IROTH) ? "r" : "-");
+    printf((mode & S_IWOTH) ? "w" : "-");
+    printf((mode & S_IXOTH) ? "x" : "-");
 }
 
 /**
- * @brief 列出目录内容
- * @param dir_path 目录路径
- * @param long_format 是否使用长格式显示
+ * 显示文件大小（人类可读格式）
  */
-void list_directory(const char *dir_path, int long_format) {
-    DIR *dir = opendir(dir_path);
-    if (dir == NULL) {
-        error("无法打开目录");
-        return;
+void print_size(off_t size) {
+    if (size < 1024) {
+        printf("%5ld ", (long)size);
+    } else if (size < 1024 * 1024) {
+        printf("%4ldK ", (long)(size / 1024));
+    } else if (size < 1024 * 1024 * 1024) {
+        printf("%4ldM ", (long)(size / (1024 * 1024)));
+    } else {
+        printf("%4ldG ", (long)(size / (1024 * 1024 * 1024)));
+    }
+}
+
+/**
+ * 长格式显示目录内容
+ */
+int list_directory_long(const char *dirname) {
+    DIR *dir = opendir(dirname);
+    if (!dir) {
+        perror("打开目录失败");
+        return -1;
     }
     
     struct dirent *entry;
+    char filepath[1024];
+    
+    printf("总计:\n");
     
     while ((entry = readdir(dir)) != NULL) {
-        // 跳过.和..
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+        // 跳过隐藏文件
+        if (entry->d_name[0] == '.') {
             continue;
         }
         
-        if (long_format) {
-            // 长格式显示
-            struct stat file_stat;
-            char full_path[1024];
-            snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, entry->d_name);
-            
-            if (stat(full_path, &file_stat) == -1) {
-                continue;
-            }
-            
-            // 权限
-            print_permissions(file_stat.st_mode);
-            
-            // 硬链接数
-            printf(" %2lu", (unsigned long)file_stat.st_nlink);
-            
-            // 用户名
-            struct passwd *pwd = getpwuid(file_stat.st_uid);
-            printf(" %-8s", pwd ? pwd->pw_name : "unknown");
-            
-            // 组名
-            struct group *grp = getgrgid(file_stat.st_gid);
-            printf(" %-8s", grp ? grp->gr_name : "unknown");
-            
-            // 文件大小
-            printf(" %8ld", (long)file_stat.st_size);
-            
-            // 最后修改时间
-            char time_str[20];
-            strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M", localtime(&file_stat.st_mtime));
-            printf(" %s", time_str);
-            
-            // 文件名
-            printf(" %s\n", entry->d_name);
-        } else {
-            // 短格式显示
-            printf("%s\t", entry->d_name);
+        snprintf(filepath, sizeof(filepath), "%s/%s", dirname, entry->d_name);
+        
+        struct stat st;
+        if (stat(filepath, &st) == -1) {
+            continue;
         }
-    }
-    
-    if (!long_format) {
-        printf("\n");
+        
+        // 权限
+        print_permissions(st.st_mode);
+        printf(" ");
+        
+        // 硬链接数
+        printf("%3ld ", (long)st.st_nlink);
+        
+        // 所有者
+        struct passwd *pw = getpwuid(st.st_uid);
+        if (pw) {
+            printf("%-8s ", pw->pw_name);
+        } else {
+            printf("%-8d ", st.st_uid);
+        }
+        
+        // 组
+        struct group *gr = getgrgid(st.st_gid);
+        if (gr) {
+            printf("%-8s ", gr->gr_name);
+        } else {
+            printf("%-8d ", st.st_gid);
+        }
+        
+        // 大小
+        print_size(st.st_size);
+        
+        // 修改时间
+        char time_str[80];
+        struct tm *tm_info = localtime(&st.st_mtime);
+        strftime(time_str, sizeof(time_str), "%b %d %H:%M", tm_info);
+        printf("%s ", time_str);
+        
+        // 文件名（目录用蓝色显示）
+        if (S_ISDIR(st.st_mode)) {
+            printf("\033[1;34m%s\033[0m\n", entry->d_name);
+        } else if (st.st_mode & S_IXUSR) {
+            // 可执行文件用绿色显示
+            printf("\033[1;32m%s\033[0m\n", entry->d_name);
+        } else {
+            printf("%s\n", entry->d_name);
+        }
     }
     
     closedir(dir);
+    return 0;
 }
 
 /**
- * @brief myls 命令实现
- * 列出目录下的文件和子目录
+ * 简短格式显示目录内容
  */
-int cmd_myls(int argc, char *argv[]) {
-    int long_format = 0;
-    const char *dir_path = ".";
+int list_directory_short(const char *dirname) {
+    DIR *dir = opendir(dirname);
+    if (!dir) {
+        perror("打开目录失败");
+        return -1;
+    }
     
-    // 解析命令行参数
+    struct dirent *entry;
+    char filepath[1024];
+    
+    while ((entry = readdir(dir)) != NULL) {
+        // 跳过隐藏文件
+        if (entry->d_name[0] == '.') {
+            continue;
+        }
+        
+        snprintf(filepath, sizeof(filepath), "%s/%s", dirname, entry->d_name);
+        
+        struct stat st;
+        if (stat(filepath, &st) == -1) {
+            printf("%s  ", entry->d_name);
+            continue;
+        }
+        
+        // 目录用蓝色显示
+        if (S_ISDIR(st.st_mode)) {
+            printf("\033[1;34m%s\033[0m  ", entry->d_name);
+        } else if (st.st_mode & S_IXUSR) {
+            // 可执行文件用绿色显示
+            printf("\033[1;32m%s\033[0m  ", entry->d_name);
+        } else {
+            printf("%s  ", entry->d_name);
+        }
+    }
+    printf("\n");
+    
+    closedir(dir);
+    return 0;
+}
+
+/**
+ * 主函数
+ */
+int main(int argc, char *argv[]) {
+    int long_format = 0;
+    const char *dirname = ".";
+    
+    // 解析参数
     for (int i = 1; i < argc; i++) {
-        //strcmp(argv[i], "-l") == 0 检查当前参数是否为 -l。
-        //如果是，将 long_format 设置为 1，否则将 dir_path 设置为当前参数。
         if (strcmp(argv[i], "-l") == 0) {
             long_format = 1;
         } else {
-            dir_path = argv[i];
+            dirname = argv[i];
         }
     }
     
-    // 检查路径是否存在且是目录
-    struct stat path_stat;
-    if (stat(dir_path, &path_stat) == -1) {
-        error("目录不存在");
-        return 1;
+    if (long_format) {
+        return list_directory_long(dirname);
+    } else {
+        return list_directory_short(dirname);
     }
-    
-    if (!S_ISDIR(path_stat.st_mode)) {
-        // 如果不是目录，直接显示文件名
-        printf("%s\n", dir_path);
-        return 0;
-    }
-    
-    // 显示目录内容
-    //list_directory 函数用于显示目录内容。
-    //dir_path 是目录路径。
-    //long_format 是一个标志，用于指定是否使用长格式显示。
-    list_directory(dir_path, long_format);
-    
-    return 0;
 }
