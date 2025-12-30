@@ -22,14 +22,17 @@ CMD_BINS = $(patsubst $(CMD_DIR)/%.c,$(BIN_DIR)/%,$(CMD_SOURCES))
 
 # Shell脚本列表
 SHELL_SCRIPTS = $(wildcard $(SCRIPT_DIR)/*.sh)
-SHELL_BINS = $(patsubst $(SCRIPT_DIR)/%.sh,$(BIN_DIR)/%,$(SHELL_SCRIPTS))
+
+# 明确列出所有命令（确保编译）
+COMMANDS = mytouch mycat mycp myrm mychmod myls myps mykill myhistory mycd myecho mymkdir myvi myagent
+CMD_TARGETS = $(addprefix $(BIN_DIR)/,$(COMMANDS))
 
 # 所有目标
-ALL_BINS = $(SHELL_BIN) $(CMD_BINS)
+ALL_BINS = $(SHELL_BIN) $(CMD_TARGETS)
 
 # 默认目标
 .PHONY: all
-all: directories $(ALL_BINS) scripts
+all: directories $(SHELL_BIN) commands scripts
 	@echo "========================================="
 	@echo "编译完成！"
 	@echo "========================================="
@@ -43,6 +46,11 @@ all: directories $(ALL_BINS) scripts
 	@echo "构建Agent:"
 	@echo "  make agent"
 	@echo "========================================="
+
+# 编译所有命令
+.PHONY: commands
+commands: $(CMD_TARGETS)
+	@echo "所有命令编译完成"
 
 # 构建Agent可执行文件
 .PHONY: agent
