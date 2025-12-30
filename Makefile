@@ -39,6 +39,29 @@ all: directories $(ALL_BINS) scripts
 	@echo ""
 	@echo "运行方式:"
 	@echo "  ./$(SHELL_BIN)"
+	@echo ""
+	@echo "构建Agent:"
+	@echo "  make agent"
+	@echo "========================================="
+
+# 构建Agent可执行文件
+.PHONY: agent
+agent:
+	@echo "========================================="
+	@echo "构建小晨Agent可执行文件..."
+	@echo "========================================="
+	@if [ -x "$(SCRIPT_DIR)/build_agent.sh" ]; then \
+		$(SCRIPT_DIR)/build_agent.sh; \
+	else \
+		echo "错误: $(SCRIPT_DIR)/build_agent.sh 不存在或不可执行"; \
+		exit 1; \
+	fi
+
+# 完整构建（包括Agent）
+.PHONY: all-with-agent
+all-with-agent: all agent
+	@echo "========================================="
+	@echo "完整构建完成（包括Agent）！"
 	@echo "========================================="
 
 # 创建目录
