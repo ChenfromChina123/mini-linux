@@ -82,8 +82,60 @@ $(SHELL_BIN): $(SHELL_MAIN)
 	@echo "编译主Shell程序: $@"
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-# 编译C命令程序
-$(BIN_DIR)/%: $(CMD_DIR)/%.c
+# 编译C命令程序（每个命令单独规则）
+$(BIN_DIR)/mytouch: $(CMD_DIR)/mytouch.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/mycat: $(CMD_DIR)/mycat.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/mycp: $(CMD_DIR)/mycp.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/myrm: $(CMD_DIR)/myrm.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/mychmod: $(CMD_DIR)/mychmod.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/myls: $(CMD_DIR)/myls.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/myps: $(CMD_DIR)/myps.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/mykill: $(CMD_DIR)/mykill.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/myhistory: $(CMD_DIR)/myhistory.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/mycd: $(CMD_DIR)/mycd.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/myecho: $(CMD_DIR)/myecho.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/mymkdir: $(CMD_DIR)/mymkdir.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/myvi: $(CMD_DIR)/myvi.c | $(BIN_DIR)
+	@echo "编译命令: $@"
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+$(BIN_DIR)/myagent: $(CMD_DIR)/myagent.c | $(BIN_DIR)
 	@echo "编译命令: $@"
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
