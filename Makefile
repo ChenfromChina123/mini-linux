@@ -63,8 +63,8 @@ $(BIN_DIR)/%: $(CMD_DIR)/%.c $(STANDALONE_COMMON_SOURCES) | $(BIN_DIR)
 
 .PHONY: directories
 directories:
-	@if not exist $(BIN_DIR) mkdir $(BIN_DIR)
-	@if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+	@mkdir -p $(BIN_DIR)
+	@mkdir -p $(OBJ_DIR)
 
 $(BIN_DIR):
 	@mkdir -p $(BIN_DIR)
@@ -109,8 +109,7 @@ all-with-agent: all agent
 .PHONY: clean
 clean:
 	@echo "清理编译产物..."
-	@if exist $(BIN_DIR) rd /s /q $(BIN_DIR)
-	@if exist $(OBJ_DIR) rd /s /q $(OBJ_DIR)
+	@rm -rf $(BIN_DIR) $(OBJ_DIR)
 	@echo "清理完成。"
 
 .PHONY: rebuild
