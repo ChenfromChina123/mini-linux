@@ -3,27 +3,10 @@
 #include "command.h"
 #include "history.h"
 #include "util.h"
+#include "input.h"
 #include <unistd.h>
 #include <sys/wait.h>
-#include <termios.h>
 
-
-/**
- * @brief 启用终端原始模式
- * @param orig 原始终端属性存储
- * @param use_raw 是否成功启用的标志
- */
-static void enable_raw(struct termios *orig, int *use_raw) {
-    *use_raw = 0;
-    if (tcgetattr(STDIN_FILENO, orig) == 0) {
-        struct termios raw = *orig;
-        raw.c_lflag &= ~(ECHO | ICANON);
-        raw.c_cc[VMIN] = 1;
-        raw.c_cc[VTIME] = 0;
-        tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-        *use_raw = 1;
-    }
-}
 
 /**
  * @brief 显示系统用户与活跃用户
@@ -35,81 +18,6 @@ int cmd_users(int argc, char *argv[]) {
     user_list_all();
     user_list_active();
     return 0;
-}
-
-/**
- * @brief 禁用终端原始模式
- * @param orig 原始终端属性
- * @param use_raw 是否处于原始模式
- */
-static void disable_raw(struct termios *orig, int use_raw) {
-    if (use_raw) tcsetattr(STDIN_FILENO, TCSAFLUSH, orig);
-}
-
-// 读取键码
-// 读取用户输入的键码。
-// 如果是特殊键（如方向键），会返回一个负数。
-// 否则，返回键码本身。
-static int read_key() {
-    int c = getchar();
-    if (c == 27) {
-        int c1 = getchar();
-        if (c1 == '[') {
-            int c2 = getchar();
-            if (c2 == 'A') return -1001;
-            if (c2 == 'B') return -1002;
-            if (c2 == 'C') return -1003;
-            if (c2 == 'D') return -1004;
-        }
-        return 27;
-    }
-    return c;
-}
-
-// 读取用户输入的行编辑
-// 读取用户输入的行编辑，支持方向键、删除键、历史命令等功能。
-// 1. 打印提示信息 prompt。
-// 2. 循环读取键码 k，直到用户按下 Enter 键或换行键。
-// 3. 处理特殊键（如方向键、删除键），更新当前输入位置 cur 和输出缓冲区 out。
-// 4. 处理普通字符键，将其添加到输出缓冲区 out 中。
-// 5. 最后，将输出缓冲区 out 中的内容复制到 out 参数中。
-static int read_line_edit(const char *prompt, char *out, size_t out_size) {
-    struct termios orig; int use_raw = 0; enable_raw(&orig, &use_raw);
-    size_t len = 0; size_t cur = 0; int hist_idx = history_size();
-    char saved[1024]; saved[0] = '\0';
-    printf("%s", prompt); fflush(stdout);
-    while (1) {
-        int k = read_key();
-        if (k == '\r' || k == '\n') { putchar('\n'); break; }
-        else if (k == 127 || k == 8) {
-            if (cur > 0) {
-                cur--; for (size_t i = cur; i < len - 1; i++) out[i] = out[i + 1]; len--; out[len] = '\0';
-                fputs("\x1b[D", stdout); fputs("\x1b[K", stdout); fwrite(out + cur, 1, len - cur, stdout); fputs(" ", stdout);
-                size_t back = len - cur + 1; while (back--) fputs("\x1b[D", stdout);
-                fflush(stdout);
-            }
-        } else if (k == -1004) {
-            if (cur > 0) { fputs("\x1b[D", stdout); cur--; }
-        } else if (k == -1003) {
-            if (cur < len) { fputs("\x1b[C", stdout); cur++; }
-        } else if (k == -1001 || k == -1002) {
-            if (hist_idx == history_size()) strncpy(saved, out, sizeof(saved) - 1), saved[sizeof(saved) - 1] = '\0';
-            if (k == -1001 && hist_idx > 0) hist_idx--; else if (k == -1002 && hist_idx < history_size()) hist_idx++;
-            const char *h = hist_idx < history_size() ? history_get_command(hist_idx) : saved;
-            if (!h) h = "";
-            size_t L = strlen(h); if (L >= out_size) L = out_size - 1;
-            memcpy(out, h, L); out[L] = '\0'; len = L; cur = L;
-            fputs("\r", stdout); fputs("\x1b[K", stdout); printf("%s%s", prompt, out); fflush(stdout);
-        } else if (k >= 32 && k < 127) {
-            if (len + 1 < out_size) {
-                for (size_t i = len; i > cur; i--) out[i] = out[i - 1]; out[cur] = (char)k; len++; out[len] = '\0';
-                fputs("\x1b[K", stdout); fwrite(out + cur, 1, len - cur, stdout);
-                cur++; size_t back = len - cur; while (back--) fputs("\x1b[D", stdout); fflush(stdout);
-            }
-        }
-    }
-    disable_raw(&orig, use_raw);
-    return (int)len;
 }
 
 // 定义所有命令
@@ -401,14 +309,10 @@ void shell_loop() {
     printf("\033[1;36m========================================\033[0m\n");
     
     for (int i = 0; i < 3; i++) {
-        printf("\n用户名: ");
-        fflush(stdout);
-        if (fgets(username, sizeof(username), stdin) == NULL) break;
+        if (read_line_with_edit("\n用户名: ", username, sizeof(username)) <= 0) break;
         trim(username);
         
-        printf("密码: ");
-        fflush(stdout);
-        if (fgets(password, sizeof(password), stdin) == NULL) break;
+        if (read_line_with_edit("密码: ", password, sizeof(password)) <= 0) break;
         trim(password);
         
         if (user_login(username, password)) {
@@ -435,7 +339,7 @@ void shell_loop() {
     
     while (1) {
         char prompt[128]; snprintf(prompt, sizeof(prompt), "\033[32m%s@mini-linux\033[0m:\033[34m$\033[0m ", current_user.username);
-        int L = read_line_edit(prompt, command, sizeof(command));
+        int L = read_line_with_edit(prompt, command, sizeof(command));
         if (L <= 0) continue;
         
         if (strlen(command) == 0) {

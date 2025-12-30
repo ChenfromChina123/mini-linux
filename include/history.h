@@ -6,8 +6,9 @@
 #include <string.h>
 #include <time.h>
 
-// 命令长度常量
-#define MAX_CMD_LENGTH 100
+#ifndef MAX_CMD_LENGTH
+#define MAX_CMD_LENGTH 1024
+#endif
 
 #define MAX_HISTORY 100
 

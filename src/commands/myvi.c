@@ -1,68 +1,22 @@
 #include "command.h"
 #include "util.h"
+#include "input.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-typedef enum { MODE_NORMAL, MODE_INSERT, MODE_COMMAND, MODE_SEARCH } Mode;//定义整数常量，别名Mode
-//定义枚举常量，分别对应不同的操作模式：正常模式、插入模式、命令模式、搜索模式
-
-enum { KEY_NONE = 0, KEY_UP = -1001, KEY_DOWN = -1002, KEY_LEFT = -1003, KEY_RIGHT = -1004 };
-//处理非字符按键，如方向键、删除键、退格键等
+typedef enum { MODE_NORMAL, MODE_INSERT, MODE_COMMAND, MODE_SEARCH } Mode;
 static int screen_rows = 24;
 static int screen_cols = 80;
-//初始化屏幕尺寸，获取终端窗口大小，后面会有更新的操作
 static void get_window_size() {
     struct winsize ws;
     if (ioctl(STDIN_FILENO, TIOCGWINSZ, &ws) == 0) {
         if (ws.ws_row > 0) screen_rows = ws.ws_row;
         if (ws.ws_col > 0) screen_cols = ws.ws_col;
     }
-}
-//保留终端的当前状态，获取终端控制权
-static void enable_raw(struct termios *orig, int *use_raw) {
-    *use_raw = 0;
-    //STDIN_FILENO正常为0，控制标准输入流
-    if (tcgetattr(STDIN_FILENO, orig) == 0) {
-        struct termios raw = *orig;
-        raw.c_lflag &= ~(ECHO | ICANON);
-        raw.c_cc[VMIN] = 1;
-        raw.c_cc[VTIME] = 0;
-        tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-        *use_raw = 1;
-    }
-}
-//恢复终端状态函数，将终端设置回原始状态
-static void disable_raw(struct termios *orig, int use_raw) {
-    if (use_raw) tcsetattr(STDIN_FILENO, TCSAFLUSH, orig);
-}
-
-//读取用户输入，处理特殊按键（如方向键）
-static int read_key() {
-    int c = getchar();
-    //27为转义字符，用于表示特殊按键（如方向键）
-    if (c == 27) {
-        int c1 = getchar();
-        if (c1 == '[' || c1 == 'O') {
-            int c2 = getchar();
-            if (c2 >= '0' && c2 <= '9') {
-                for (;;) {
-                    int cx = getchar();
-                    if (cx == 'A' || cx == 'B' || cx == 'C' || cx == 'D' || cx == '~') { c2 = cx; break; }
-                }
-            }
-            if (c2 == 'A') return KEY_UP;
-            if (c2 == 'B') return KEY_DOWN;
-            if (c2 == 'C') return KEY_RIGHT;
-            if (c2 == 'D') return KEY_LEFT;
-        }
-        return 27;
-    }
-    return c;
 }
 
 static void render(char **lines, size_t line_count, size_t top, size_t row, size_t col, int show_numbers, Mode mode, const char *status) {
@@ -219,8 +173,8 @@ static void save_file(const char *filename, char **lines, size_t line_count) {
 }
 
 //退出编辑器，释放资源，返回退出码
-static int myvi_exit(struct termios *orig, int use_raw, char **lines, size_t line_count, char *yank, int code) {
-    disable_raw(orig, use_raw);
+static int myvi_exit(struct termios *orig, char **lines, size_t line_count, char *yank, int code) {
+    disable_raw_mode(orig);
     printf("\x1b[2J");
     printf("\x1b[H");
     fflush(stdout);
@@ -264,8 +218,7 @@ int cmd_myvi(int argc, char *argv[]) {
         lines[line_count++] = strdup("");
     }
     struct termios orig;
-    int use_raw = 0;
-    enable_raw(&orig, &use_raw);
+    enable_raw_mode(&orig);
     get_window_size();
     size_t row = 0;
     size_t col = 0;
@@ -296,7 +249,7 @@ int cmd_myvi(int argc, char *argv[]) {
             col = 0;
         }
         render(lines, line_count, top, row, col, show_numbers, mode, status);
-        int k = read_key();
+        int k = read_key_code();
         if (mode == MODE_NORMAL) {
             if (k >= '0' && k <= '9') {
                 if (k == '0' && count == 0) { col = 0; continue; }
@@ -357,7 +310,7 @@ int cmd_myvi(int argc, char *argv[]) {
             else if (k == KEY_DOWN) { if (row + 1 < line_count) { row++; size_t len = strlen(lines[row]); if (col > len) col = len; } }
             else if (k == KEY_UP) { if (row > 0) { row--; size_t len = strlen(lines[row]); if (col > len) col = len; } }
             else if (k == '\r' || k == '\n') { split_line(&lines, &line_count, &cap, row, col); row++; col = 0; dirty = 1; }
-            else if (k == 127 || k == 8) { if (col > 0) { delete_char(&lines[row], col - 1); col--; dirty = 1; } else if (row > 0) { join_with_prev(&lines, &line_count, row, &col); row--; dirty = 1; } }
+            else if (k == KEY_BACKSPACE || k == 8) { if (col > 0) { delete_char(&lines[row], col - 1); col--; dirty = 1; } else if (row > 0) { join_with_prev(&lines, &line_count, row, &col); row--; dirty = 1; } }
             else { insert_char(&lines[row], col, (char)k); col++; dirty = 1; }
             size_t avail = screen_rows > 2 ? (size_t)(screen_rows - 2) : 0;
             if (row < top) top = row;
@@ -367,15 +320,15 @@ int cmd_myvi(int argc, char *argv[]) {
             else if (k == '\r' || k == '\n') {
                 cmd[cmd_len] = '\0';
                 if (strcmp(cmd, "w") == 0) { save_file(filename, lines, line_count); dirty = 0; success("文件已保存"); }
-                else if (strcmp(cmd, "q") == 0) { if (dirty) { strcpy(status, "有未保存修改"); } else { return myvi_exit(&orig, use_raw, lines, line_count, yank, 0); } }
-                else if (strcmp(cmd, "q!") == 0) { return myvi_exit(&orig, use_raw, lines, line_count, yank, 0); }
-                else if (strcmp(cmd, "wq") == 0) { save_file(filename, lines, line_count); return myvi_exit(&orig, use_raw, lines, line_count, yank, 0); }
+                else if (strcmp(cmd, "q") == 0) { if (dirty) { strcpy(status, "有未保存修改"); } else { return myvi_exit(&orig, lines, line_count, yank, 0); } }
+                else if (strcmp(cmd, "q!") == 0) { return myvi_exit(&orig, lines, line_count, yank, 0); }
+                else if (strcmp(cmd, "wq") == 0) { save_file(filename, lines, line_count); return myvi_exit(&orig, lines, line_count, yank, 0); }
                 else if (strcmp(cmd, "set number") == 0) { show_numbers = 1; status[0] = '\0'; }
                 else if (strcmp(cmd, "set nonumber") == 0) { show_numbers = 0; status[0] = '\0'; }
                 else if (strcmp(cmd, "help") == 0) { strcpy(status, "h/j/k/l i a o dd x p :w :q :wq / n N"); }
                 else { strcpy(status, "未知命令"); }
                 mode = MODE_NORMAL; cmd_len = 0;
-            } else if (k == 127 || k == 8) { if (cmd_len > 0) cmd[--cmd_len] = '\0'; }
+            } else if (k == KEY_BACKSPACE || k == 8) { if (cmd_len > 0) cmd[--cmd_len] = '\0'; }
             else { if (cmd_len + 1 < sizeof(cmd)) cmd[cmd_len++] = (char)k; }
         } else if (mode == MODE_SEARCH) {
             if (k == 27) { mode = MODE_NORMAL; status[0] = '\0'; cmd_len = 0; }
@@ -389,11 +342,11 @@ int cmd_myvi(int argc, char *argv[]) {
                 }
                 if (!found) strcpy(status, "未找到"); else status[0] = '\0';
                 mode = MODE_NORMAL; cmd_len = 0;
-            } else if (k == 127 || k == 8) { if (cmd_len > 0) cmd[--cmd_len] = '\0'; }
+            } else if (k == KEY_BACKSPACE || k == 8) { if (cmd_len > 0) cmd[--cmd_len] = '\0'; }
             else { if (cmd_len + 1 < sizeof(cmd)) cmd[cmd_len++] = (char)k; }
         }
     }
-    disable_raw(&orig, use_raw);
+    disable_raw_mode(&orig);
     for (size_t i = 0; i < line_count; i++) free(lines[i]);
     free(lines);
     if (yank) free(yank);

@@ -21,6 +21,10 @@
 - **命令执行**：
   - C程序：使用fork()创建子进程，execvp()执行命令，waitpid()等待结束
   - Shell脚本：使用system()函数调用
+- **高级输入处理**：
+  - 支持方向键（上下左右）进行光标移动和历史命令回溯
+  - 支持 Backspace 删除和行内编辑功能
+  - 统一的输入处理模块（input.c/input.h）
 - **内置命令**：exit, cd, pwd, help
 - **命令历史**：自动记录到~/.mini_shell_history
 

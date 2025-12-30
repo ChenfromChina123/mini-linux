@@ -15,6 +15,7 @@ TARGET = bin/mini_shell
 CORE_SOURCES = \
 	$(CORE_DIR)/shell.c \
 	$(CORE_DIR)/util.c \
+	$(CORE_DIR)/input.c \
 	$(wildcard $(CORE_DIR)/history/*.c) \
 	$(wildcard $(CORE_DIR)/user/*.c)
 
@@ -29,7 +30,7 @@ OBJECTS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SOURCES))
 
 STANDALONE_COMMANDS = $(INTEGRATED_COMMANDS) mychmod mykill myhistory
 STANDALONE_TARGETS = $(addprefix $(BIN_DIR)/,$(STANDALONE_COMMANDS))
-STANDALONE_COMMON_SOURCES = $(CORE_DIR)/util.c
+STANDALONE_COMMON_SOURCES = $(CORE_DIR)/util.c $(CORE_DIR)/input.c
 
 SHELL_SCRIPTS = $(wildcard $(SCRIPT_DIR)/*.sh)
 
@@ -48,7 +49,6 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | directories
-	@mkdir -p $(dir $@)
 	@echo "编译: $< -> $@"
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -62,7 +62,8 @@ $(BIN_DIR)/%: $(CMD_DIR)/%.c $(STANDALONE_COMMON_SOURCES) | $(BIN_DIR)
 
 .PHONY: directories
 directories:
-	@mkdir -p $(BIN_DIR) $(OBJ_DIR)
+	@if not exist $(BIN_DIR) mkdir $(BIN_DIR)
+	@if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
 
 $(BIN_DIR):
 	@mkdir -p $(BIN_DIR)
@@ -101,7 +102,8 @@ all-with-agent: all agent
 .PHONY: clean
 clean:
 	@echo "清理编译产物..."
-	rm -rf $(BIN_DIR) $(OBJ_DIR) $(TARGET)
+	@if exist $(BIN_DIR) rd /s /q $(BIN_DIR)
+	@if exist $(OBJ_DIR) rd /s /q $(OBJ_DIR)
 	@echo "清理完成。"
 
 .PHONY: rebuild
