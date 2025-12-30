@@ -13,6 +13,11 @@
 #include <sys/stat.h>
 #include <pwd.h>
 
+/* 添加gethostname所需的头文件 */
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200112L
+#endif
+
 #define MAX_CMD_LEN 1024
 #define MAX_ARGS 64
 #define HISTORY_FILE ".mini_shell_history"
