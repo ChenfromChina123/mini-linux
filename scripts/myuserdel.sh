@@ -5,52 +5,51 @@
 # 使用：myuserdel [username]
 #
 
-# 从 Mini Shell 数据库删除
-remove_from_mini_users() {
-    local username="$1"
+# 从 Mini Shell 用户管理文件删除
+delete_from_mini_users() {
+    local username=$1
     local db_file="$HOME/.mini_users"
     if [ -f "$db_file" ]; then
-        sed -i "/^$username	/d" "$db_file"
+        sed -i "/^${username}\t/d" "$db_file"
     fi
 }
 
-# 检查用户是否在数据库中
-check_user_exists() {
-    local username="$1"
+# 检查用户是否在用户管理文件中
+check_user_in_mini_users() {
+    local username=$1
     local db_file="$HOME/.mini_users"
     if [ -f "$db_file" ]; then
-        grep -q "^$username	" "$db_file"
+        grep -q "^${username}\t" "$db_file"
         return $?
     fi
     return 1
 }
 
-# 删除用户
+# 删除用户函数
 delete_user() {
-    local username="$1"
+    local username=$1
     
-    # 检查用户是否在数据库中存在
-    if ! check_user_exists "$username"; then
-        echo "错误: Mini Shell 用户 '$username' 不存在"
+    # 检查用户是否在用户管理文件中存在
+    if ! check_user_in_mini_users "$username"; then
+        echo "错误: 用户 $username 不存在于 Mini Shell 管理文件中。"
         return 1
     fi
     
-    # 检查是否尝试删除 root
-    if [ "$username" = "root" ]; then
-        echo "错误: 禁止删除 root 用户"
+    # root 用户保护
+    if [ "$username" == "root" ]; then
+        echo "错误: 不能删除 root 用户。"
         return 1
     fi
     
-    # 确认删除
-    read -p "确定要删除 Mini Shell 用户 '$username' 吗? (y/n): " choice
-    
-    if [ "$choice" != "y" ] && [ "$choice" != "Y" ]; then
-        echo "已取消删除操作"
+    # 交互式确认
+    read -p "确定要删除用户 $username 吗? (y/n): " confirm
+    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+        echo "操作已取消。"
         return 0
     fi
     
-    # 从数据库删除
-    remove_from_mini_users "$username"
+    # 从用户管理文件删除
+    delete_from_mini_users "$username"
     echo "成功: Mini Shell 用户 '$username' 已删除"
     
     return 0

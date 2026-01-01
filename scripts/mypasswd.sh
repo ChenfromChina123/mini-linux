@@ -1,11 +1,11 @@
 #!/bin/bash
 #
 # mypasswd.sh - 修改 Mini Shell 用户密码脚本
-# 功能：修改 Mini Shell 内部数据库中的用户密码
+# 功能：修改 Mini Shell 内部用户管理文件中的用户密码
 # 使用：mypasswd [username]
 #
 
-# 更新 Mini Shell 数据库中的密码
+# 更新 Mini Shell 用户管理文件中的密码
 # 参数1: 用户名
 # 参数2: 新密码
 update_mini_users_password() {
@@ -21,7 +21,7 @@ update_mini_users_password() {
     fi
 }
 
-# 检查用户是否已在数据库中存在
+# 检查用户是否已在用户管理文件中存在
 # 参数1: 用户名
 check_user_exists() {
     local username="$1"
@@ -72,7 +72,7 @@ change_password() {
         return 1
     fi
     
-    # 修改数据库中的密码
+    # 修改用户管理文件中的密码
     update_mini_users_password "$target_user" "$new_password"
     echo "成功: 用户 '$target_user' 的密码已修改"
     
@@ -87,7 +87,7 @@ interactive_mode() {
     echo "========================================"
     
     if [ ! -f "$db_file" ]; then
-        echo "错误: 用户数据库文件不存在"
+        echo "错误: 用户管理文件不存在 ($db_file)"
         return 1
     fi
     

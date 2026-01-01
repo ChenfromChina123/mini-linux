@@ -5,14 +5,14 @@
 # 使用：myuseradd [--batch <file>]
 #
 
-# 更新 Mini Shell 的 .mini_users 数据库
+# 更新 Mini Shell 的 .mini_users 用户管理文件
 update_mini_users() {
     local username="$1"
     local password="$2"
     local is_root="${3:-0}"
     local db_file="$HOME/.mini_users"
     
-    # 确保数据库文件存在
+    # 确保用户管理文件存在
     touch "$db_file"
     
     # 检查是否已存在于 .mini_users
@@ -25,7 +25,7 @@ update_mini_users() {
     fi
 }
 
-# 检查用户是否已在数据库中存在
+# 检查用户是否已在用户管理文件中存在
 check_user_exists() {
     local username="$1"
     local db_file="$HOME/.mini_users"
@@ -72,7 +72,7 @@ create_user_interactive() {
         return 1
     fi
     
-    # 同步到 Mini Shell 数据库
+    # 同步到 Mini Shell 用户管理文件
     update_mini_users "$username" "$password" 0
     
     echo "成功: Mini Shell 用户 '$username' 创建成功"
@@ -123,7 +123,7 @@ create_users_batch() {
             echo -n "(使用默认密码) "
         fi
         
-        # 同步到 Mini Shell 数据库
+        # 同步到 Mini Shell 用户管理文件
         update_mini_users "$username" "$password" 0
         
         echo "成功"
