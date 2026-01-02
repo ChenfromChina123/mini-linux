@@ -3,6 +3,7 @@
  * 功能：显示系统中进程信息
  * 使用：myps [-a] [-u]
  */
+ 
 
 #include "command.h"
 #include "util.h"
@@ -38,13 +39,13 @@ int read_proc_stat(const char *pid, char *name, char *state, unsigned long *utim
     int pid_num, ppid;
     fscanf(fp, "%d %s %c %d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %*d %*d %ld %ld",
            &pid_num, name, state, &ppid, utime, stime, priority, nice);
-    
+    //fscanf是读取文件指针，将文件指针指向的内容读取到变量中
     fclose(fp);
-    
     // 移除括号
     int len = strlen(name);
     if (len > 2 && name[0] == '(' && name[len-1] == ')') {
         memmove(name, name+1, len-2);
+        //从源内存地址 复制 一定数量的字节到目标内存地址。
         name[len-2] = '\0';
     }
     

@@ -22,6 +22,7 @@ update_mini_users() {
     else
         # 追加新用户
         echo -e "$username\t$password\t$is_root" >> "$db_file"
+        #-e用于识别转义字符，如\t
     fi
 }
 
@@ -46,6 +47,7 @@ create_user_interactive() {
     read -p "请输入用户名: " username
     
     if [ -z "$username" ]; then
+    #-z作用：检查字符串是否为空
         echo "错误: 用户名不能为空"
         return 1
     fi

@@ -44,6 +44,7 @@ int remove_directory(const char *path, int interactive) {
         }
         
         if (S_ISDIR(st.st_mode)) {
+            //判断是否为目录
             // 递归删除子目录
             remove_directory(filepath, interactive);
         } else {
