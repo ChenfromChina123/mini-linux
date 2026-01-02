@@ -208,6 +208,22 @@ Mini_computer/
 - `make test-compile` - 测试编译
 - `make help` - 显示帮助信息
 
+### Agent智能助手配置
+
+`agent` 命令需要预先配置智能助手可执行文件：
+
+1. 将智能助手可执行文件放置到 `bin/xiaochen_agent`
+2. 确保文件有执行权限（Linux: `chmod +x bin/xiaochen_agent`）
+3. 设置环境变量 `VOID_API_KEY`（如需要）
+
+示例：
+```bash
+# 复制智能助手文件
+cp xiaochen_terminal bin/xiaochen_agent
+# 或在Windows上
+copy xiaochen_terminal bin\xiaochen_agent
+```
+
 ## 使用指南
 
 ### 启动Shell
