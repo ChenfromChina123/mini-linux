@@ -36,7 +36,7 @@ SHELL_SCRIPTS = $(wildcard $(SCRIPT_DIR)/*.sh)
 USER_SCRIPTS = myuseradd.sh myuserdel.sh mypasswd.sh
 
 .PHONY: all
-all: directories $(TARGET) standalone scripts
+all: directories $(TARGET) standalone scripts setup-agent
 	@echo "========================================="
 	@echo "编译完成！"
 	@echo "========================================="
@@ -89,6 +89,25 @@ scripts: $(SHELL_SCRIPTS) | $(BIN_DIR)
 		chmod +x $$base 2>/dev/null || true; \
 	done
 
+.PHONY: setup-agent
+setup-agent: | $(BIN_DIR)
+	@echo "配置Agent智能助手..."
+	@if [ -f "$(BIN_DIR)/xiaochen_terminal" ]; then \
+		if [ ! -f "$(BIN_DIR)/xiaochen_agent" ] || [ "$(BIN_DIR)/xiaochen_terminal" -nt "$(BIN_DIR)/xiaochen_agent" ]; then \
+			cp "$(BIN_DIR)/xiaochen_terminal" "$(BIN_DIR)/xiaochen_agent"; \
+			chmod +x "$(BIN_DIR)/xiaochen_agent"; \
+			echo "  ✓ Agent已配置: $(BIN_DIR)/xiaochen_agent"; \
+		else \
+			echo "  ✓ Agent已是最新版本"; \
+		fi \
+	elif [ -f "xiaochen_terminal" ]; then \
+		cp "xiaochen_terminal" "$(BIN_DIR)/xiaochen_agent"; \
+		chmod +x "$(BIN_DIR)/xiaochen_agent"; \
+		echo "  ✓ Agent已配置: $(BIN_DIR)/xiaochen_agent"; \
+	else \
+		echo "  ⚠ 警告: 未找到 xiaochen_terminal，agent 命令将不可用"; \
+		echo "  请将智能助手可执行文件放到项目根目录或 bin/ 目录下"; \
+	fi
 
 .PHONY: clean
 clean:

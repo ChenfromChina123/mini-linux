@@ -208,6 +208,29 @@ Mini_computer/
 - `make test-compile` - 测试编译
 - `make help` - 显示帮助信息
 
+### Agent智能助手自动配置
+
+系统会在编译时自动配置 Agent 智能助手：
+
+1. **自动检测**：编译时会自动查找 `xiaochen_terminal` 文件
+2. **自动配置**：将其复制为 `bin/xiaochen_agent` 并添加执行权限
+3. **位置要求**：将智能助手可执行文件放在以下任一位置：
+   - 项目根目录：`xiaochen_terminal`
+   - bin目录：`bin/xiaochen_terminal`
+
+**手动配置**（如需要）：
+```bash
+# 复制智能助手文件
+cp xiaochen_terminal bin/xiaochen_agent
+chmod +x bin/xiaochen_agent
+```
+
+**使用启动脚本**（推荐）：
+```bash
+# 启动脚本会自动检查并配置Agent
+./scripts/run_shell.sh
+```
+
 ## 使用指南
 
 ### 启动Shell
