@@ -89,23 +89,6 @@ scripts: $(SHELL_SCRIPTS) | $(BIN_DIR)
 		chmod +x $$base 2>/dev/null || true; \
 	done
 
-.PHONY: agent
-agent:
-	@echo "========================================="
-	@echo "构建小晨Agent可执行文件..."
-	@echo "========================================="
-	@if [ -x "$(SCRIPT_DIR)/build_agent.sh" ]; then \
-		$(SCRIPT_DIR)/build_agent.sh; \
-	else \
-		echo "错误: $(SCRIPT_DIR)/build_agent.sh 不存在或不可执行"; \
-		exit 1; \
-	fi
-
-.PHONY: all-with-agent
-all-with-agent: all agent
-	@echo "========================================="
-	@echo "完整构建完成（包括Agent）！"
-	@echo "========================================="
 
 .PHONY: clean
 clean:
@@ -143,7 +126,6 @@ help:
 	@echo "  make standalone    - 仅编译独立命令到 bin/"
 	@echo "  make scripts       - 仅复制脚本到 bin/"
 	@echo "  make test-compile  - 仅测试编译（不链接）"
-	@echo "  make agent         - 构建小晨Agent可执行文件"
 	@echo "========================================="
 	@echo "  make uninstall - 从系统卸载"
 	@echo "  make test-compile - 测试编译"

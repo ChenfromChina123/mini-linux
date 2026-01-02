@@ -11,6 +11,7 @@
 - [编译说明](#编译说明)
 - [使用指南](#使用指南)
 - [实现细节](#实现细节)
+- [开发文档](#开发文档)
 
 ## 功能特性
 
@@ -130,18 +131,19 @@ Mini_computer/
 │       ├── mymkdir.c             # 创建目录
 │       ├── myecho.c              # 写入文件（重定向）
 │       ├── myvi.c                # 简易编辑器
-│       └── myagent.c             # AI终端助手
+│       └── myagent.c             # AI终端助手（需要预先构建bin/xiaochen_agent）
 ├── scripts/                      # Shell脚本（用户管理）
 │   ├── myuseradd.sh              # 创建内部用户
 │   ├── myuserdel.sh              # 删除内部用户
-│   ├── mypasswd.sh               # 修改内部用户密码
-│   └── build_agent.sh            # 构建Agent可执行文件
+│   └── mypasswd.sh               # 修改内部用户密码
 ├── bin/                          # 独立命令与脚本输出目录
 │   ├── mytouch                   # 各命令可执行文件（可选）
 │   ├── mycat
-│   ├── xiaochen_agent            # AI终端助手可执行文件
+│   ├── xiaochen_agent            # AI终端助手可执行文件（需预先构建）
 │   └── ...
-├── xiaochen_agent_v2/            # AI终端助手源码
+├── docs/                         # 文档目录
+│   ├── 任务说明.md               # 作业要求
+│   └── 分工说明.md               # 团队分工
 ├── Makefile                      # 编译脚本
 └── README.md                     # 本文档
 ```
@@ -188,30 +190,21 @@ Mini_computer/
    make rebuild
    ```
 
-6. **构建Agent可执行文件**（可选）
-   ```bash
-   make agent
-   ```
-   
-   这将使用PyInstaller或shiv将xiaochen_agent_v2打包为单个可执行文件并复制到bin目录
-
-7. **运行Shell**
+6. **运行Shell**
    ```bash
    make run
    # 或直接运行
-   ./bin/mini_shell
+   ./mini_linux_shell
    ```
 
 ### Makefile目标
 
 - `make` 或 `make all` - 编译所有程序
-- `make agent` - 构建Agent可执行文件
-- `make all-with-agent` - 编译所有程序（包括Agent）
 - `make clean` - 清理编译产物
 - `make rebuild` - 重新编译
 - `make run` - 编译并运行
-- `make standalone` - 仅编译独立命令
-- `make scripts` - 仅复制脚本
+- `make install` - 安装到系统（/usr/local/bin）
+- `make uninstall` - 从系统卸载
 - `make test-compile` - 测试编译
 - `make help` - 显示帮助信息
 
@@ -346,23 +339,7 @@ user@hostname:~$
   user@hostname:~$ myhistory -c
   ```
 
-### AI终端助手
-
-- **启动交互式助手**
-  ```bash
-  user@hostname:~$ agent
-  ```
-
-- **直接执行指令**
-  ```bash
-  user@hostname:~$ agent 帮我创建一个测试文件
-  ```
-
-使用前需要：
-1. 运行 `make agent` 构建可执行文件
-2. 设置环境变量：`export VOID_API_KEY="your_api_key"`
-
-### 用户管理
+### 用户管理（需要root权限）
 
 - **创建用户（交互式）**
   ```bash
@@ -437,7 +414,14 @@ system(script_path);
 - 获取当前目录：`getcwd()`
 - 颜色输出：使用ANSI转义序列
 
-## 设计原则
+## 开发文档
+
+### 项目要求
+
+详细的项目要求请参考：
+- [任务说明文档](docs/任务说明.md)
+
+### 设计原则
 
 1. **每个命令一个独立文件**：不使用函数库形式
 2. **C程序与Shell脚本分离**：文件操作用C，用户管理用Shell
@@ -463,4 +447,8 @@ system(script_path);
 
 本项目采用 Apache-2.0 许可证开源。
 
-**最后更新**：2026年1月
+---
+
+**开发团队**：详见 [分工说明](docs/分工说明.md)
+
+**最后更新**：2025年12月
