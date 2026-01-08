@@ -89,6 +89,9 @@ scripts: $(SHELL_SCRIPTS) | $(BIN_DIR)
 		cp $$s $$base 2>/dev/null || true; \
 		sed -i 's/\r$$//' $$base 2>/dev/null || true; \
 		chmod +x $$base 2>/dev/null || true; \
+		if [ "$$base" = "mypasswd" ]; then cp $$base passwd 2>/dev/null || true; fi; \
+		if [ "$$base" = "myuseradd" ]; then cp $$base useradd 2>/dev/null || true; fi; \
+		if [ "$$base" = "myuserdel" ]; then cp $$base userdel 2>/dev/null || true; fi; \
 	done
 
 .PHONY: setup-agent

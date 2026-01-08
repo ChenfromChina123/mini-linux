@@ -49,17 +49,16 @@
   - `-c`：清空历史记录
 
 ### 用户管理命令 (Shell 脚本实现)
-- **myuseradd.sh**：创建 Mini Shell 内部用户
+- **myuseradd.sh**：创建 Mini Shell 内部用户 (别名: `myuseradd`, `useradd`)
   - 交互式模式：逐步输入用户名和密码
   - 批量模式：从文件读取 `username:password` 列表批量创建
   - 数据存储：统一保存至 `$HOME/.mini_users`
-- **myuserdel.sh**：删除 Mini Shell 内部用户
+- **myuserdel.sh**：删除 Mini Shell 内部用户 (别名: `myuserdel`, `userdel`)
   - 安全检查：禁止删除 root 用户
   - 交互确认：删除前进行二次确认
-- **mypasswd.sh**：修改 Mini Shell 内部用户密码
+- **mypasswd.sh**：修改 Mini Shell 内部用户密码 (别名: `mypasswd`, `passwd`)
   - 交互模式：显示用户列表并选择
   - 参数模式：直接指定用户名进行修改
-  - 安全检查：密码长度至少 6 位
 
 ## 系统架构
 
@@ -85,7 +84,7 @@
 └──────────┬──────────────────────────┘
            │
            ├─── 内置命令 ────> 直接在主进程执行
-           │                   (help/exit/users/passwd/useradd/userdel/history 等)
+           │                   (help/clear/exit/users/mypasswd/passwd/myuseradd/useradd/myuserdel/userdel/history 等)
            │
            ├─── 内建命令 ────> 直接在主进程执行（C函数）
            │                   (mytouch/mycat/mycp/myrm/mychmod/myls/myps/mycd/mymkdir/myecho/myvi/agent)

@@ -38,6 +38,7 @@ Command commands[] = {
     {"myuseradd", cmd_useradd, "创建新用户 (管理员权限)"},
     {"myuserdel", cmd_userdel, "删除指定用户 (管理员权限)"},
     {"mypasswd", cmd_passwd, "修改用户密码"},
+    {"passwd", cmd_passwd, "修改用户密码"},
     {"agent", cmd_agent, "启动小晨AI终端助手"},
     {"exit", cmd_exit, "退出shell"},
     {"clear", cmd_clear, "清屏"},
@@ -108,10 +109,10 @@ int cmd_help(int argc, char *argv[]) {
     printf("  mymkdir [-p] <目录>        - 创建新目录 (-p 递归创建)\n");
 
     printf("\n\033[1;33m用户管理：\033[0m\n");
-    printf("  users                      - 显示所有用户及活跃会话\n");
-    printf("  myuseradd                  - 创建新用户 (支持交互/批量)\n");
-    printf("  myuserdel <用户名>         - 删除指定用户\n");
-    printf("  mypasswd [用户名]          - 修改用户密码\n");
+    printf("  users                      - 显示系统用户与活跃用户\n");
+    printf("  myuseradd <用户名>         - 创建新用户 (仅管理员)\n");
+    printf("  myuserdel <用户名>         - 删除指定用户 (仅管理员)\n");
+    printf("  mypasswd/passwd [用户名]   - 修改用户密码\n");
 
     printf("\n\033[1;33m系统工具：\033[0m\n");
     printf("  myps                       - 显示当前进程状态\n");
