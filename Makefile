@@ -114,6 +114,12 @@ setup-agent: | $(BIN_DIR)
 		echo "  请将智能助手可执行文件放到项目根目录或 bin/ 目录下"; \
 	fi
 
+.PHONY: test
+test: all
+	@echo "运行全面自动化测试..."
+	@chmod +x tests/run_all.sh
+	@./tests/run_all.sh
+
 .PHONY: clean
 clean:
 	@echo "清理编译产物..."

@@ -200,6 +200,7 @@ Mini_computer/
 ### Makefile目标
 
 - `make` 或 `make all` - 编译所有程序
+- `make test` - 运行全面自动化测试
 - `make clean` - 清理编译产物
 - `make rebuild` - 重新编译
 - `make run` - 编译并运行
