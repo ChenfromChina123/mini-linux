@@ -35,8 +35,6 @@ Command commands[] = {
     {"mymkdir", cmd_mymkdir, "创建目录"},
     {"myps", cmd_myps, "显示进程信息"},
     {"users", cmd_users, "显示系统用户与活跃用户"},
-    {"myuseradd", cmd_useradd, "创建新用户 (管理员权限)"},
-    {"myuserdel", cmd_userdel, "删除指定用户 (管理员权限)"},
     {"agent", cmd_agent, "启动小晨AI终端助手"},
     {"exit", cmd_exit, "退出shell"},
     {"clear", cmd_clear, "清屏"},
@@ -132,58 +130,6 @@ int cmd_history(int argc, char *argv[]) {
     return 0;
 }
 
-
-/**
- * @brief 创建新用户
- */
-int cmd_useradd(int argc, char *argv[]) {
-    if (!is_root_user()) {
-        error("只有root用户可以创建用户");
-        return 1;
-    }
-    
-    if (argc < 3) {
-        error("使用方法: useradd <用户名> <密码> [--root]");
-        return 1;
-    }
-    
-    int is_root = 0;
-    if (argc >= 4 && strcmp(argv[3], "--root") == 0) {
-        is_root = 1;
-    }
-    
-    if (user_create(argv[1], argv[2], is_root)) {
-        success("用户创建成功");
-        return 0;
-    } else {
-        return 1;
-    }
-}
-
-// 删除用户命令实现：允许root用户删除已存在的用户。
-// 1. 检查是否为root用户：如果不是，提示错误并返回。
-// 2. 检查参数数量：如果参数不足，提示使用方法并返回。
-// 3. 解析参数：获取要删除的用户名。
-// 4. 调用 user_delete 函数删除用户。
-// 5. 根据删除结果打印成功或失败消息。
-int cmd_userdel(int argc, char *argv[]) {
-    if (!is_root_user()) {
-        error("只有root用户可以删除用户");
-        return 1;
-    }
-    
-    if (argc < 2) {
-        error("使用方法: userdel <用户名>");
-        return 1;
-    }
-    
-    if (user_delete(argv[1])) {
-        success("用户删除成功");
-        return 0;
-    } else {
-        return 1;
-    }
-}
 
 // 初始化shell
 void shell_init() {
