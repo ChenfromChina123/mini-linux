@@ -109,11 +109,12 @@ interactive_mode() {
 
 # 主函数
 main() {
-    # 如果第一个参数是空的，或者只是回车符，则进入交互模式
-    local first_arg=$(echo "$1" | tr -d '\r')
+    # 严格过滤参数，去掉回车符和空格
+    local first_arg=$(echo "$1" | tr -d ' \r\n')
     
-    if [ -z "$first_arg" ]; then
-        # 无参数，交互式选择用户
+    # 增加防御性判断：如果参数为空，或者参数名等于脚本名本身，则进入交互模式
+    if [ -z "$first_arg" ] || [ "$first_arg" = "mypasswd" ] || [ "$first_arg" = "./mypasswd" ]; then
+        # 无参数或错误参数，交互式选择用户
         interactive_mode
     else
         # 有参数，直接修改指定用户密码
