@@ -70,12 +70,6 @@ change_password() {
         return 1
     fi
     
-    # 检查密码强度（至少6个字符）
-    if [ ${#new_password} -lt 6 ]; then
-        echo "错误: 密码长度至少为6个字符"
-        return 1
-    fi
-    
     # 修改用户管理文件中的密码
     update_mini_users_password "$target_user" "$new_password"
     echo "成功: 用户 '$target_user' 的密码已修改"
