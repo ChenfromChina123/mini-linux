@@ -144,8 +144,10 @@ create_users_batch() {
 
 # 主函数
 main() {
-    local cmd=$(echo "$1" | tr -d '\r')
-    if [ "$cmd" = "--batch" ]; then
+    # 严格过滤参数，去掉回车符、换行符和首尾空格
+    local first_arg=$(echo "$1" | tr -d ' \r\n')
+
+    if [ "$first_arg" = "--batch" ]; then
         local file=$(echo "$2" | tr -d '\r')
         if [ -z "$file" ]; then
             echo "错误: 请指定用户列表文件"
@@ -154,6 +156,7 @@ main() {
         fi
         create_users_batch "$file"
     else
+        # 默认进入交互模式
         create_user_interactive
     fi
 }
