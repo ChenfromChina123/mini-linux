@@ -27,6 +27,7 @@ check_user_exists() {
     local username="$1"
     local db_file="$HOME/.mini_users"
     if [ -f "$db_file" ]; then
+        # 使用 grep 确保精确匹配用户名
         grep -q "^$username	" "$db_file"
         return $?
     fi
@@ -37,6 +38,9 @@ check_user_exists() {
 # 参数1: 目标用户名
 change_password() {
     local target_user="$1"
+    
+    # 去除可能存在的回车符（Windows换行符处理）
+    target_user=$(echo "$target_user" | tr -d '\r')
     
     # 检查用户是否存在
     if ! check_user_exists "$target_user"; then
@@ -111,17 +115,16 @@ interactive_mode() {
 
 # 主函数
 main() {
-    # 由于不再依赖系统用户，不再强制要求 root 权限
-    # 任何可以访问 .mini_users 的用户都可以运行此脚本来管理 Mini Shell 用户
+    # 如果第一个参数是空的，或者只是回车符，则进入交互模式
+    local first_arg=$(echo "$1" | tr -d '\r')
     
-    if [ -z "$1" ]; then
+    if [ -z "$first_arg" ]; then
         # 无参数，交互式选择用户
         interactive_mode
     else
         # 有参数，直接修改指定用户密码
-        change_password "$1"
+        change_password "$first_arg"
     fi
 }
 
 main "$@"
-

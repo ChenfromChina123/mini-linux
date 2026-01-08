@@ -14,7 +14,7 @@ update_mini_users() {
     
     # 确保用户管理文件存在
     touch "$db_file"
-    vv
+    
     # 检查是否已存在于 .mini_users
     if grep -q "^$username	" "$db_file"; then
         # 更新密码和 root 状态
@@ -22,7 +22,6 @@ update_mini_users() {
     else
         # 追加新用户
         echo -e "$username\t$password\t$is_root" >> "$db_file"
-        #-e用于识别转义字符，如\t
     fi
 }
 
@@ -45,9 +44,9 @@ create_user_interactive() {
     
     # 输入用户名
     read -p "请输入用户名: " username
+    username=$(echo "$username" | tr -d '\r')
     
     if [ -z "$username" ]; then
-    #-z作用：检查字符串是否为空
         echo "错误: 用户名不能为空"
         return 1
     fi
@@ -63,6 +62,9 @@ create_user_interactive() {
     echo
     read -s -p "请再次输入密码: " password2
     echo
+    
+    password=$(echo "$password" | tr -d '\r')
+    password2=$(echo "$password2" | tr -d '\r')
     
     if [ "$password" != "$password2" ]; then
         echo "错误: 两次输入的密码不一致"
@@ -106,14 +108,14 @@ create_users_batch() {
             continue
         fi
         
-        # 去除空格
-        username=$(echo "$username" | tr -d ' ')
-        password=$(echo "$password" | tr -d ' ')
+        # 去除空格和回车符
+        username=$(echo "$username" | tr -d ' \r')
+        password=$(echo "$password" | tr -d ' \r')
         
         echo -n "创建用户 '$username'... "
         
         # 检查用户是否已存在
-    if check_user_exists "$username"; then
+        if check_user_exists "$username"; then
             echo "跳过（已存在）"
             ((fail_count++))
             continue
@@ -142,13 +144,15 @@ create_users_batch() {
 
 # 主函数
 main() {
-    if [ "$1" = "--batch" ]; then
-        if [ -z "$2" ]; then
+    local cmd=$(echo "$1" | tr -d '\r')
+    if [ "$cmd" = "--batch" ]; then
+        local file=$(echo "$2" | tr -d '\r')
+        if [ -z "$file" ]; then
             echo "错误: 请指定用户列表文件"
             echo "用法: myuseradd --batch <user_file>"
             exit 1
         fi
-        create_users_batch "$2"
+        create_users_batch "$file"
     else
         create_user_interactive
     fi
