@@ -175,7 +175,16 @@ int execute_command(int argc, char *argv[]) {
             strncat(full_cmd, " ", sizeof(full_cmd) - strlen(full_cmd) - 1);
             strncat(full_cmd, argv[i], sizeof(full_cmd) - strlen(full_cmd) - 1);
         }
-        return system(full_cmd);
+        int result = system(full_cmd);
+        
+        // 执行用户管理脚本后重新加载用户数据，确保内存数据与文件同步
+        if (strcmp(cmd_name, "myuseradd") == 0 || 
+            strcmp(cmd_name, "myuserdel") == 0 || 
+            strcmp(cmd_name, "mypasswd") == 0) {
+            user_reload();
+        }
+        
+        return result;
     }
 
     // 3. 检查是否为可执行文件（C程序）
