@@ -5,11 +5,15 @@
  *      mychmod <mode> <file>  - 修改文件权限
  */
 
+#include "command.h"
+#include "util.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
 
 /**
  * 显示文件权限
@@ -18,7 +22,7 @@ void show_permissions(const char *filename) {
     struct stat st;
     
     if (stat(filename, &st) == -1) {
-        perror("获取文件信息失败");
+        fprintf(stderr, "获取文件信息失败: %s\n", strerror(errno));
         return;
     }
     
@@ -51,14 +55,14 @@ int change_permissions(const char *filename, const char *mode_str) {
     char *endptr;
     long mode = strtol(mode_str, &endptr, 8);
     
-    if (*endptr != '\0' || mode < 0 || mode > 0777) {
+    if (strlen(mode_str) != 3 || *endptr != '\0' || mode < 0 || mode > 0777) {
         fprintf(stderr, "错误: 无效的权限模式 '%s'\n", mode_str);
         fprintf(stderr, "权限模式应为3位八进制数（例如：755, 644）\n");
         return -1;
     }
     
     if (chmod(filename, (mode_t)mode) == -1) {
-        perror("修改文件权限失败");
+        fprintf(stderr, "修改文件权限失败: %s\n", strerror(errno));
         return -1;
     }
     
@@ -68,17 +72,16 @@ int change_permissions(const char *filename, const char *mode_str) {
 /**
  * 主函数
  */
-int main(int argc, char *argv[]) {
+int cmd_mychmod(int argc, char *argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "用法: %s <file>              - 查看文件权限\n", argv[0]);
-        fprintf(stderr, "      %s <mode> <file>      - 修改文件权限\n", argv[0]);
-        fprintf(stderr, "示例: %s 755 myfile.txt\n", argv[0]);
+        error("使用方法: mychmod <文件> 或 mychmod <权限> <文件>");
         return 1;
     }
     
     if (argc == 2) {
         // 查看权限
         show_permissions(argv[1]);
+        return 0;
     } else if (argc == 3) {
         // 修改权限
         const char *mode = argv[1];
@@ -87,12 +90,18 @@ int main(int argc, char *argv[]) {
         if (change_permissions(filename, mode) == 0) {
             printf("文件 '%s' 权限已修改为 %s\n", filename, mode);
             show_permissions(filename);
+            return 0;
         }
+        return 1;
     } else {
-        fprintf(stderr, "错误: 参数过多\n");
+        error("参数过多");
         return 1;
     }
-    
-    return 0;
 }
+
+#ifdef MINI_LINUX_STANDALONE
+int main(int argc, char *argv[]) {
+    return cmd_mychmod(argc, argv);
+}
+#endif
 

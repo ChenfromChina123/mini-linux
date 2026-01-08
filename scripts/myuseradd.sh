@@ -14,7 +14,7 @@ update_mini_users() {
     
     # 确保用户管理文件存在
     touch "$db_file"
-    
+    vv
     # 检查是否已存在于 .mini_users
     if grep -q "^$username	" "$db_file"; then
         # 更新密码和 root 状态

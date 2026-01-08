@@ -24,24 +24,34 @@ void warning(const char *message) {
     printf("\033[33mWarning: %s\033[0m\n", message);
 }
 
-// 将命令字符串分割成命令和参数
+// 将命令字符串分割成命令和参数（使用标准库函数 strspn/strcspn，最安全且代码最简洁）
 int split_command(const char *command, char **argv, int max_args) {
     int argc = 0;
-    char *cmd_copy = strdup(command);
-    char *token = strtok(cmd_copy, " ");
-    
-    while (token != NULL && argc < max_args) {
-        argv[argc++] = strdup(token);
-        //strdup 函数用于复制字符串。
-        //token 是当前分割出的参数。
-        //argv[argc++] 是参数数组的当前位置，用于存储复制后的参数。
-        //argc++ 用于增加参数计数器，指向下一个参数位置。
-        token = strtok(NULL, " ");
-        //strtok(NULL, " ") 用于继续分割字符串，从当前位置开始。
-        //token 会更新为下一个参数，直到没有更多参数或达到最大参数数。
+    const char *delimiters = " \t\n\r"; // 定义所有可能的空白分隔符
+    const char *ptr = command;
+
+    while (argc < max_args) {
+        // 1. 跳过开头的空白字符（返回 ptr 中第一个不属于 delimiters 的字符索引）
+        ptr += strspn(ptr, delimiters);
+        
+        // 如果已经到达字符串末尾，则退出
+        if (*ptr == '\0') break;
+
+        // 2. 计算当前参数的长度（返回 ptr 中第一个属于 delimiters 的字符索引）
+        size_t len = strcspn(ptr, delimiters);
+
+        // 3. 分配内存并拷贝参数
+        argv[argc] = (char *)malloc(len + 1);
+        if (argv[argc]) {
+            memcpy(argv[argc], ptr, len);
+            argv[argc][len] = '\0';
+            argc++;
+        }
+
+        // 4. 将指针移动到当前参数的末尾，准备处理下一个
+        ptr += len;
     }
-    
-    free(cmd_copy);
+
     return argc;
 }
 

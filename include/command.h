@@ -50,6 +50,8 @@ int cmd_myecho(int argc, char *argv[]);
  */
 int cmd_mycp(int argc, char *argv[]);
 
+int cmd_mychmod(int argc, char *argv[]);
+
 /**
  * @brief myls 命令实现
  * @param argc 参数个数

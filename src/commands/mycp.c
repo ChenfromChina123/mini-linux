@@ -13,6 +13,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
+#include <errno.h>
 
 /**
  * @brief 复制文件
@@ -23,7 +25,7 @@
 int copy_file(const char *src, const char *dst) {
     int src_fd = open(src, O_RDONLY);
     if (src_fd == -1) {
-        perror("打开源文件失败");
+        fprintf(stderr, "无法打开源文件 %s: %s\n", src, strerror(errno));
         return -1;
     }
     
@@ -37,7 +39,7 @@ int copy_file(const char *src, const char *dst) {
     
     int dst_fd = open(dst, O_WRONLY | O_CREAT | O_TRUNC, st.st_mode);
     if (dst_fd == -1) {
-        perror("打开目标文件失败");
+        fprintf(stderr, "无法创建目标文件 %s: %s\n", dst, strerror(errno));
         close(src_fd);
         return -1;
     }
@@ -68,25 +70,113 @@ int copy_file(const char *src, const char *dst) {
 }
 
 /**
+ * @brief 递归复制文件夹
+ * @param src 源文件夹路径
+ * @param dst 目标文件夹路径
+ * @return 成功返回0，失败返回-1
+ */
+int copy_directory(const char *src, const char *dst) {
+    DIR *dir = opendir(src);
+    if (!dir) {
+        fprintf(stderr, "无法打开源目录 %s: %s\n", src, strerror(errno));
+        return -1;
+    }
+
+    // 获取源目录权限
+    struct stat st;
+    if (stat(src, &st) == -1) {
+        perror("获取目录信息失败");
+        closedir(dir);
+        return -1;
+    }
+
+    // 创建目标目录
+    if (mkdir(dst, st.st_mode) == -1 && errno != EEXIST) {
+        fprintf(stderr, "无法创建目标目录 %s: %s\n", dst, strerror(errno));
+        closedir(dir);
+        return -1;
+    }
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        // 跳过 . 和 ..
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+
+        char src_path[PATH_MAX];
+        char dst_path[PATH_MAX];
+        snprintf(src_path, sizeof(src_path), "%s/%s", src, entry->d_name);
+        snprintf(dst_path, sizeof(dst_path), "%s/%s", dst, entry->d_name);
+
+        struct stat entry_st;
+        if (stat(src_path, &entry_st) == -1) {
+            continue;
+        }
+
+        if (S_ISDIR(entry_st.st_mode)) {
+            // 递归复制子目录
+            copy_directory(src_path, dst_path);
+        } else {
+            // 复制文件
+            copy_file(src_path, dst_path);
+        }
+    }
+
+    closedir(dir);
+    return 0;
+}
+
+/**
  * @brief mycp 命令实现
  * @param argc 参数个数
  * @param argv 参数数组
  * @return 成功返回0，失败返回非0
  */
 int cmd_mycp(int argc, char *argv[]) {
+    int recursive = 0;
+    int arg_idx = 1;
+
     if (argc < 3) {
-        error("使用方法: mycp <源文件> <目标文件>");
+        error("使用方法: mycp [-r] <源路径> <目标路径>");
         return 1;
     }
-    
-    const char *src = argv[1];
-    const char *dst = argv[2];
-    
-    if (copy_file(src, dst) == 0) {
-        printf("已复制文件: %s -> %s\n", src, dst);
-        return 0;
+
+    // 简单的参数解析
+    if (strcmp(argv[1], "-r") == 0) {
+        recursive = 1;
+        arg_idx = 2;
+        if (argc < 4) {
+            error("使用方法: mycp [-r] <源路径> <目标路径>");
+            return 1;
+        }
     }
-    
+
+    const char *src = argv[arg_idx];
+    const char *dst = argv[arg_idx + 1];
+
+    struct stat st;
+    if (stat(src, &st) == -1) {
+        error("源路径不存在");
+        return 1;
+    }
+
+    if (S_ISDIR(st.st_mode)) {
+        if (!recursive) {
+            error("mycp: 略过目录 (使用 -r 以递归复制)");
+            return 1;
+        }
+        if (copy_directory(src, dst) == 0) {
+            success("目录复制成功");
+            return 0;
+        }
+    } else {
+        if (copy_file(src, dst) == 0) {
+            success("文件复制成功");
+            return 0;
+        }
+    }
+
     return 1;
 }
 

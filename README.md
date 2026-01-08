@@ -88,7 +88,7 @@
            │                   (help/exit/users/passwd/useradd/userdel/history 等)
            │
            ├─── 内建命令 ────> 直接在主进程执行（C函数）
-           │                   (mytouch/mycat/mycp/myrm/myls/myps/mycd/mymkdir/myecho/myvi/agent)
+           │                   (mytouch/mycat/mycp/myrm/mychmod/myls/myps/mycd/mymkdir/myecho/myvi/agent)
            │
            └─── Shell脚本 ──> system()调用
                                (myuseradd.sh, myuserdel.sh...)
@@ -125,6 +125,7 @@ Mini_computer/
 │       ├── mycat.c               # 显示文件内容
 │       ├── mycp.c                # 复制文件
 │       ├── myrm.c                # 删除文件/目录
+│       ├── mychmod.c             # 修改/查看文件权限
 │       ├── myls.c                # 列出目录
 │       ├── myps.c                # 显示进程信息
 │       ├── mycd.c                # 切换目录

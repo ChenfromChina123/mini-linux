@@ -1,0 +1,233 @@
+Mini Linux Shell 开发分工说明
+
+一、项目概述
+
+开发一个轻量级的自定义 Linux Shell，具有基本的命令执行、文件操作、目录管理、进程监控和用户认证功能。
+
+二、团队成员及分工
+
+说明：本分工在原有基础上，结合当前代码结构和实际完成情况进行了调整，突出“谁负责哪一块模块”，弱化具体周次的时间轴，强调方向清晰、边界明确，允许成员之间根据需要相互协作、交叉支援。
+
+1）成员 A —— Shell 核心与整体集成
+角色：核心架构与集成
+主要方向：Shell 主循环、命令分发、整体运行流程
+
+负责范围：
+- Shell 主程序与交互框架：
+  - 提示符显示、用户输入处理（含行编辑与历史调用）
+  - 命令行解析与参数拆分（与 util 协作）
+  - 内置命令查找与分发（Command 表）
+- 进程执行与外部命令支持：
+  - fork/execvp/waitpid 执行外部程序
+  - Shell 脚本调用（scripts/ 与 bin/*.sh）
+- 与其他模块的集成：
+  - 与用户系统、历史系统、内建命令的对接与调度
+
+主要文件：
+- include/shell.h
+- src/core/shell.c
+- src/app/main.c（主入口，根据实际结构调整）
+
+
+2）成员 B —— 用户与安全体系
+角色：用户与会话安全负责人
+主要方向：用户认证、权限控制、用户数据持久化
+
+负责范围：
+- 用户与会话系统：
+  - 登录验证、密码检查
+  - 当前会话注册与注销
+- 用户管理能力：
+  - 新建、删除用户（配合 myuseradd.sh、myuserdel.sh 等脚本）
+  - users、passwd 等相关命令的后端逻辑
+- 数据与权限：
+  - 用户信息持久化（如内部用户数据库文件）
+  - 基础权限检查（普通用户 / 管理员区分）
+
+主要文件（示例）：
+- src/core/user/*.c、include/user/*.h（具体根据项目结构）
+- scripts/myuseradd.sh、scripts/myuserdel.sh、scripts/mypasswd.sh
+
+
+3）成员 C —— 内建命令与 AI Agent
+角色：命令子系统负责人
+主要方向：文件/目录/进程等内建命令实现 + 终端智能体
+
+负责范围：
+- 文件与目录相关命令：
+  - mycat、myrm、mytouch、myecho、mycp、myls
+  - mycd、mymkdir、mychmod 等
+  - 保证基本功能完整、错误处理合理（文件不存在、权限不足等）
+- 编辑与高级工具：
+  - myvi：终端文本编辑器（模式管理、渲染、文件读写）
+  - mykill：进程信号发送（如 SIGTERM）
+- 终端智能体（Agent）：
+  - myagent 命令及其与外部 AI 进程（如 xiaochen_agent）的交互
+  - 支持发起文件读写、搜索、命令执行等复合操作
+
+主要文件：
+- include/command.h
+- src/commands/*.c（各命令文件）
+
+
+4）成员 D —— 基础设施、历史系统与文档
+角色：基础支撑与质量保障
+主要方向：通用工具函数、命令历史、构建脚本与文档
+
+负责范围：
+- 工具与公共模块：
+  - 通用输出工具（error/success/warning 等）
+  - 参数切割、字符串处理（split_command、trim 等）
+- 历史记录系统：
+  - 命令历史的加载、追加与清理
+  - 与 Shell 主循环集成（执行结果持久化）
+- 构建与文档：
+  - 编译与运行脚本 / Makefile（如有）
+  - 整体 README 与各命令说明文档（docs/commands/*.md）
+  - 生成/维护 Doxygen 等 API 文档（docs_web/）
+
+主要文件：
+- include/util.h、src/core/util.c
+- include/history.h、src/core/history/*.c
+- README.md、docs/*.md、docs/commands/*.md
+
+
+三、文件级分工清单（按当前项目文件）
+
+说明：以下按“当前仓库文件”逐一列出归属成员与主要职责，便于后续维护与交接。生成物（如 docs_web/）统一归口到文档负责人，通常不逐文件维护。
+
+1）Shell 核心与输入（成员 A）
+- src/app/main.c —— 程序入口、初始化与启动 Shell 主循环
+- include/shell.h —— Shell 对外接口、命令结构体与声明
+- src/core/shell.c —— Shell 主循环、命令分发、外部命令执行与脚本调度
+- include/input.h —— 行编辑/输入模块对外接口
+- src/core/input.c —— 读取输入、行编辑、与历史/提示符交互的输入能力
+
+2）通用工具函数 util（成员 D）
+- include/util.h —— 工具函数对外声明（输出、字符串处理等）
+- src/core/util.c —— 工具函数实现（error/success/warning、split_command、trim 等）
+
+3）历史记录模块 history（成员 D）
+- include/history.h —— 历史模块对外接口与声明
+- src/core/history/history_internal.h —— 历史模块内部接口与全局数据约定
+- src/core/history/history_globals.c —— 历史模块全局状态与初始化依赖
+- src/core/history/get_history_path.c —— 历史文件路径获取与统一管理
+- src/core/history/history_init.c —— 历史系统初始化（加载/准备存储）
+- src/core/history/history_add.c —— 写入/追加历史记录（含返回码等）
+- src/core/history/history_show.c —— 显示历史记录
+- src/core/history/history_size.c —— 历史容量/数量统计
+- src/core/history/history_get_command.c —— 获取指定历史条目（供行编辑/回溯使用）
+
+4）用户与会话模块 user（成员 B）
+- include/user.h —— 用户系统对外接口、用户结构体与声明
+- src/core/user/user_internal.h —— 用户系统内部接口与数据结构约定
+- src/core/user/user_globals.c —— 用户系统全局状态（当前用户、缓存等）
+- src/core/user/get_user_db_path.c —— 用户数据库文件路径获取与统一管理
+- src/core/user/get_sessions_path.c —— 会话文件路径获取与统一管理
+- src/core/user/load_users.c —— 读取用户数据库到内存
+- src/core/user/save_users.c —— 将用户变更持久化到数据库
+- src/core/user/user_init.c —— 用户系统初始化（默认用户、加载、校验）
+- src/core/user/user_login.c —— 登录校验与当前用户设置
+- src/core/user/user_create.c —— 创建用户（含权限校验/写库）
+- src/core/user/user_delete.c —— 删除用户（含权限校验/写库）
+- src/core/user/user_change_password.c —— 修改密码与安全校验
+- src/core/user/user_session_register.c —— 注册当前会话（写入 sessions）
+- src/core/user/user_session_unregister.c —— 注销当前会话（清理 sessions）
+- src/core/user/is_root_user.c —— Root 判定与权限辅助
+- src/core/user/get_current_user.c —— 获取当前用户信息（给 Shell/命令使用）
+- src/core/user/get_user.c —— 按用户名查找用户信息
+- src/core/user/get_user_count.c —— 获取用户总数/统计
+- src/core/user/user_list_all.c —— 列出所有用户信息（供 users 命令展示）
+- src/core/user/user_list_active.c —— 列出活跃会话用户（供 users 命令展示）
+
+5）命令系统接口与内建命令 commands（成员 C）
+- include/command.h —— 命令接口声明与统一函数签名约定
+- src/commands/mycat.c —— 文件内容读取与显示
+- src/commands/mytouch.c —— 创建空文件/更新时间戳（按实现）
+- src/commands/myecho.c —— 写入文件与重定向处理
+- src/commands/mycp.c —— 文件复制（可扩展为目录递归等）
+- src/commands/myrm.c —— 删除文件/目录（按实现选项扩展）
+- src/commands/myls.c —— 目录遍历与信息展示（含权限/颜色等）
+- src/commands/mycd.c —— 切换目录与 ~ 展开（按实现）
+- src/commands/mymkdir.c —— 创建目录（含 -p 等逻辑）
+- src/commands/mychmod.c —— 权限解析与 chmod 调用
+- src/commands/myps.c —— 进程信息展示（基于 /proc 等）
+- src/commands/mykill.c —— 信号发送与进程控制（如 SIGTERM）
+- src/commands/myhistory.c —— 历史命令展示/清理等命令入口（与 history 模块协作）
+- src/commands/myvi.c —— 终端编辑器（模式、渲染、缓冲区、保存）
+- src/commands/myagent.c —— AI Agent 命令入口与外部桥接
+
+6）Shell 脚本 scripts
+- scripts/run_shell.sh —— 成员 D：启动与运行脚本（便捷运行/打包）
+- scripts/myuseradd.sh —— 成员 B：用户创建脚本（管理员流程）
+- scripts/myuserdel.sh —— 成员 B：用户删除脚本（管理员流程）
+- scripts/mypasswd.sh —— 成员 B：修改密码脚本（用户流程）
+
+7）项目文档 docs（成员 D）
+- README.md —— 项目说明、结构、运行方式与注意事项
+- docs/分工说明.md —— 分工与协作方式维护
+- docs/任务说明.md —— 课程/作业要求整理
+- docs/任务实现说明.md —— 实现细节说明与设计文档
+- docs/项目结构说明.md —— 目录结构与模块关系说明
+- docs/WINDOWS_BUILD.md —— Windows 环境构建说明
+- docs/C_MEMBER_AND_AGENT_WORKFLOW.md —— C 成员与 Agent 协作流程说明
+
+8）命令文档 docs/commands（成员 D）
+- docs/commands/mycat.md —— mycat 命令实现说明
+- docs/commands/mytouch.md —— mytouch 命令实现说明
+- docs/commands/myecho.md —— myecho 命令实现说明
+- docs/commands/mycp.md —— mycp 命令实现说明
+- docs/commands/myrm.md —— myrm 命令实现说明
+- docs/commands/myls.md —— myls 命令实现说明
+- docs/commands/mycd.md —— mycd 命令实现说明
+- docs/commands/mymkdir.md —— mymkdir 命令实现说明
+- docs/commands/mychmod.md —— mychmod 命令实现说明
+- docs/commands/myps.md —— myps 命令实现说明
+- docs/commands/mykill.md —— mykill 命令实现说明
+- docs/commands/myhistory.md —— myhistory 命令实现说明
+- docs/commands/myvi.md —— myvi 命令实现说明
+- docs/commands/myagent.md —— myagent 命令实现说明
+
+
+四、协作机制
+
+1）代码规范
+- 遵循 C 语言编码规范，使用有意义的变量名和函数名
+- 每个函数必须有注释说明功能、参数和返回值
+- 头文件使用 #ifndef / #define / #endif 保护
+
+2）版本控制
+- 使用 Git 进行版本控制
+- 每个成员创建自己的分支，完成功能后合并到主分支
+- 定期提交代码，保持进度同步
+
+3）会议与沟通
+- 每周召开一次进度会议，汇报完成情况和遇到的问题
+- 建立微信群或其他即时通讯工具，方便日常沟通
+- 遇到技术难题时，及时组织讨论，共同解决
+
+4）测试与调试
+- 每个成员负责自己模块的单元测试
+- 每周进行一次集成测试，确保各模块协同工作
+- 使用 GDB 进行调试，解决编译和运行时错误
+
+
+五、里程碑
+
+- 需求分析与设计（第 1 周初）：系统架构设计、文件结构设计
+- 核心功能开发（第 1 周末）：主 Shell 框架、用户认证系统初步实现
+- 命令实现（第 2 周末）：所有命令基本实现完成
+- 集成测试（第 3 周中）：系统能正常运行，各模块协同工作
+- 优化与文档（第 3 周末）：系统优化、完整文档编写
+- 项目交付（第 4 周初）：可运行的 Mini Linux Shell 系统
+
+
+六、注意事项
+
+1. 安全性考虑：避免缓冲区溢出和权限漏洞
+2. 错误处理：每个函数必须有适当的错误处理机制
+3. 代码可读性：保持代码结构清晰，注释完整
+4. 性能优化：避免不必要的系统调用和内存分配
+5. 兼容性：确保在 Linux 系统上能正常编译和运行
+
+本分工说明将根据项目进展情况适时调整，确保项目顺利完成。

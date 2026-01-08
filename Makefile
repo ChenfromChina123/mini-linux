@@ -19,7 +19,7 @@ CORE_SOURCES = \
 	$(wildcard $(CORE_DIR)/history/*.c) \
 	$(wildcard $(CORE_DIR)/user/*.c)
 
-INTEGRATED_COMMANDS = myagent mycat mycd mycp myecho myls mymkdir myps myrm mytouch myvi
+INTEGRATED_COMMANDS = myagent mycat mycd mychmod mycp myecho myls mymkdir myps myrm mytouch myvi
 INTEGRATED_CMD_SOURCES = $(addprefix $(CMD_DIR)/,$(addsuffix .c,$(INTEGRATED_COMMANDS)))
 
 APP_SOURCES = $(wildcard $(APP_DIR)/*.c)
@@ -28,7 +28,7 @@ SOURCES = $(APP_SOURCES) $(CORE_SOURCES) $(INTEGRATED_CMD_SOURCES)
 # 将源文件映射到对象文件
 OBJECTS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SOURCES))
 
-STANDALONE_COMMANDS = $(INTEGRATED_COMMANDS) mychmod mykill myhistory
+STANDALONE_COMMANDS = $(INTEGRATED_COMMANDS) mykill myhistory
 STANDALONE_TARGETS = $(addprefix $(BIN_DIR)/,$(STANDALONE_COMMANDS))
 STANDALONE_COMMON_SOURCES = $(CORE_DIR)/util.c $(CORE_DIR)/input.c
 

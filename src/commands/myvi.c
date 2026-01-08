@@ -54,6 +54,8 @@ static void ensure_cap(char ***lines_ptr, size_t *cap_ptr, size_t need) {
     while (need > cap) {
         size_t ncap = cap ? cap * 2 : 128;
         char **tmp = realloc(lines, sizeof(char *) * ncap);
+        //realloc作用：重新分配内存空间，将原内存空间中的数据复制到新内存空间中
+        //realloc失败时，返回错误码
         if (!tmp) return;
         lines = tmp;
         cap = ncap;

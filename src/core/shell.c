@@ -25,6 +25,7 @@ int cmd_users(int argc, char *argv[]) {
 Command commands[] = {
     {"mycat", cmd_mycat, "读取并显示文件内容"},
     {"myrm", cmd_myrm, "删除指定文件"},
+    {"mychmod", cmd_mychmod, "查看或修改文件权限"},
     {"myvi", cmd_myvi, "简单的文件编辑器"},
     {"mytouch", cmd_mytouch, "创建空文件"},
     {"myecho", cmd_myecho, "向文件写入内容"},
@@ -98,6 +99,7 @@ int cmd_help(int argc, char *argv[]) {
     printf("  mycp <源> <目的>           - 复制文件或目录\n");
     printf("  myrm <文件>                - 删除指定文件\n");
     printf("  myvi <文件>                - 简单的文本编辑器\n");
+    printf("  mychmod <文件>             - 查看文件权限\n");
     printf("  mychmod <权限> <文件>      - 修改文件权限 (如: mychmod 777 test.txt)\n");
 
     printf("\n\033[1;33m目录操作：\033[0m\n");

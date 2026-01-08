@@ -25,11 +25,14 @@ int cat_file(const char *filename, FILE *output) {
     }
     
     char buffer[4096];
-    size_t bytes_read;
+    //定义4K的缓存大小
+    size_t bytes_read;  
     
     while ((bytes_read = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
         fwrite(buffer, 1, bytes_read, output);
+        //fwrite用法
     }
+    //循环读取文件内容
     
     fclose(fp);
     return 0;

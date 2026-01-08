@@ -1,19 +1,3 @@
-toolName: todo_write
-            
-status: success
-          
-Todos updated: 3 items
-          
-
-        
-            
-toolName: view_files
-            
-status: success
-          
-            
-filePath: d:\Users\Administrator\Mini_computer\src\commands\myrm.c
-          
 `myrm` 命令的执行过程可以分为 **参数解析**、**目标检测** 和 **删除执行** 三个主要阶段。
 
 以下是详细的步骤解析：

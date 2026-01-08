@@ -78,6 +78,7 @@ int kill_process_by_name(const char *process_name) {
             
             if (choice == 'y' || choice == 'Y') {
                 if (kill(pid, SIGTERM) == 0) {
+                    //SIGTERM通常为15，用于优雅退出进程
                     printf("进程 %s (PID: %d) 已终止\n", name, pid);
                     killed++;
                 } else {
