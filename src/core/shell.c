@@ -37,7 +37,7 @@ Command commands[] = {
     {"users", cmd_users, "显示系统用户与活跃用户"},
     {"myuseradd", cmd_useradd, "创建新用户 (管理员权限)"},
     {"myuserdel", cmd_userdel, "删除指定用户 (管理员权限)"},
-    {"passwd", cmd_passwd, "修改用户密码"},
+    {"mypasswd", cmd_passwd, "修改用户密码"},
     {"agent", cmd_agent, "启动小晨AI终端助手"},
     {"exit", cmd_exit, "退出shell"},
     {"clear", cmd_clear, "清屏"},
@@ -111,7 +111,7 @@ int cmd_help(int argc, char *argv[]) {
     printf("  users                      - 显示所有用户及活跃会话\n");
     printf("  myuseradd                  - 创建新用户 (支持交互/批量)\n");
     printf("  myuserdel <用户名>         - 删除指定用户\n");
-    printf("  passwd [用户名]            - 修改用户密码\n");
+    printf("  mypasswd [用户名]          - 修改用户密码\n");
 
     printf("\n\033[1;33m系统工具：\033[0m\n");
     printf("  myps                       - 显示当前进程状态\n");
@@ -286,7 +286,7 @@ int execute_command(int argc, char *argv[]) {
     sprintf(sh_filename, "%s.sh", argv[0]);
     if (access(sh_filename, R_OK) == 0) {
         char full_cmd[1024] = {0};
-        sprintf(full_cmd, "sh %s", sh_filename);
+        sprintf(full_cmd, "bash %s", sh_filename);
         for (int i = 1; i < argc; i++) {
             strcat(full_cmd, " ");
             strcat(full_cmd, argv[i]);
@@ -299,7 +299,7 @@ int execute_command(int argc, char *argv[]) {
     if (access(sh_filename, R_OK) == 0) {
         // 构建完整命令行字符串
         char full_cmd[1024] = {0};
-        sprintf(full_cmd, "sh %s", sh_filename);
+        sprintf(full_cmd, "bash %s", sh_filename);
         for (int i = 1; i < argc; i++) {
             strcat(full_cmd, " ");
             strcat(full_cmd, argv[i]);
@@ -311,7 +311,7 @@ int execute_command(int argc, char *argv[]) {
     sprintf(sh_filename, "bin/%s.sh", argv[0]);
     if (access(sh_filename, R_OK) == 0) {
         char full_cmd[1024] = {0};
-        sprintf(full_cmd, "sh %s", sh_filename);
+        sprintf(full_cmd, "bash %s", sh_filename);
         for (int i = 1; i < argc; i++) {
             strcat(full_cmd, " ");
             strcat(full_cmd, argv[i]);
