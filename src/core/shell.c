@@ -115,6 +115,8 @@ int cmd_help(int argc, char *argv[]) {
     printf("  mykill <进程名>            - 终止指定名称的进程\n");
     printf("  agent                      - 启动小晨AI终端助手\n");
 
+    printf("\n\033[1;36m温馨提示：\033[0m\n");
+    printf("  若遇到操作难题，可输入 'agent' 召唤 AI 助手获取智能建议。\n");
     printf("\n");
 
     return 0;
