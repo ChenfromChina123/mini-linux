@@ -84,13 +84,13 @@
 └──────────┬──────────────────────────┘
            │
            ├─── 内置命令 ────> 直接在主进程执行
-           │                   (help/clear/exit/users/mypasswd/passwd/myuseradd/useradd/myuserdel/userdel/history 等)
+           │                   (help/clear/exit/users/history 等)
            │
            ├─── 内建命令 ────> 直接在主进程执行（C函数）
            │                   (mytouch/mycat/mycp/myrm/mychmod/myls/myps/mycd/mymkdir/myecho/myvi/agent)
            │
-           └─── Shell脚本 ──> system()调用
-                               (myuseradd.sh, myuserdel.sh...)
+           └─── 外部脚本 ──> 智能搜索并执行 (scripts/*.sh)
+                               (myuseradd/useradd, myuserdel/userdel, mypasswd/passwd)
 ```
 
 ### 命令执行流程

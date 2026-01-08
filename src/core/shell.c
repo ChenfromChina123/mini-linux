@@ -106,9 +106,9 @@ int cmd_help(int argc, char *argv[]) {
 
     printf("\n\033[1;33m用户管理：\033[0m\n");
     printf("  users                      - 显示系统用户与活跃用户\n");
-    printf("  myuseradd.sh <用户名>      - 创建新用户 (仅管理员)\n");
-    printf("  myuserdel.sh <用户名>      - 删除指定用户 (仅管理员)\n");
-    printf("  mypasswd.sh [用户名]       - 修改用户密码\n");
+    printf("  myuseradd <用户名>         - 创建新用户 (仅管理员)\n");
+    printf("  myuserdel <用户名>         - 删除指定用户 (仅管理员)\n");
+    printf("  mypasswd/passwd [用户名]   - 修改用户密码\n");
 
     printf("\n\033[1;33m系统工具：\033[0m\n");
     printf("  myps                       - 显示当前进程状态\n");
@@ -157,10 +157,28 @@ int execute_command(int argc, char *argv[]) {
         // 内置命令，直接执行
         return cmd->func(argc, argv);
     }
+
+    // 2. 优先检查并执行 Shell 脚本 (scripts/ 目录)
+    char sh_filename[256];
+    const char *cmd_name = argv[0];
     
-    // 2. 检查是否为可执行文件（C程序或shell脚本）
-    
-    // 尝试直接执行
+    // 别名映射
+    if (strcmp(cmd_name, "passwd") == 0) cmd_name = "mypasswd";
+    else if (strcmp(cmd_name, "useradd") == 0) cmd_name = "myuseradd";
+    else if (strcmp(cmd_name, "userdel") == 0) cmd_name = "myuserdel";
+
+    sprintf(sh_filename, "scripts/%s.sh", cmd_name);
+    if (access(sh_filename, R_OK) == 0) {
+        char full_cmd[1024] = {0};
+        sprintf(full_cmd, "bash %s", sh_filename);
+        for (int i = 1; i < argc; i++) {
+            strncat(full_cmd, " ", sizeof(full_cmd) - strlen(full_cmd) - 1);
+            strncat(full_cmd, argv[i], sizeof(full_cmd) - strlen(full_cmd) - 1);
+        }
+        return system(full_cmd);
+    }
+
+    // 3. 检查是否为可执行文件（C程序）
     if (access(argv[0], X_OK) == 0) {
         // 文件可执行
         // 创建子进程执行命令
@@ -190,55 +208,7 @@ int execute_command(int argc, char *argv[]) {
         }
     }
     
-    // 3. 检查是否为C程序源文件
-    char c_filename[256];
-    sprintf(c_filename, "%s.c", argv[0]);
-    if (access(c_filename, R_OK) == 0) {
-        error("直接执行C源文件暂不支持，请先编译");
-        return 1;
-    }
-    
-    // 4. 检查是否为shell脚本文件
-    char sh_filename[256];
-    
-    // 首先尝试在当前目录找 .sh
-    sprintf(sh_filename, "%s.sh", argv[0]);
-    if (access(sh_filename, R_OK) == 0) {
-        char full_cmd[1024] = {0};
-        sprintf(full_cmd, "bash %s", sh_filename);
-        for (int i = 1; i < argc; i++) {
-            strcat(full_cmd, " ");
-            strcat(full_cmd, argv[i]);
-        }
-        return system(full_cmd);
-    }
-    
-    // 尝试在 scripts/ 目录找 .sh
-    sprintf(sh_filename, "scripts/%s.sh", argv[0]);
-    if (access(sh_filename, R_OK) == 0) {
-        // 构建完整命令行字符串
-        char full_cmd[1024] = {0};
-        sprintf(full_cmd, "bash %s", sh_filename);
-        for (int i = 1; i < argc; i++) {
-            strcat(full_cmd, " ");
-            strcat(full_cmd, argv[i]);
-        }
-        return system(full_cmd);
-    }
-
-    // 尝试在 bin/ 目录找 .sh (Makefile 复制后的位置)
-    sprintf(sh_filename, "bin/%s.sh", argv[0]);
-    if (access(sh_filename, R_OK) == 0) {
-        char full_cmd[1024] = {0};
-        sprintf(full_cmd, "bash %s", sh_filename);
-        for (int i = 1; i < argc; i++) {
-            strcat(full_cmd, " ");
-            strcat(full_cmd, argv[i]);
-        }
-        return system(full_cmd);
-    }
-    
-    // 5. 命令不存在
+    // 4. 命令不存在
     error("command not found");
     return 1;
 }

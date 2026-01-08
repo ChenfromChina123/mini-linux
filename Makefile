@@ -75,24 +75,19 @@ $(OBJ_DIR):
 
 .PHONY: scripts
 scripts: $(SHELL_SCRIPTS) | $(BIN_DIR)
-	@echo "复制并修复Shell脚本到 $(BIN_DIR)/"
+	@echo "同步 Shell 脚本到 $(BIN_DIR)/ 并修复换行符"
 	@for script in $(SHELL_SCRIPTS); do \
 		base=$$(basename $$script); \
 		cp $$script $(BIN_DIR)/$$base; \
 		sed -i 's/\r$$//' $(BIN_DIR)/$$base; \
 		chmod +x $(BIN_DIR)/$$base; \
-		echo "  - $$base (已修复换行符)"; \
+		echo "  - $$base"; \
 	done
-	@# 确保用户管理脚本可以通过去掉 .sh 的方式调用
-	@cd $(BIN_DIR) && for s in $(USER_SCRIPTS); do \
-		base=$${s%.sh}; \
-		cp $$s $$base 2>/dev/null || true; \
-		sed -i 's/\r$$//' $$base 2>/dev/null || true; \
-		chmod +x $$base 2>/dev/null || true; \
-		if [ "$$base" = "mypasswd" ]; then cp $$base passwd 2>/dev/null || true; fi; \
-		if [ "$$base" = "myuseradd" ]; then cp $$base useradd 2>/dev/null || true; fi; \
-		if [ "$$base" = "myuserdel" ]; then cp $$base userdel 2>/dev/null || true; fi; \
-	done
+	@# 建立脚本别名 (以 .sh 结尾，确保调用的一致性)
+	@cd $(BIN_DIR) && \
+		if [ -f "mypasswd.sh" ]; then ln -sf mypasswd.sh passwd.sh 2>/dev/null || cp mypasswd.sh passwd.sh; fi; \
+		if [ -f "myuseradd.sh" ]; then ln -sf myuseradd.sh useradd.sh 2>/dev/null || cp myuseradd.sh useradd.sh; fi; \
+		if [ -f "myuserdel.sh" ]; then ln -sf myuserdel.sh userdel.sh 2>/dev/null || cp myuserdel.sh userdel.sh; fi
 
 .PHONY: setup-agent
 setup-agent: | $(BIN_DIR)
