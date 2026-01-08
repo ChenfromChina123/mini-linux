@@ -31,8 +31,18 @@ int cmd_myecho(int argc, char *argv[]) {
         }
     }
     
-    if (redirect_pos == -1 || redirect_pos == argc - 1) {
-        error("使用方法: myecho <内容> > <文件名> 或 myecho <内容> >> <文件名>");
+    if (redirect_pos == -1) {
+        // 如果没有重定向符号，则输出到标准输出 (stdout)
+        for (int i = 1; i < argc; i++) {
+            printf("%s", argv[i]);
+            if (i < argc - 1) printf(" ");
+        }
+        printf("\n");
+        return 0;
+    }
+
+    if (redirect_pos == argc - 1) {
+        error("错误: 重定向符号后缺少文件名");
         return 1;
     }
     

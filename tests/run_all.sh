@@ -50,7 +50,8 @@ TEST_DIR="test_workspace_$(date +%s)"
 cd "$TEST_DIR" || exit
 
 ../bin/mytouch test.txt && [ -f "test.txt" ] || log_fail "mytouch 失败"
-../bin/myecho "Hello Mini Linux" > test.txt
+# 测试 myecho 的内置重定向功能 (不依赖外部 shell)
+../bin/myecho "Hello Mini Linux" ">" test.txt
 CONTENT=$(../bin/mycat test.txt)
 if [ "$CONTENT" == "Hello Mini Linux" ]; then
     log_success "myecho/mycat 功能正常"
