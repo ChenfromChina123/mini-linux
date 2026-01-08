@@ -75,17 +75,19 @@ $(OBJ_DIR):
 
 .PHONY: scripts
 scripts: $(SHELL_SCRIPTS) | $(BIN_DIR)
-	@echo "复制Shell脚本到 $(BIN_DIR)/"
+	@echo "复制并修复Shell脚本到 $(BIN_DIR)/"
 	@for script in $(SHELL_SCRIPTS); do \
 		base=$$(basename $$script); \
 		cp $$script $(BIN_DIR)/$$base; \
+		sed -i 's/\r$$//' $(BIN_DIR)/$$base; \
 		chmod +x $(BIN_DIR)/$$base; \
-		echo "  - $$base"; \
+		echo "  - $$base (已修复换行符)"; \
 	done
 	@# 确保用户管理脚本可以通过去掉 .sh 的方式调用
 	@cd $(BIN_DIR) && for s in $(USER_SCRIPTS); do \
 		base=$${s%.sh}; \
 		cp $$s $$base 2>/dev/null || true; \
+		sed -i 's/\r$$//' $$base 2>/dev/null || true; \
 		chmod +x $$base 2>/dev/null || true; \
 	done
 
