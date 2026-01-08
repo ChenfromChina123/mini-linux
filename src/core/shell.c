@@ -106,9 +106,9 @@ int cmd_help(int argc, char *argv[]) {
 
     printf("\n\033[1;33m用户管理：\033[0m\n");
     printf("  users                      - 显示系统用户与活跃用户\n");
-    printf("  myuseradd <用户名>         - 创建新用户 (仅管理员)\n");
-    printf("  myuserdel <用户名>         - 删除指定用户 (仅管理员)\n");
-    printf("  mypasswd/passwd [用户名]   - 修改用户密码\n");
+    printf("  myuseradd.sh <用户名>      - 创建新用户 (仅管理员)\n");
+    printf("  myuserdel.sh <用户名>      - 删除指定用户 (仅管理员)\n");
+    printf("  mypasswd.sh [用户名]       - 修改用户密码\n");
 
     printf("\n\033[1;33m系统工具：\033[0m\n");
     printf("  myps                       - 显示当前进程状态\n");

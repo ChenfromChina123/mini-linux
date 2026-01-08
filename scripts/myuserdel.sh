@@ -10,8 +10,8 @@ delete_from_mini_users() {
     local username="$1"
     local db_file="$HOME/.mini_users"
     if [ -f "$db_file" ]; then
-        # 使用更健壮的 sed 匹配，支持制表符或空格
-        sed -i "/^${username}[[:space:]]/d" "$db_file"
+        # 注意：这里使用制表符匹配
+        sed -i "/^${username}	/d" "$db_file"
     fi
 }
 
@@ -90,16 +90,13 @@ delete_user_interactive() {
 
 # 主函数
 main() {
-    # 严格过滤参数，去掉回车符、换行符和首尾空格
-    local first_arg=$(echo "$1" | tr -d ' \r\n')
-    
-    # 增加防御性判断：如果参数为空，或者参数名等于脚本名本身，则进入交互模式
-    if [ -z "$first_arg" ] || [ "$first_arg" = "myuserdel" ] || [ "$first_arg" = "./myuserdel" ] || [ "$first_arg" = "userdel" ]; then
-        # 无参数或错误参数，交互式模式
+    local arg=$(echo "$1" | tr -d '\r')
+    if [ -z "$arg" ]; then
+        # 无参数，交互式模式
         delete_user_interactive
     else
         # 有参数，直接删除指定用户
-        delete_user "$first_arg"
+        delete_user "$arg"
     fi
 }
 
