@@ -52,6 +52,7 @@ logs/
 .mini_history
 
 # IDE
+.vs/
 .vscode/
 .idea/
 *.swp

@@ -19,7 +19,7 @@
  * @brief 读取进程状态信息
  * @param pid 进程号字符串
  * @param name 进程名输出缓冲区
- * @param state 进程状态输出
+ * @param state 进程状态输出缓冲区
  * @param utime 用户态时间输出
  * @param stime 内核态时间输出
  * @param priority 优先级输出

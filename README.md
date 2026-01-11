@@ -209,6 +209,25 @@ Mini_computer/
 - `make test-compile` - 测试编译
 - `make help` - 显示帮助信息
 
+### Python/pytest 自动化测试
+
+项目包含基于 pytest 的自动化测试用例，主要用于回归验证 Shell 的交互链路：
+
+- 测试入口：`tests/`
+- 按“项目测试文档”结构组织的用例：`tests/项目测试文档/`
+
+运行方式：
+
+```bash
+python -m pytest -q
+```
+
+生成一次“迭代1”执行日志（写入 `tests/项目测试文档/执行记录/迭代1_执行日志.md`）：
+
+```bash
+python tests/项目测试文档/执行记录/迭代1_执行日志.py
+```
+
 ### Agent智能助手自动配置
 
 系统会在编译时自动配置 Agent 智能助手：
